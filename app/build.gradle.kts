@@ -50,7 +50,6 @@ dependencies {
     // navigation bar
     implementation(libs.chip.navigation.bar)
 
-
     // default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

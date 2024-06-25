@@ -1,9 +1,19 @@
 
 # Travel App 
-여행 어플리케이션으로 UI는 유튜브 및 다른 여행 어플리케이션 UI를 참고하여 만들어 졌습니다.
+이 어플리케이션은 여행 관광지 및 숙박 업소 조사와 플래너를 위한 어플리케이션입니다.
 
-참고 : 
-UiLover Android(YouTube): https://www.youtube.com/watch?v=KPIGmyp8Bt0
+현재 개발 내용 및 load는 다음과 같습니다.
+1. 숙박업소 및 검색기반 관련성이 높은 순 대로 관광지 정보 제공 - 진행 중
+2. google 지도 제공으로 위치 기반 숙소 정보 제공
+3. 기타 회원가입 및 로그인
+4. ChatGpt Api를 통해 실시간으로 gpt와 대화하며 실시간 Planner 작성 및 여행 경비 계산
+
+확장 예정 기능 - 미정
+1. 
+
+
+UI Design은 UiLover Android YouTube 채널 Travel app을 Base로 
+SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니다.
 
 ## Guide
 
@@ -22,11 +32,13 @@ UiLover Android(YouTube): https://www.youtube.com/watch?v=KPIGmyp8Bt0
 
 ### Libraries
 - AndroidX
-    - Activity & Activity Compose
-    - AppCompat
-    - Core
-    - Lifecycle & ViewModel Compose
-    - Navigation
+  - Activity
+  - AppCompat
+  - Core
+  - Lifecycle
+  - Navigation
+  - ViewPager2
+  - ConstraintLayout
 
 - Kotlin Libraries
 - Compose
@@ -34,7 +46,7 @@ UiLover Android(YouTube): https://www.youtube.com/watch?v=KPIGmyp8Bt0
   - Navigation
 
 - Dagger & Hilt
-- Square (Retorfit)
+- Square (Retrofit)
 
 ### Layer
 
@@ -57,5 +69,7 @@ UiLover Android(YouTube): https://www.youtube.com/watch?v=KPIGmyp8Bt0
 참고 사이트 정리 :
 
 > DroidKnights 
-- Application & YouTube ([Application]() [YouTube](https://www.youtube.com/@DroidKnights))
+- Application & YouTube ([Application-Github](https://github.com/droidknights/DroidKnightsApp), [YouTube](https://www.youtube.com/@DroidKnights))
+> UI/UX Design
+- UiLover Android(YouTube): ([UiLover Android(YouTube)](https://www.youtube.com/watch?v=KPIGmyp8Bt0))
 - 

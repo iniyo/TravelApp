@@ -10,6 +10,9 @@
     <string name="explorer">Explorer</string>
     <string name="bookmark">Bookmark</string>
     <string name="profile">Profile</string>
-    <string name="street_address_city">Street, Address, City...</string>
+    <string name="street_address_city">Street, Address, City…</string>
     <string name="search">search</string>
+    <string name="title">title</string>
+    <string name="address">address</string>
+    <string name="zero_number">0</string>
 </resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "907725164670",
+    "project_id": "travelapp-init-provider",
+    "storage_bucket": "travelapp-init-provider.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:907725164670:android:8fa52f5eae59488b99882f",
+        "android_client_info": {
+          "package_name": "pjo.travelapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlZ0q5M_OBOJcoQEO7YPXbHzaeuSDrYc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

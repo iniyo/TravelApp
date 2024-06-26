@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.google.dev.ksp)
 }
 
@@ -55,6 +56,12 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // viewmodel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // coroutine
+    implementation(libs.kotlinx.coroutines.core)
+
     // retrofit2
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -64,6 +71,10 @@ dependencies {
 
     // flexbox
     implementation(libs.flexbox)
+
+    // splash screen
+    implementation(libs.androidx.core.splashscreen)
+
 
     // default
     implementation(libs.androidx.core.ktx)

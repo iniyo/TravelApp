@@ -5,32 +5,31 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 
 
-@AndroidEntryPoint
-class TicketFragment : Fragment() {
+class SearchFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        arguments?.let {
 
-
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        return inflater.inflate(R.layout.fragment_ticket, container, false)
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            TicketFragment().apply {
+        fun newInstance() =
+            SearchFragment().apply {
 
             }
     }

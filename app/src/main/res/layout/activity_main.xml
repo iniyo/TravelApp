@@ -57,7 +57,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/bg_gray">
+                android:background="@drawable/bg_light_gray">
 
                 <EditText
                     android:id="@+id/editTextText"
@@ -71,8 +71,8 @@
                     android:importantForAutofill="no"
                     android:inputType="text"
                     android:padding="8dp"
-                    android:textColor="@color/darkBlue"
-                    android:textColorHint="@color/darkBlue"
+                    android:textColor="@color/dark_blue"
+                    android:textColorHint="@color/dark_blue"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/textView4"
@@ -85,7 +85,7 @@
                     android:layout_height="42dp"
                     android:layout_marginVertical="2dp"
                     android:layout_marginEnd="4dp"
-                    android:background="@drawable/bg_blue"
+                    android:background="@drawable/bg_light_blue"
                     android:gravity="center"
                     android:text="@string/search"
                     android:textColor="@color/white"
@@ -161,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/recommended"
-                    android:textColor="@color/darkBlue"
+                    android:textColor="@color/dark_blue"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -215,7 +215,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/popular_destination"
-                    android:textColor="@color/darkBlue"
+                    android:textColor="@color/dark_blue"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -272,7 +272,7 @@
         app:cnb_menuResource="@menu/menu_bottom"
         app:cnb_orientationMode="horizontal"
         app:cnb_radius="50dp"
-        app:cnb_unselectedColor="@color/darkBlue"
+        app:cnb_unselectedColor="@color/dark_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

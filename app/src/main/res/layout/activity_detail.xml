@@ -86,7 +86,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/title"
                             android:textAlignment="center"
-                            android:textColor="@color/darkBlue"
+                            android:textColor="@color/dark_blue"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -102,7 +102,7 @@
                                 android:layout_weight="1"
                                 android:drawablePadding="10dp"
                                 android:text="@string/address"
-                                android:textColor="@color/darkBlue"
+                                android:textColor="@color/dark_blue"
                                 android:textSize="16sp"
                                 app:drawableStartCompat="@drawable/location" />
 
@@ -146,7 +146,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="80dp"
                             android:layout_marginTop="8dp"
-                            android:background="@drawable/bg_gray_corner"
+                            android:background="@drawable/bg_light_gray_corner"
                             android:orientation="horizontal">
 
                             <androidx.constraintlayout.widget.ConstraintLayout
@@ -178,7 +178,7 @@
                                     app:srcCompat="@drawable/hourglass" />
 
                                 <TextView
-                                    android:id="@+id/tv_duration"
+                                    android:id="@+id/tv_tip_duration"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_margin="8dp"
@@ -294,7 +294,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:text="Description"
-                            android:textColor="@color/darkBlue"
+                            android:textColor="@color/dark_blue"
                             android:textSize="20sp" />
 
                         <TextView
@@ -303,7 +303,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:text="lorem_intro"
-                            android:textColor="@color/darkBlue"
+                            android:textColor="@color/dark_blue"
                             android:textSize="16sp" />
 
 
@@ -316,7 +316,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:background="@color/lightGray"
+        android:background="@color/light_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -327,7 +327,7 @@
             android:layout_width="180dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
-            android:background="@drawable/bg_blue"
+            android:background="@drawable/bg_light_blue"
             android:text="Add to cart"
             android:textColor="@color/white"
             android:textSize="20sp"
@@ -353,7 +353,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="/person"
-            android:textColor="@color/darkBlue"
+            android:textColor="@color/dark_blue"
             app:layout_constraintBottom_toBottomOf="@+id/tv_price"
             app:layout_constraintStart_toEndOf="@+id/tv_price"
             app:layout_constraintTop_toTopOf="@+id/tv_price" />

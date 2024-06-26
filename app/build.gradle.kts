@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.dev.ksp)
 }
 
 android {
@@ -49,6 +50,20 @@ dependencies {
 
     // navigation bar
     implementation(libs.chip.navigation.bar)
+
+    // hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android)
+
+    // retrofit2
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // compose navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // flexbox
+    implementation(libs.flexbox)
 
     // default
     implementation(libs.androidx.core.ktx)

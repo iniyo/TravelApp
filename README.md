@@ -1,5 +1,5 @@
 
-# Travel App 
+# Travel App
 이 어플리케이션은 여행 관광지 및 숙박 업소 조사와 플래너를 위한 어플리케이션입니다.
 
 현재 개발 내용 및 load는 다음과 같습니다.
@@ -9,10 +9,10 @@
 4. ChatGpt Api를 통해 실시간으로 gpt와 대화하며 실시간 Planner 작성 및 여행 경비 계산
 
 확장 예정 기능 - 미정
-1. 
+1.
 
 
-UI Design은 UiLover Android YouTube 채널 Travel app을 Base로 
+UI Design은 UiLover Android YouTube 채널 Travel app을 Base로
 SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니다.
 
 ## Guide
@@ -68,7 +68,7 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 
 참고 사이트 정리 :
 
-> DroidKnights 
+> DroidKnights
 - Application & YouTube ([Application-Github](https://github.com/droidknights/DroidKnightsApp), [YouTube](https://www.youtube.com/@DroidKnights))
 > UI/UX Design
 - UiLover Android(YouTube): ([UiLover Android(YouTube)](https://www.youtube.com/watch?v=KPIGmyp8Bt0))

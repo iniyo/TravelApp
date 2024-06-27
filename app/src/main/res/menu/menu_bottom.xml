@@ -2,28 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 <item
-    android:id="@+id/explorer"
+    android:id="@+id/nav_home"
     android:icon="@drawable/bottom_btn1"
     android:title="@string/home"
     app:cnb_backgroundColor="@color/blue"
     app:cnb_iconColor="@color/white"
     />
     <item
-        android:id="@+id/favorites"
+        android:id="@+id/nav_explorer"
         android:icon="@drawable/bottom_btn2"
         android:title="@string/explorer"
         app:cnb_backgroundColor="@color/blue"
         app:cnb_iconColor="@color/white"
         />
     <item
-        android:id="@+id/cart"
+        android:id="@+id/nav_bookmark"
         android:icon="@drawable/bottom_btn3"
         android:title="@string/bookmark"
         app:cnb_backgroundColor="@color/blue"
         app:cnb_iconColor="@color/white"
         />
     <item
-        android:id="@+id/profile"
+        android:id="@+id/nav_profile"
         android:icon="@drawable/bottom_btn4"
         android:title="@string/profile"
         app:cnb_backgroundColor="@color/blue"

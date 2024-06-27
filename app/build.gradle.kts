@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.dev.ksp)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -54,6 +55,7 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
+    implementation(libs.play.services.maps)
     ksp(libs.hilt.compiler)
 
     // viewmodel
@@ -66,15 +68,15 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    // compose navigation
-    implementation(libs.androidx.navigation.compose)
+    // navigation
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
 
     // flexbox
     implementation(libs.flexbox)
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)
-
 
     // default
     implementation(libs.androidx.core.ktx)

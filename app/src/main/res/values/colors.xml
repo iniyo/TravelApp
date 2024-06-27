@@ -7,4 +7,5 @@
     <color name="light_gray">#EFEFEF</color>
     <color name="yellow">#ffC106</color>
     <color name="light_blue">#EBF5FE</color>
+    <color name="gray">#D0EFEFEF</color>
 </resources>

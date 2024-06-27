@@ -4,7 +4,8 @@ enum class Fragments {
     HOME_PAGE,
     SEARCH_PAGE,
     TICKET_PAGE,
-    DETAIL_PAGE
+    DETAIL_PAGE,
+    MAPS_PAGE
 }
 
 enum class Activitys {

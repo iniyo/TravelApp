@@ -2,8 +2,11 @@ package pjo.travelapp.presentation.util
 
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import pjo.travelapp.R
+import pjo.travelapp.presentation.ui.fragment.HomeFragmentDirections
 import javax.inject.Inject
 
 /**
@@ -16,13 +19,15 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
     }
 
     override fun navigateTo(screen: Fragments) {
+        val directions: NavDirections
+
         when (screen) {
             Fragments.HOME_PAGE -> {
                 navController.navigate(R.id.homeFragment)
             }
 
             Fragments.SEARCH_PAGE -> {
-                navController.navigate(R.id.searchFragment)
+                navController.navigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
             }
 
             Fragments.TICKET_PAGE -> {
@@ -31,6 +36,10 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
 
             Fragments.DETAIL_PAGE -> {
                 navController.navigate(R.id.detailFragment)
+            }
+
+            Fragments.MAPS_PAGE -> {
+                navController.navigate(R.id.mapsFragment)
             }
         }
     }

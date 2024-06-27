@@ -17,6 +17,9 @@
             app:exitAnim="@anim/anim_slide_on_top"
             app:popEnterAnim="@anim/anim_slide_on_top"
             app:popExitAnim="@anim/anim_slide_on_top" />
+        <action
+            android:id="@+id/action_homeFragment_to_mapsFragment"
+            app:destination="@id/mapsFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -33,5 +36,10 @@
         android:name="pjo.travelapp.presentation.ui.fragment.DetailFragment"
         android:label="fragment_detail"
         tools:layout="@layout/fragment_detail" />
+    <fragment
+        android:id="@+id/mapsFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps" />
 
 </navigation>

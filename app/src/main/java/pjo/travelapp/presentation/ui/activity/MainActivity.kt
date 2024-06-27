@@ -80,7 +80,7 @@ open class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.nav_explorer -> {
-                        navigator.navigateTo(Fragments.TICKET_PAGE)
+                        navigator.navigateTo(Fragments.MAPS_PAGE)
                     }
 
                     R.id.nav_bookmark -> {

@@ -22,7 +22,7 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 
 ### Required
 - IDE : Android Studio 최신 버전 ([Download](https://developer.android.com/studio))
-- JDK : Java 17을 실행할 수 있는 JDK
+- JDK : Java 18을 실행할 수 있는 JDK
 
 - Kotlin Language : 2.0.0
 

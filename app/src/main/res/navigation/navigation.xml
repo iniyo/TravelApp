@@ -14,9 +14,9 @@
             android:id="@+id/action_homeFragment_to_searchFragment"
             app:destination="@id/searchFragment"
             app:enterAnim="@anim/anim_slide_on_top"
-            app:exitAnim="@anim/anim_slide_on_top"
+            app:exitAnim="@anim/anim_slide_on_bottom"
             app:popEnterAnim="@anim/anim_slide_on_top"
-            app:popExitAnim="@anim/anim_slide_on_top" />
+            app:popExitAnim="@anim/anim_slide_on_bottom" />
         <action
             android:id="@+id/action_homeFragment_to_mapsFragment"
             app:destination="@id/mapsFragment" />

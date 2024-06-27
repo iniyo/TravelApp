@@ -30,7 +30,7 @@
                 android:paddingVertical="5dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
+                    android:id="@+id/iv_btn_close"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -127,6 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:stateListAnimator="@null"
+                        android:background="@color/gray"
                         android:text="후쿠오카"
                         android:textColor="@color/black" />
 

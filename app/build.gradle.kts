@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.google.dev.ksp)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -49,6 +52,31 @@ dependencies {
 
     // navigation bar
     implementation(libs.chip.navigation.bar)
+
+    // hilt
+    implementation(libs.hilt.android)
+    implementation(libs.play.services.maps)
+    ksp(libs.hilt.compiler)
+
+    // viewmodel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // coroutine
+    implementation(libs.kotlinx.coroutines.core)
+
+    // retrofit2
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // navigation
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+
+    // flexbox
+    implementation(libs.flexbox)
+
+    // splash screen
+    implementation(libs.androidx.core.splashscreen)
 
     // default
     implementation(libs.androidx.core.ktx)

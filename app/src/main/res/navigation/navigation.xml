@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/anim_slide_on_top"
+            app:exitAnim="@anim/anim_slide_on_top"
+            app:popEnterAnim="@anim/anim_slide_on_top"
+            app:popExitAnim="@anim/anim_slide_on_top" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.SearchFragment"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/ticketFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.TicketFragment"
+        android:label="fragment_ticket"
+        tools:layout="@layout/fragment_ticket" />
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.DetailFragment"
+        android:label="fragment_detail"
+        tools:layout="@layout/fragment_detail" />
+
+</navigation>

@@ -15,6 +15,7 @@ import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.util.Activitys
 import pjo.travelapp.presentation.util.AppNavigator
+import pjo.travelapp.presentation.util.Fragments
 import pjo.travelapp.presentation.viewmodel.MainViewModel
 import javax.inject.Inject
 
@@ -36,14 +37,14 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun initContentView() {
-        // 현재 액티비티의 윈도우 객체 참조 - 액티비티의 UI를 나타냄.
+        /*// 현재 액티비티의 윈도우 객체 참조 - 액티비티의 UI를 나타냄.
         window.apply {
             // FLAG_LAYOUT_NO_LIMITS - 창의 레이아웃의 화면의 경계를 무시할 수 있도록.
             setFlags(
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
             )
-        }
+        }*/
         splashScreen = installSplashScreen()
         startSplash()
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -75,11 +76,11 @@ open class MainActivity : AppCompatActivity() {
             cnbItem.setOnItemSelectedListener { id ->
                 when (id) {
                     R.id.nav_home -> {
-                        navigator.navigateTo(Activitys.MAIN_ACTIVITY)
+                        navigator.navigateTo(Fragments.HOME_PAGE)
                     }
 
                     R.id.nav_explorer -> {
-                        navigator.navigateTo(Activitys.DetailActivity)
+                        navigator.navigateTo(Fragments.TICKET_PAGE)
                     }
 
                     R.id.nav_bookmark -> {
@@ -87,7 +88,7 @@ open class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.nav_profile -> {
-
+                        navigator.navigateTo(Fragments.DETAIL_PAGE)
                     }
                 }
             }

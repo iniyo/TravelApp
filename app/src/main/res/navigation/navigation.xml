@@ -28,5 +28,10 @@
         android:name="pjo.travelapp.presentation.ui.fragment.TicketFragment"
         android:label="fragment_ticket"
         tools:layout="@layout/fragment_ticket" />
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.DetailFragment"
+        android:label="fragment_detail"
+        tools:layout="@layout/fragment_detail" />
 
 </navigation>

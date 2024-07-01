@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "907725164670",
+    "firebase_url": "https://travelapp-init-provider-default-rtdb.firebaseio.com",
     "project_id": "travelapp-init-provider",
     "storage_bucket": "travelapp-init-provider.appspot.com"
   },
@@ -12,7 +13,20 @@
           "package_name": "pjo.travelapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "907725164670-1n4tnqsttt3986ga1n4fehuuh76oflag.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pjo.travelapp",
+            "certificate_hash": "4ab94ac14617f53972152443cfb5a1af75a85bda"
+          }
+        },
+        {
+          "client_id": "907725164670-fl754a1qu8so7memhfn6gq9293go7j6m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDlZ0q5M_OBOJcoQEO7YPXbHzaeuSDrYc0"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "907725164670-fl754a1qu8so7memhfn6gq9293go7j6m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

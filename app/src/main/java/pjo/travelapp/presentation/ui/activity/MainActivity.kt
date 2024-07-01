@@ -2,7 +2,6 @@ package pjo.travelapp.presentation.ui.activity
 
 import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.animation.AnticipateInterpolator
 import androidx.activity.viewModels
@@ -13,17 +12,16 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
-import pjo.travelapp.presentation.util.Activitys
+import pjo.travelapp.presentation.ui.viewmodel.BaseViewModel
 import pjo.travelapp.presentation.util.AppNavigator
 import pjo.travelapp.presentation.util.Fragments
-import pjo.travelapp.presentation.viewmodel.MainViewModel
 import javax.inject.Inject
 
 @AndroidEntryPoint
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var splashScreen: SplashScreen
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: BaseViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
 
     @Inject
@@ -83,12 +81,12 @@ open class MainActivity : AppCompatActivity() {
                         navigator.navigateTo(Fragments.MAPS_PAGE)
                     }
 
-                    R.id.nav_bookmark -> {
-
+                    R.id.nav_planner -> {
+                        navigator.navigateTo(Fragments.SIGN_PAGE)
                     }
 
                     R.id.nav_profile -> {
-                        navigator.navigateTo(Fragments.DETAIL_PAGE)
+                        navigator.navigateTo(Fragments.USER_PAGE)
                     }
                 }
             }

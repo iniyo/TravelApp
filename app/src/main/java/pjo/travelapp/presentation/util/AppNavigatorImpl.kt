@@ -34,13 +34,26 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
                 navController.navigate(R.id.ticketFragment)
             }
 
-            Fragments.DETAIL_PAGE -> {
-                navController.navigate(R.id.detailFragment)
+            Fragments.ACCOMMODATION_PAGE -> {
+                navController.navigate(R.id.accommodationDetailFragment)
             }
 
             Fragments.MAPS_PAGE -> {
                 navController.navigate(R.id.mapsFragment)
             }
+
+            Fragments.USER_PAGE -> {
+                navController.navigate(R.id.userDetailFragment)
+            }
+
+            Fragments.PLAN_PAGE -> {
+                navController.navigate(R.id.planFragment)
+            }
+
+            Fragments.SIGN_PAGE -> {
+
+            }
+
         }
     }
 

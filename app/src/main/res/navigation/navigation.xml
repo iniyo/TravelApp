@@ -32,14 +32,23 @@
         android:label="fragment_ticket"
         tools:layout="@layout/fragment_ticket" />
     <fragment
-        android:id="@+id/detailFragment"
-        android:name="pjo.travelapp.presentation.ui.fragment.DetailFragment"
-        android:label="fragment_detail"
-        tools:layout="@layout/fragment_detail" />
-    <fragment
         android:id="@+id/mapsFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.MapsFragment"
         android:label="fragment_maps"
         tools:layout="@layout/fragment_maps" />
+    <fragment
+        android:id="@+id/planFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.PlanFragment"
+        android:label="fragment_plan"
+        tools:layout="@layout/fragment_plan" />
+    <fragment
+        android:id="@+id/userDetailFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.UserDetailFragment"
+        android:label="fragment_user_detail"
+        tools:layout="@layout/fragment_user_detail" />
+    <fragment
+        android:id="@+id/accommodationDetailFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.AccommodationDetailFragment"
+        android:label="AccommodationDetailFragment" />
 
 </navigation>

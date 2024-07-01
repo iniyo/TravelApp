@@ -16,9 +16,9 @@
         app:cnb_iconColor="@color/white"
         />
     <item
-        android:id="@+id/nav_bookmark"
+        android:id="@+id/nav_planner"
         android:icon="@drawable/bottom_btn3"
-        android:title="@string/bookmark"
+        android:title="@string/planner"
         app:cnb_backgroundColor="@color/blue"
         app:cnb_iconColor="@color/white"
         />

@@ -1,3 +1,9 @@
+// localProperties에서 값 읽어오기
+import java.util.Properties
+import java.io.FileInputStream
+var properties = Properties()
+properties.load(FileInputStream("local.properties"))
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,7 +11,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.dev.ksp)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
-    id("androidx.navigation.safeargs.kotlin")
+    alias(libs.plugins.android.navigation.safrargs)
 }
 
 android {
@@ -20,6 +26,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+//        manifestPlaceholders = [apiKey: "your_api_key_here"]
+
+        buildConfigField("String", "MAPS_API_KEY", properties.getProperty("maps_api_key"))
+        buildConfigField("String", "META_APP_ID", properties.getProperty("meta_app_id"))
+        buildConfigField("String", "META_CLIENT_TOKEN", properties.getProperty("meta_client_token"))
     }
 
     buildTypes {
@@ -37,6 +49,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -45,6 +58,18 @@ android {
 
 dependencies {
 
+    /**
+     * open source
+     */
+    // rolling textview
+    implementation(libs.rollingtext)
+    /**
+     * open source end
+     */
+
+    /**
+     * jetpack, androidx, default
+     */
     // glide
     implementation(libs.glide)
 
@@ -57,6 +82,7 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     implementation(libs.play.services.maps)
+    implementation(libs.firebase.auth)
     ksp(libs.hilt.compiler)
 
     // viewmodel
@@ -77,6 +103,10 @@ dependencies {
     // flexbox
     implementation(libs.flexbox)
 
+    // firebase
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.facebook.login)
+
     // splash screen
     implementation(libs.androidx.core.splashscreen)
 
@@ -90,4 +120,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    /**
+     * jetpack, androidx, default end
+     */
 }

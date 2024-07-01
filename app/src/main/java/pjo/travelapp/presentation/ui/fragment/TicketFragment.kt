@@ -7,10 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
+import pjo.travelapp.databinding.FragmentTicketBinding
 
 
 @AndroidEntryPoint
 class TicketFragment : Fragment() {
+
+    private var _binding: FragmentTicketBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,17 +24,13 @@ class TicketFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-
-        return inflater.inflate(R.layout.fragment_ticket, container, false)
+    ): View {
+        _binding = FragmentTicketBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
-    companion object {
-
-        @JvmStatic
-        fun newInstance() =
-            TicketFragment().apply {
-
-            }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

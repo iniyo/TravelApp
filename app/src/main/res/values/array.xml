@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="arr_rolling">
+        <item>@string/osaka</item>
+        <item>@string/tokyo</item>
+        <item>@string/fukuoka</item>
+        <item>@string/paris</item>
+    </string-array>
+
+    <string-array name="arr_location">
+        <item>@string/seoul</item>
+        <item>@string/busan</item>
+        <item>@string/daejeon</item>
+        <item>@string/daegu</item>
+    </string-array>
+
+</resources>

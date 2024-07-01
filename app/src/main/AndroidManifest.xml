@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:name=".TravelApplication"
         android:allowBackup="true"
@@ -27,9 +27,14 @@
              project's local.properties file (e.g. MAPS_API_KEY=Aiza...), and replace the
              "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
         -->
+
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/meta_client_token" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY" />
+            android:value="AIzaSyAYJqIcY33v6xlFOJxw5720nVGtXIS9sfA" />
 
         <activity
             android:name=".presentation.ui.activity.MainActivity"

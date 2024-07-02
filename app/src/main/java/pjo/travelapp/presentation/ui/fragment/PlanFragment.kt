@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentPlanBinding
+import pjo.travelapp.presentation.util.FlexboxItemManager
 
 @AndroidEntryPoint
 class PlanFragment : Fragment() {
@@ -33,5 +34,21 @@ class PlanFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        flexboxItemAdd()
+    }
+
+    private fun flexboxItemAdd() {
+        val itemManager = FlexboxItemManager(requireContext(), binding.fblButtonContainer)
+        itemManager.addItem(R.drawable.ic_map, R.string.map)
+        itemManager.addItem(R.drawable.ic_map, R.string.share)
+        itemManager.addItem(R.drawable.ic_map, R.string.edit)
+        itemManager.addItem(R.drawable.ic_map, R.string.budget_plan)
+        itemManager.addItem(R.drawable.ic_map, R.string.chek_list)
+        itemManager.addItem(R.drawable.ic_map, R.string.airport)
+        itemManager.addItem(R.drawable.ic_map, R.string.accommodation)
     }
 }

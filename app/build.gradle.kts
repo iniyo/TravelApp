@@ -1,8 +1,9 @@
 // localProperties에서 값 읽어오기
 import java.util.Properties
 import java.io.FileInputStream
-var properties = Properties()
-properties.load(FileInputStream("local.properties"))
+val properties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -27,11 +28,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-//        manifestPlaceholders = [apiKey: "your_api_key_here"]
-
-        buildConfigField("String", "MAPS_API_KEY", properties.getProperty("maps_api_key"))
-        buildConfigField("String", "META_APP_ID", properties.getProperty("meta_app_id"))
-        buildConfigField("String", "META_CLIENT_TOKEN", properties.getProperty("meta_client_token"))
+        // Manifest에 값을 전달
+        manifestPlaceholders["mapsApiKey"] = properties.getProperty("maps_api_key")
+        manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")
     }
 
     buildTypes {
@@ -50,6 +49,7 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        dataBinding = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -63,6 +63,8 @@ dependencies {
      */
     // rolling textview
     implementation(libs.rollingtext)
+    // lottie animation
+    implementation(libs.lottie)
     /**
      * open source end
      */

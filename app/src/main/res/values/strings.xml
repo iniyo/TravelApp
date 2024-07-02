@@ -31,4 +31,11 @@
     <string name="facebook_application_id" translatable="false">1518175629048040</string>
     <string name="facebook_login_protocol_scheme" translatable="false">fb1518175629048040</string>
     <string name="meta_client_token">0099472ecd0470fd45362119307d4b6c</string>
+    <string name="map">지도</string>
+    <string name="share">공유</string>
+    <string name="edit">편집</string>
+    <string name="budget_plan">예산계획</string>
+    <string name="chek_list">체크리스트</string>
+    <string name="airport">항공권</string>
+    <string name="accommodation">숙소</string>
 </resources>

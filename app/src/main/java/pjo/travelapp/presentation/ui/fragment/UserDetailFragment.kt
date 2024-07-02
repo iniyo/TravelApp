@@ -1,9 +1,11 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -29,10 +31,19 @@ class UserDetailFragment : Fragment() {
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             // Successfully signed in
             val user = FirebaseAuth.getInstance().currentUser
+            Toast.makeText(context, "Sign-in successful", Toast.LENGTH_SHORT).show()
             // Update UI or navigate to next screen
         } else {
-            // Sign in failed. If response is null the user canceled the sign-in flow using the back button.
-            // Otherwise check response.getError().getErrorCode() and handle the error.
+            // Sign in failed
+            if (response == null) {
+                // User cancelled the sign-in flow using the back button
+                Log.e("UserDetailFragment", "Sign-in cancelled by user.")
+                Toast.makeText(context, "Sign-in cancelled by user.", Toast.LENGTH_SHORT).show()
+            } else {
+                // Handle other errors
+                Log.e("UserDetailFragment", "Sign-in error: ${response.error?.errorCode}")
+                Toast.makeText(context, "Sign-in error: ${response.error?.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -51,6 +62,12 @@ class UserDetailFragment : Fragment() {
         _binding = FragmentUserDetailBinding.inflate(layoutInflater, container, false)
         createSignInIntent()
         return binding.root
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
     }
 
     override fun onDestroyView() {

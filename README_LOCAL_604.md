@@ -72,7 +72,6 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - Application & YouTube ([Application-Github](https://github.com/droidknights/DroidKnightsApp), [YouTube](https://www.youtube.com/@DroidKnights))
 > UI/UX Design
 - UiLover Android(YouTube): ([UiLover Android(YouTube)](https://www.youtube.com/watch?v=KPIGmyp8Bt0))
-<<<<<<< .merge_file_8un9qT
 - Splash Screen(Velog): ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
 - Rolling Textview(Github): ([YvesCheung](https://github.com/YvesCheung/RollingText))
 > Manifest 설정 관련
@@ -85,9 +84,3 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - 
 
 
-=======
-- Splash Screen: ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
-
-> 각종 이슈 대응:
-- navControll 사용 시 action(애니메이션) 적용 안됨: ([stackoverflow](https://stackoverflow.com/questions/69396539/using-jetpack-navigation-component-transition-animation-is-not-working))
->>>>>>> .merge_file_PW3w05

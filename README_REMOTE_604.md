@@ -72,22 +72,7 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - Application & YouTube ([Application-Github](https://github.com/droidknights/DroidKnightsApp), [YouTube](https://www.youtube.com/@DroidKnights))
 > UI/UX Design
 - UiLover Android(YouTube): ([UiLover Android(YouTube)](https://www.youtube.com/watch?v=KPIGmyp8Bt0))
-<<<<<<< .merge_file_8un9qT
-- Splash Screen(Velog): ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
-- Rolling Textview(Github): ([YvesCheung](https://github.com/YvesCheung/RollingText))
-> Manifest 설정 관련
-- Android Development[permission 종류](https://developer.android.com/reference/android/Manifest.permission)
-- // 권한 종류 중 Protection level: dangerous 가 되어있는 경우 사용자에게 권한 허용을 받아야 함. 
-
-
-> 각종 오류 및 이슈 해결
-- search fragment로 전환 시 duration이 적용되지 않는 문제 ([StackOverFlow](https://stackoverflow.com/questions/69396539/using-jetpack-navigation-component-transition-animation-is-not-working)(issue해결)[https://github.com/iniyo/TravelApp/issues/3])
-- 
-
-
-=======
 - Splash Screen: ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
 
 > 각종 이슈 대응:
 - navControll 사용 시 action(애니메이션) 적용 안됨: ([stackoverflow](https://stackoverflow.com/questions/69396539/using-jetpack-navigation-component-transition-animation-is-not-working))
->>>>>>> .merge_file_PW3w05

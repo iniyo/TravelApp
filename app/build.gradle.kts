@@ -29,6 +29,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Manifest에 값을 전달
+        manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
         manifestPlaceholders["mapsApiKey"] = properties.getProperty("maps_api_key")
         manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")
     }
@@ -65,6 +66,12 @@ dependencies {
     implementation(libs.rollingtext)
     // lottie animation
     implementation(libs.lottie)
+    // kakao login
+    implementation(libs.v2.user)
+    // naver login
+    implementation(libs.oauth)
+    //
+    implementation("com.github.applikeysolutions:cosmocalendar:1.0.4")
     /**
      * open source end
      */

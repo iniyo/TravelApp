@@ -9,12 +9,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentPlanBinding
 import pjo.travelapp.presentation.util.FlexboxItemManager
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PlanFragment : Fragment() {
 
     private var _binding: FragmentPlanBinding? = null
     private val binding get() = _binding!!
+
+    @Inject
+    lateinit var navigator: AppNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,12 +49,70 @@ class PlanFragment : Fragment() {
 
     private fun flexboxItemAdd() {
         val itemManager = FlexboxItemManager(requireContext(), binding.fblButtonContainer)
-        itemManager.addItem(R.drawable.ic_map, R.string.map)
-        itemManager.addItem(R.drawable.ic_map, R.string.share)
-        itemManager.addItem(R.drawable.ic_map, R.string.edit)
-        itemManager.addItem(R.drawable.ic_map, R.string.budget_plan)
-        itemManager.addItem(R.drawable.ic_map, R.string.chek_list)
-        itemManager.addItem(R.drawable.ic_map, R.string.airport)
-        itemManager.addItem(R.drawable.ic_map, R.string.accommodation)
+        itemManager.addItem("ll_fbl_item_1", "iv_map", "tv_map", R.drawable.ic_map, R.string.map) { view ->
+
+        }
+        itemManager.addItem("ll_fbl_item_2", "iv_share", "tv_share", R.drawable.ic_map, R.string.share) { view ->
+            // Handle click event for ll_fbl_item_2
+        }
+        itemManager.addItem("ll_fbl_item_3", "iv_edit", "tv_edit", R.drawable.ic_map, R.string.edit) { view ->
+            // Handle click event for ll_fbl_item_3
+        }
+        itemManager.addItem("ll_fbl_item_4", "iv_budget_plan", "tv_budget_plan", R.drawable.ic_map, R.string.budget_plan) { view ->
+            // Handle click event for ll_fbl_item_4
+        }
+        itemManager.addItem("ll_fbl_item_5", "iv_check_list", "tv_check_list", R.drawable.ic_map, R.string.check_list) { view ->
+            // Handle click event for ll_fbl_item_5
+        }
+        itemManager.addItem("ll_fbl_item_6", "iv_airline_ticket", "tv_airline_ticket", R.drawable.ic_map, R.string.airline_ticket) { view ->
+            // Handle click event for ll_fbl_item_6
+        }
+        itemManager.addItem("ll_fbl_item_7", "iv_accommodation", "tv_accommodation", R.drawable.ic_map, R.string.accommodation) { view ->
+            // Handle click event for ll_fbl_item_7
+        }
+    }
+
+
+    private fun setClickListener() {
+        val ids = listOf(
+            "ll_fbl_item_1",
+            "ll_fbl_item_2",
+            "ll_fbl_item_3",
+            "ll_fbl_item_4",
+            "ll_fbl_item_5",
+            "ll_fbl_item_6",
+            "ll_fbl_item_7"
+        )
+
+        for (id in ids) {
+            val resId = requireContext().resources.getIdentifier(id, "id", requireContext().packageName)
+            val view = binding.fblButtonContainer.findViewById<View>(resId)
+            view?.setOnClickListener {
+                // Handle click event for each view
+                when (id) {
+                    "ll_fbl_item_1" -> {
+                        // Do something for item 1
+                    }
+                    "ll_fbl_item_2" -> {
+                        // Do something for item 2
+                    }
+                    "ll_fbl_item_3" -> {
+                        // Do something for item 3
+                    }
+                    "ll_fbl_item_4" -> {
+                        // Do something for item 4
+                    }
+                    "ll_fbl_item_5" -> {
+                        // Do something for item 5
+                    }
+                    "ll_fbl_item_6" -> {
+                        // Do something for item 6
+                    }
+                    "ll_fbl_item_7" -> {
+                        // Do something for item 7
+                    }
+                }
+            }
+        }
     }
 }

@@ -9,5 +9,4 @@ import dagger.hilt.android.components.ActivityComponent
 @Module
 object InterfaceObjectModule {
 
-
 }

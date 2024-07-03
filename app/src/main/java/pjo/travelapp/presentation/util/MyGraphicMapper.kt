@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.res.Resources
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_DIP
 
 
-class MyGraphicMapper {
+object MyGraphicMapper {
     private fun convertDensity(value: Float, isPxToDp: Boolean): Float {
         val resources = Resources.getSystem()
         val metrics = resources.displayMetrics // 스마트폰 크기를 가져옮.
@@ -16,6 +18,15 @@ class MyGraphicMapper {
         } else {
             value * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
         }
+    }
+    private val GESTURE_THRESHOLD_DP = 16.0f
+
+    private var gestureThreshold: Int = 0
+    fun getpx(context: Context) {
+        val a = TypedValue.applyDimension(
+            COMPLEX_UNIT_DIP,
+            GESTURE_THRESHOLD_DP + 0.5f,
+            context.resources.displayMetrics)
     }
 
     fun getNavigationBarHeight(context: Context) {

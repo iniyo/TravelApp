@@ -8,4 +8,7 @@
     <color name="yellow">#ffC106</color>
     <color name="light_blue">#EBF5FE</color>
     <color name="gray">#D0EFEFEF</color>
+    <color name="naver_green">#03C75A</color>
+    <color name="kakao_yellow">#FEE500</color>
+    <color name="white_blue">#DBE9F4</color>
 </resources>

@@ -1,4 +1,4 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.navigator
 
 enum class Fragments {
     HOME_PAGE,
@@ -8,7 +8,8 @@ enum class Fragments {
     SIGN_PAGE,
     USER_PAGE,
     ACCOMMODATION_PAGE,
-    PLAN_PAGE
+    PLAN_PAGE,
+    CALENDAR_PAGE
 }
 
 enum class Activitys {
@@ -23,4 +24,5 @@ interface AppNavigator {
     // Navigate to a given screen.
     fun navigateTo(screen: Fragments)
     fun navigateTo(screen: Activitys)
+    fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
 }

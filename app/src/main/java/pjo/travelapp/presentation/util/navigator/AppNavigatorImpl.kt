@@ -1,9 +1,8 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.navigator
 
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import pjo.travelapp.R
 import pjo.travelapp.presentation.ui.fragment.HomeFragmentDirections
@@ -19,7 +18,6 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
     }
 
     override fun navigateTo(screen: Fragments) {
-        val directions: NavDirections
 
         when (screen) {
             Fragments.HOME_PAGE -> {
@@ -27,6 +25,7 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             }
 
             Fragments.SEARCH_PAGE -> {
+                // navigator에서 action 시 animation 사용할 때 direction을 사용
                 navController.navigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
             }
 
@@ -51,9 +50,12 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             }
 
             Fragments.SIGN_PAGE -> {
-
+                navController.navigate(R.id.signFragment)
             }
 
+            Fragments.CALENDAR_PAGE -> {
+                navController.navigate(R.id.calendarFragment)
+            }
         }
     }
 
@@ -65,5 +67,11 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
 //                activity.startActivity(intent)
 //            }
 //        }
+    }
+
+    override fun destinationChangedListener(onDestinationChanged: (Int) -> Unit) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            onDestinationChanged(destination.id)
+        }
     }
 }

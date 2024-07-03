@@ -29,6 +29,10 @@
         -->
 
         <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="${kakaoApiKey}"/>
+
+        <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="${metaClientToken}" />
 
@@ -42,8 +46,12 @@
             android:theme="@style/AppTheme.splash" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <data android:host="oauth"
+                    android:scheme="kakao${kakaoApiKey}" />
             </intent-filter>
         </activity>
     </application>

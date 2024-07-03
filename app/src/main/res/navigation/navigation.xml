@@ -50,5 +50,19 @@
         android:id="@+id/accommodationDetailFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.AccommodationDetailFragment"
         android:label="AccommodationDetailFragment" />
+    <fragment
+        android:id="@+id/signFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.SignFragment"
+        android:label="fragment_sign"
+        tools:layout="@layout/fragment_sign" >
+        <action
+            android:id="@+id/action_signFragment_to_userDetailFragment"
+            app:destination="@id/userDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.CalendarFragment"
+        android:label="fragment_calendar"
+        tools:layout="@layout/fragment_calendar" />
 
 </navigation>

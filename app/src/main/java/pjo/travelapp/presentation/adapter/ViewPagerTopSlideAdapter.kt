@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import pjo.travelapp.R
-import pjo.travelapp.databinding.TopSlideItemContainerBinding
+import pjo.travelapp.databinding.VpMainTopSlideItemBinding
 
 class ViewPagerTopSlideAdapter(
     private val imgList: List<String>
@@ -21,7 +21,7 @@ class ViewPagerTopSlideAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
-            TopSlideItemContainerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            VpMainTopSlideItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
@@ -33,7 +33,7 @@ class ViewPagerTopSlideAdapter(
         super.onAttachedToRecyclerView(recyclerView)
     }
 
-    class ViewHolder(private val binding: TopSlideItemContainerBinding) :
+    class ViewHolder(private val binding: VpMainTopSlideItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(imgUrl: String) {
 

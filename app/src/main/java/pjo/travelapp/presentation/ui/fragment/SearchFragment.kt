@@ -8,8 +8,7 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.databinding.FragmentSearchBinding
-import pjo.travelapp.presentation.util.AppNavigator
-import pjo.travelapp.presentation.util.Fragments
+import pjo.travelapp.presentation.util.navigator.AppNavigator
 import javax.inject.Inject
 
 @AndroidEntryPoint

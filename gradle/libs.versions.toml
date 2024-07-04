@@ -2,7 +2,6 @@
 agp = "8.5.0"
 chipNavigationBar = "1.4.0"
 coreSplashscreen = "1.0.1"
-cosmocalendar = "1.0.6"
 facebookLogin = "17.0.0"
 firebaseUiAuth = "7.2.0"
 flexbox = "3.0.0"
@@ -44,7 +43,6 @@ androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx",
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 chip-navigation-bar = { module = "com.github.ismaeldivita:chip-navigation-bar", version.ref = "chipNavigationBar" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
-cosmocalendar = { module = "com.github.applikeysolutions:cosmocalendar", version.ref = "cosmocalendar" }
 facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }

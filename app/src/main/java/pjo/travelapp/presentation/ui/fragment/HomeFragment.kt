@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
@@ -37,6 +38,10 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     @Inject
     lateinit var navigator: AppNavigator
+    private lateinit var a: List<Int>
+    private lateinit var b: List<Int>
+    private lateinit var c: List<Int>
+    private lateinit var d: List<Int>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,6 +56,7 @@ class HomeFragment : Fragment() {
         setSpinnerItems()
         startRollingTextAnimation()
         setLottieAnimation()
+        setImgaeList()
         setAdapter()
     }
 
@@ -65,39 +71,59 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setImgaeList() {
+        a = listOf(
+            R.drawable.banner1,
+            R.drawable.banner2
+        )
+        b = listOf(
+            R.drawable.item_1,
+            R.drawable.item_2,
+            R.drawable.item_3,
+            R.drawable.item_4,
+            R.drawable.item_5
+        )
+    }
+
     private fun setAdapter() {
-
-        /*binding.vpTopSlider.apply {
+        binding.vpTopSlider.apply {
             val pageTransformer = CompositePageTransformer().apply {
-
                 addTransformer(MarginPageTransformer(40))
-
             }
             setPageTransformer(pageTransformer)
             clipToPadding = false
             clipChildren = false
-            adapter = ViewPagerTopSlideAdapter()
+            adapter = ViewPagerTopSlideAdapter(a)
             orientation = ViewPager2.ORIENTATION_HORIZONTAL
             offscreenPageLimit = 2
+
         }
 
         binding.rvCategory.apply {
-
-            adapter = CategoryAdapter()
-        }*/
+            adapter = CategoryAdapter(b)
+            layoutManager = LinearLayoutManager(
+                context,
+                LinearLayoutManager.HORIZONTAL,
+                false
+            ).apply {
+                recycleChildrenOnDetach = true
+            }
+            setItemViewCacheSize(b.size)
+            setHasFixedSize(true)
+        }
     }
 
-   /* // firebase 인증상태 확인
-    private fun signInAnonymously() {
-        FirebaseAuth.getInstance().signInAnonymously()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    fetchImagesFromDatabase()
-                } else {
-                    Log.w("TAG", "signInAnonymously:failure", task.exception)
-                }
-            }
-    }*/
+    /* // firebase 인증상태 확인
+     private fun signInAnonymously() {
+         FirebaseAuth.getInstance().signInAnonymously()
+             .addOnCompleteListener { task ->
+                 if (task.isSuccessful) {
+                     fetchImagesFromDatabase()
+                 } else {
+                     Log.w("TAG", "signInAnonymously:failure", task.exception)
+                 }
+             }
+     }*/
 
 
     private fun setLottieAnimation() {
@@ -135,3 +161,5 @@ class HomeFragment : Fragment() {
         }
     }
 }
+
+

@@ -10,16 +10,18 @@ import pjo.travelapp.data.CategoryItem
 import pjo.travelapp.databinding.CategoryItemBinding
 
 class CategoryAdapter(
-    private val imgList: MutableList<CategoryItem>
+    private val imgList: List<Int>
 ): RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     private var selectedItem: Int = -1
 
     class ViewHolder(private val binding: CategoryItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: CategoryItem, position: Int, selectedItem:Int) {
+        fun bind(imgUrl: Int, position: Int, selectedItem:Int) {
 
             binding.apply {
-                Glide.with(root.context)
+
+                ivPic.setImageResource(imgUrl)
+                /*Glide.with(root.context)
                     .load(imgUrl)
                     .skipMemoryCache(false)
                     .placeholder(R.drawable.intro_pic)
@@ -34,7 +36,7 @@ class CategoryAdapter(
                     llCategoryMainContainer.isSelected = false
                     ivPic.setImageResource(R.drawable.bg_gray_corner)
                     tvTitle.visibility = View.GONE
-                }
+                }*/
             }
         }
     }

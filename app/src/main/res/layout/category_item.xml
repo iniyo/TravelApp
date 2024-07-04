@@ -5,15 +5,15 @@
     android:layout_height="wrap_content"
     android:id="@+id/ll_category_main_container"
     android:layout_margin="8dp"
-    android:layout_marginEnd="8dp"
-    android:background="@drawable/selector_category_item">
+    android:layout_marginEnd="8dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_pic"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:importantForAccessibility="no"
-        app:srcCompat="@drawable/bg_gray_corner" />
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.50" />
 
     <TextView
         android:id="@+id/tv_title"

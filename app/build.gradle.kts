@@ -70,8 +70,6 @@ dependencies {
     implementation(libs.v2.user)
     // naver login
     implementation(libs.oauth)
-    //
-    implementation("com.github.applikeysolutions:cosmocalendar:1.0.4")
     /**
      * open source end
      */

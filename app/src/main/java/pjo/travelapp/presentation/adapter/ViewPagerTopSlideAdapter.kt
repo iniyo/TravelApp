@@ -9,7 +9,7 @@ import pjo.travelapp.R
 import pjo.travelapp.databinding.VpMainTopSlideItemBinding
 
 class ViewPagerTopSlideAdapter(
-    private val imgList: List<String>
+    private val imgList: List<Int>
 ) : RecyclerView.Adapter<ViewPagerTopSlideAdapter.ViewHolder>() {
 
 
@@ -35,16 +35,17 @@ class ViewPagerTopSlideAdapter(
 
     class ViewHolder(private val binding: VpMainTopSlideItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: String) {
+        fun bind(imgUrl: Int) {
 
             binding.apply {
 
                 Log.d("TAG", "bind: $imgUrl")
-                Glide.with(root.context)
+                ivTopSlide.setImageResource(imgUrl)
+               /* Glide.with(root.context)
                     .load(imgUrl)
                     .skipMemoryCache(false)
                     .placeholder(R.drawable.intro_pic)
-                    .into(ivTopSlide)
+                    .into(ivTopSlide)*/
 
             }
         }

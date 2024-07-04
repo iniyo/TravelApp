@@ -45,4 +45,6 @@
     <string name="my_schedule">내 일정</string>
     <string name="announcement">고객센터</string>
     <string name="customer_center">고객센터</string>
+    <string name="sign_in_and_up">로그인 및 회원가입</string>
+    <string name="person">/ person</string>
 </resources>

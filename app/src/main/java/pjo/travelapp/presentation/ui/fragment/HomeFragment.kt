@@ -3,7 +3,6 @@ package pjo.travelapp.presentation.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,17 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.yy.mobile.rollingtextview.CharOrder
 import com.yy.mobile.rollingtextview.strategy.Strategy
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
-import pjo.travelapp.data.CategoryItem
 import pjo.travelapp.databinding.FragmentHomeBinding
 import pjo.travelapp.presentation.adapter.CategoryAdapter
+import pjo.travelapp.presentation.adapter.PopularAdapter
+import pjo.travelapp.presentation.adapter.RecommendedAdapter
 import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -77,6 +73,13 @@ class HomeFragment : Fragment() {
             R.drawable.banner2
         )
         b = listOf(
+            R.drawable.cat1,
+            R.drawable.cat2,
+            R.drawable.cat3,
+            R.drawable.cat4,
+            R.drawable.cat5
+        )
+        c = listOf(
             R.drawable.item_1,
             R.drawable.item_2,
             R.drawable.item_3,
@@ -86,30 +89,51 @@ class HomeFragment : Fragment() {
     }
 
     private fun setAdapter() {
-        binding.vpTopSlider.apply {
-            val pageTransformer = CompositePageTransformer().apply {
-                addTransformer(MarginPageTransformer(40))
+        binding.apply {
+            vpTopSlider.apply {
+                val pageTransformer = CompositePageTransformer().apply {
+                    addTransformer(MarginPageTransformer(40))
+                }
+                setPageTransformer(pageTransformer)
+                clipToPadding = false
+                clipChildren = false
+                adapter = ViewPagerTopSlideAdapter(a)
+                orientation = ViewPager2.ORIENTATION_HORIZONTAL
+                offscreenPageLimit = 2
             }
-            setPageTransformer(pageTransformer)
-            clipToPadding = false
-            clipChildren = false
-            adapter = ViewPagerTopSlideAdapter(a)
-            orientation = ViewPager2.ORIENTATION_HORIZONTAL
-            offscreenPageLimit = 2
 
-        }
-
-        binding.rvCategory.apply {
-            adapter = CategoryAdapter(b)
-            layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            ).apply {
-                recycleChildrenOnDetach = true
+            rvCategory.apply {
+                adapter = CategoryAdapter(b)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(b.size) // cache할 아이템 사이즈
+                setHasFixedSize(true) // size 일정
             }
-            setItemViewCacheSize(b.size)
-            setHasFixedSize(true)
+
+            rvRecommended.apply {
+                adapter = RecommendedAdapter(c)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(c.size)
+                setHasFixedSize(true)
+            }
+
+            rvPopular.apply {
+                adapter = PopularAdapter(c)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(c.size)
+                setHasFixedSize(true)
+            }
         }
     }
 

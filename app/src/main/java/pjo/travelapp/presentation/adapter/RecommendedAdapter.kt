@@ -4,20 +4,19 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.databinding.RecycleCategoryItemBinding
+import pjo.travelapp.databinding.RecycleRecommendedItemBinding
 
-class CategoryAdapter(
+class RecommendedAdapter(
     private val imgList: List<Int>
-) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecommendedAdapter.ViewHolder>() {
 
-    private var selectedItem: Int = -1
-
-    class ViewHolder(private val binding: RecycleCategoryItemBinding) :
+    class ViewHolder(private val binding: RecycleRecommendedItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int, position: Int, selectedItem: Int) {
+        fun bind(imgUrl: Int) {
 
             binding.apply {
 
-                sivPic.setImageResource(imgUrl)
+                sivRecommendedItemMainImg.setImageResource(imgUrl)
                 /*Glide.with(root.context)
                     .load(imgUrl)
                     .skipMemoryCache(false)
@@ -40,12 +39,12 @@ class CategoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
-            RecycleCategoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            RecycleRecommendedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(imgList[position % imgList.size], position, selectedItem)
+        holder.bind(imgList[position % imgList.size])
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

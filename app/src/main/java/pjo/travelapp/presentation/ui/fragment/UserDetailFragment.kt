@@ -17,6 +17,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentUserDetailBinding
 import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
 import pjo.travelapp.presentation.util.signmanager.KakaoSignManager
 import pjo.travelapp.presentation.util.signmanager.NaverSignManager
 import javax.inject.Inject
@@ -26,6 +28,9 @@ class UserDetailFragment : Fragment() {
 
     private var _binding: FragmentUserDetailBinding? = null
     private val binding get() = _binding!!
+
+    @Inject
+    lateinit var navigator: AppNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +51,20 @@ class UserDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setClickListner()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setClickListner() {
+        binding.apply {
+            flSignInAndUpButton.setOnClickListener {
+                navigator.navigateTo(Fragments.SIGN_PAGE)
+            }
+        }
     }
 
     private fun setScreenSize() {

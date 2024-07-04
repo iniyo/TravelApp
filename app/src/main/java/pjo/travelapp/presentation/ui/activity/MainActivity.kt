@@ -25,13 +25,17 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var splashScreen: SplashScreen
     private val viewModel: BaseViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-
     @Inject
     lateinit var navigator: AppNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        init()
+    }
+
+    private fun init() {
+        startSplash()
         initContentView()
         setNavigationOnClick()
         setFloatingButton()
@@ -39,8 +43,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun initContentView() {
-        splashScreen = installSplashScreen()
-        startSplash()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
@@ -55,16 +57,8 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun startSplash() {
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            ObjectAnimator.ofPropertyValuesHolder(splashScreenView.iconView).run {
-                interpolator = AnticipateInterpolator()
-                duration = 1500L
-                doOnEnd {
-                    splashScreenView.remove()
-                }
-                start()
-            }
-        }
+        splashScreen = installSplashScreen()
+        startSplash()
     }
 
     private fun setNavigationOnClick() {
@@ -78,7 +72,7 @@ open class MainActivity : AppCompatActivity() {
                         navigator.navigateTo(Fragments.MAPS_PAGE)
                     }
                     R.id.nav_planner -> {
-                        navigator.navigateTo(Fragments.CALENDAR_PAGE)
+                        navigator.navigateTo(Fragments.PLAN_PAGE)
                     }
                     R.id.nav_profile -> {
                         navigator.navigateTo(Fragments.USER_PAGE)
@@ -89,14 +83,21 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun observeDestinationChanges() {
+
         navigator.destinationChangedListener { destinationId ->
             binding.apply {
+                if(destinationId == R.id.homeFragment)
+                {
+                    cnbItem.setItemSelected(R.id.nav_home)
+                }
                 if (destinationId == R.id.signFragment || destinationId == R.id.searchFragment) {
                     tvFloatingAiText.visibility = View.GONE
                     ivFloatingAiButton.visibility = View.GONE
+                    cnbItem.visibility = View.GONE
                 } else {
                     tvFloatingAiText.visibility = View.VISIBLE
                     ivFloatingAiButton.visibility = View.VISIBLE
+                    cnbItem.visibility = View.VISIBLE
                 }
             }
         }

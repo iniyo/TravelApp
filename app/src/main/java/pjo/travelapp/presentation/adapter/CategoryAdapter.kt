@@ -1,26 +1,23 @@
 package pjo.travelapp.presentation.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import pjo.travelapp.R
-import pjo.travelapp.data.CategoryItem
-import pjo.travelapp.databinding.CategoryItemBinding
+import pjo.travelapp.databinding.RecycleCategoryItemBinding
 
 class CategoryAdapter(
     private val imgList: List<Int>
-): RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     private var selectedItem: Int = -1
 
-    class ViewHolder(private val binding: CategoryItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int, position: Int, selectedItem:Int) {
+    class ViewHolder(private val binding: RecycleCategoryItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(imgUrl: Int, position: Int, selectedItem: Int) {
 
             binding.apply {
 
-                ivPic.setImageResource(imgUrl)
+                sivPic.setImageResource(imgUrl)
                 /*Glide.with(root.context)
                     .load(imgUrl)
                     .skipMemoryCache(false)
@@ -40,8 +37,10 @@ class CategoryAdapter(
             }
         }
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = CategoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            RecycleCategoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 

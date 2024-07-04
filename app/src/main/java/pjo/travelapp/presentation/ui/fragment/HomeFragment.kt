@@ -3,7 +3,6 @@ package pjo.travelapp.presentation.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,18 +15,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.yy.mobile.rollingtextview.CharOrder
 import com.yy.mobile.rollingtextview.strategy.Strategy
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
-import pjo.travelapp.data.CategoryItem
 import pjo.travelapp.databinding.FragmentHomeBinding
 import pjo.travelapp.presentation.adapter.CategoryAdapter
+import pjo.travelapp.presentation.adapter.PopularAdapter
+import pjo.travelapp.presentation.adapter.RecommendedAdapter
 import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
+import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.PageDecoration
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -42,6 +40,7 @@ class HomeFragment : Fragment() {
     private lateinit var b: List<Int>
     private lateinit var c: List<Int>
     private lateinit var d: List<Int>
+    lateinit var items: Array<String>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +52,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        items = resources.getStringArray(R.array.arr_location)
         setSpinnerItems()
         startRollingTextAnimation()
         setLottieAnimation()
@@ -61,7 +61,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setSpinnerItems() {
-        val items = resources.getStringArray(R.array.arr_location)
+
         val mAdapter = ArrayAdapter(requireContext(), R.layout.sp_item, items)
         mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -77,6 +77,13 @@ class HomeFragment : Fragment() {
             R.drawable.banner2
         )
         b = listOf(
+            R.drawable.cat1,
+            R.drawable.cat2,
+            R.drawable.cat3,
+            R.drawable.cat4,
+            R.drawable.cat5
+        )
+        c = listOf(
             R.drawable.item_1,
             R.drawable.item_2,
             R.drawable.item_3,
@@ -86,30 +93,59 @@ class HomeFragment : Fragment() {
     }
 
     private fun setAdapter() {
-        binding.vpTopSlider.apply {
-            val pageTransformer = CompositePageTransformer().apply {
-                addTransformer(MarginPageTransformer(40))
-            }
-            setPageTransformer(pageTransformer)
-            clipToPadding = false
-            clipChildren = false
-            adapter = ViewPagerTopSlideAdapter(a)
-            orientation = ViewPager2.ORIENTATION_HORIZONTAL
-            offscreenPageLimit = 2
+        val itemMargin = 24
+        val previewWidth = 30
+        val decoMargin = previewWidth + itemMargin
+        val pageTransX = decoMargin + previewWidth
+        val decoration = PageDecoration(decoMargin)
 
-        }
+        binding.apply {
+            vpTopSlider.apply {
+                addItemDecoration(decoration)
 
-        binding.rvCategory.apply {
-            adapter = CategoryAdapter(b)
-            layoutManager = LinearLayoutManager(
-                context,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            ).apply {
-                recycleChildrenOnDetach = true
+                setPageTransformer { page, position ->
+                    page.translationX = position * - pageTransX
+                }
+
+                clipToPadding = false
+                clipChildren = false
+                adapter = ViewPagerTopSlideAdapter(a)
+                orientation = ViewPager2.ORIENTATION_HORIZONTAL
+                offscreenPageLimit = 2
             }
-            setItemViewCacheSize(b.size)
-            setHasFixedSize(true)
+
+            rvCategory.apply {
+                adapter = CategoryAdapter(b)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(b.size) // cache할 아이템 사이즈
+                setHasFixedSize(true) // size 일정
+            }
+
+            rvRecommended.apply {
+                adapter = RecommendedAdapter(c)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(c.size)
+                setHasFixedSize(true)
+            }
+
+            rvPopular.apply {
+                adapter = PopularAdapter(c)
+                layoutManager = LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.HORIZONTAL,
+                    false
+                )
+                setItemViewCacheSize(c.size)
+                setHasFixedSize(true)
+            }
         }
     }
 

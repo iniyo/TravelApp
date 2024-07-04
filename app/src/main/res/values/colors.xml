@@ -6,9 +6,13 @@
     <color name="dark_blue">#253F66</color>
     <color name="light_gray">#EFEFEF</color>
     <color name="yellow">#ffC106</color>
-    <color name="light_blue">#EBF5FE</color>
+    <color name="light_blue">#78BDFB</color>
+    <color name="white_blue">#EBF5FE</color>
     <color name="gray">#D0EFEFEF</color>
+    <color name="dark_gray">#79141313</color>
     <color name="naver_green">#03C75A</color>
+    <color name="light_green">#11D368</color>
     <color name="kakao_yellow">#FEE500</color>
-    <color name="white_blue">#DBE9F4</color>
+    <color name="light_purple">#9045E6</color>
+    <color name="indigo">#F27136</color>
 </resources>

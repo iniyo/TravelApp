@@ -13,6 +13,15 @@
     </style>
 
 
+    <!-- spinner style -->
+    <style name="Widget.My.Spinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:overlapAnchor">false</item>
+        <item name="overlapAnchor"> false</item> <!-- true: 드롭다운 메뉴의 표시위치가 스피너와 겹칠 수 있음, false:  드랍다운 메뉴가 스피너 아래로 고정 -->
+        <item name="android:spinnerMode">dropdown</item> <!-- dropdown: 메뉴가 드랍다운 형식으로 표시, dialog: 메뉴가 팝업형태로 표시 -->
+        <item name="android:dropDownWidth">match_parent</item> <!-- dropDownWidth: 드랍다운 메뉴의 가로길이를 설정 -->
+        <item name="android:background">@drawable/bg_spinner</item>
+    </style>
+
     <!-- TabLayout 텍스트 -->
     <style name="merchandise_tab_text_appearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import pjo.travelapp.databinding.FragmentSignBinding
 import pjo.travelapp.presentation.util.signmanager.KakaoSignManager
 import pjo.travelapp.presentation.util.signmanager.NaverSignManager
@@ -40,6 +41,18 @@ class SignFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setClickListner()
+    }
+
+    private fun setClickListner() {
+        binding.apply {
+            ivSignDisplayBackButton.setOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
     }
 
     private fun sign() {

@@ -5,19 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:layout_marginBottom="90dp"
     tools:context=".presentation.ui.fragment.SignFragment">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lav_sign_background"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="40dp"
-        android:scaleType="fitXY"
-        android:elevation="5dp"
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tb_sign_display_title"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@color/white"
+        app:contentInsetStart="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@color/white">
+
+        <ImageView
+            android:id="@+id/iv_sign_display_back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/back_white" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lav_sign_background"
+        android:layout_width="230dp"
+        android:layout_height="230dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tb_sign_display_title"
         app:lottie_autoPlay="true"
         app:lottie_rawRes="@raw/animation_bg_sign" />
 
@@ -47,10 +66,13 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_sign_container_title" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
+        android:paddingBottom="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_sign_container_detail">
@@ -59,7 +81,6 @@
             android:id="@+id/btn_google"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
             android:importantForAccessibility="no"
             android:scaleType="fitXY"
             app:srcCompat="@drawable/google_login_btn_long" />
@@ -81,18 +102,20 @@
             android:importantForAccessibility="no"
             android:scaleType="fitXY"
             app:srcCompat="@drawable/naver_login_btn_long" />
-
-        <TextView
-            android:id="@+id/tv_terms"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="50dp"
-            android:layout_marginTop="50dp"
-            android:ems="10"
-            android:gravity="center"
-            android:text="@string/travelapp_terms"
-            android:textSize="13sp" />
     </LinearLayout>
 
-
+    <TextView
+        android:id="@+id/tv_terms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
+        android:ems="10"
+        android:gravity="center"
+        android:text="@string/travelapp_terms"
+        android:textSize="12sp"
+        android:textColor="@color/dark_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

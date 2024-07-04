@@ -37,7 +37,7 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
             }
             orientation = LinearLayout.HORIZONTAL
             setPadding(6.dpToPx(), 6.dpToPx(), 6.dpToPx(), 6.dpToPx())
-            background = ContextCompat.getDrawable(context, R.drawable.bg_white_corner)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_white_solid_corner)
             gravity = Gravity.CENTER_VERTICAL
             clickListener?.let { setOnClickListener(it) } // 클릭 리스너 설정
         }

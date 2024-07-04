@@ -31,6 +31,11 @@ open class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        init()
+    }
+
+    private fun init() {
+        startSplash()
         initContentView()
         setNavigationOnClick()
         setFloatingButton()
@@ -38,8 +43,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun initContentView() {
-        splashScreen = installSplashScreen()
-        startSplash()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
@@ -54,16 +57,8 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun startSplash() {
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            ObjectAnimator.ofPropertyValuesHolder(splashScreenView.iconView).run {
-                interpolator = AnticipateInterpolator()
-                duration = 1500L
-                doOnEnd {
-                    splashScreenView.remove()
-                }
-                start()
-            }
-        }
+        splashScreen = installSplashScreen()
+        startSplash()
     }
 
     private fun setNavigationOnClick() {

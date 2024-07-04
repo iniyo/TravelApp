@@ -64,12 +64,27 @@ dependencies {
      */
     // rolling textview
     implementation(libs.rollingtext)
+    // navigation bar
+    implementation(libs.chip.navigation.bar)
     // lottie animation
     implementation(libs.lottie)
     // kakao login
     implementation(libs.v2.user)
     // naver login
     implementation(libs.oauth)
+    // glide
+    implementation(libs.glide)
+    // firebase
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.facebook.login)
+    implementation(libs.firebase.auth)
+    // google service
+    implementation(libs.play.services.maps)
+    // retrofit2
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    // flexbox
+    implementation(libs.flexbox)
     /**
      * open source end
      */
@@ -77,19 +92,11 @@ dependencies {
     /**
      * jetpack, androidx, default
      */
-    // glide
-    implementation(libs.glide)
-
     // viewpager
     implementation(libs.androidx.viewpager2)
 
-    // navigation bar
-    implementation(libs.chip.navigation.bar)
-
     // hilt
     implementation(libs.hilt.android)
-    implementation(libs.play.services.maps)
-    implementation(libs.firebase.auth)
     ksp(libs.hilt.compiler)
 
     // viewmodel
@@ -98,21 +105,10 @@ dependencies {
     // coroutine
     implementation(libs.kotlinx.coroutines.core)
 
-    // retrofit2
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-
     // navigation
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.dynamic.features.fragment)
-
-    // flexbox
-    implementation(libs.flexbox)
-
-    // firebase
-    implementation(libs.firebase.ui.auth)
-    implementation(libs.facebook.login)
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)

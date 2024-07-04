@@ -2,26 +2,23 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
-import dagger.hilt.android.AndroidEntryPoint
-import pjo.travelapp.R
-import pjo.travelapp.databinding.FragmentCalendarBinding
+import pjo.travelapp.databinding.FragmentCheckBinding
 
-class CalendarFragment : Fragment() {
+class CheckFragment : Fragment() {
 
-    private var _binding: FragmentCalendarBinding? = null
+    private var _binding: FragmentCheckBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        _binding = FragmentCheckBinding.inflate(inflater, container, false)
         return binding.root
     }
 

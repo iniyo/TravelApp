@@ -6,6 +6,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import pjo.travelapp.R
 import pjo.travelapp.presentation.ui.fragment.HomeFragmentDirections
+import pjo.travelapp.presentation.ui.fragment.UserDetailFragmentDirections
 import javax.inject.Inject
 
 /**
@@ -50,11 +51,11 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             }
 
             Fragments.SIGN_PAGE -> {
-                navController.navigate(R.id.signFragment)
+                navController.navigate(UserDetailFragmentDirections.actionUserDetailFragmentToSignFragment())
             }
 
             Fragments.CALENDAR_PAGE -> {
-                navController.navigate(R.id.calendarFragment)
+                navController.navigate(R.id.checkFragment)
             }
         }
     }

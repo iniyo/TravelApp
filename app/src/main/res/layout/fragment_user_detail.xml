@@ -14,9 +14,9 @@
         android:id="@+id/cl_profile_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="30dp"
         android:background="@color/white"
-        android:elevation="1dp">
+        android:elevation="1dp"
+        android:paddingBottom="30dp">
 
         <ImageView
             android:id="@+id/iv_setting"
@@ -41,69 +41,57 @@
             app:srcCompat="@drawable/intro_pic" />
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/tv_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="30dp"
             android:text="김덕배"
+            android:textColor="@color/dark_blue"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/iv_profile"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/iv_profile" />
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/iv_user_info_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:importantForAccessibility="no"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/tv_user_name"
             app:layout_constraintStart_toEndOf="@+id/tv_user_name"
             app:layout_constraintTop_toTopOf="@+id/tv_user_name"
-            app:srcCompat="@drawable/ic_trip" />
+            app:srcCompat="@drawable/ic_edit" />
 
-        <FrameLayout
-            android:id="@+id/fl_sign_in_and_up_button"
+        <TextView
+            android:id="@+id/btn_login_and_signup"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
+            android:layout_gravity="center"
             android:background="@drawable/bg_blue_solid_corner"
+            android:gravity="center"
             android:paddingHorizontal="15dp"
+            android:text="@string/sign_in_and_up"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/iv_setting"
-            app:layout_constraintTop_toBottomOf="@+id/iv_profile">
-
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/lav_sign_btn"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:lottie_rawRes="@raw/animation_click_button" />
-
-            <TextView
-                android:id="@+id/btn_login_and_signup"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textStyle="bold"
-                android:text="@string/sign_in_and_up"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toBottomOf="@+id/iv_profile" />
 
         <TextView
             android:id="@+id/tv_login_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:text="회원가입하고 TravelApp의 다양한 서비스를 즐겨보세요!"
             android:textColor="@color/dark_blue"
             android:textSize="14sp"
-            android:text="회원가입하고 TravelApp의 다양한 서비스를 즐겨보세요!"
-            app:layout_constraintStart_toStartOf="@+id/fl_sign_in_and_up_button"
-            app:layout_constraintTop_toBottomOf="@+id/fl_sign_in_and_up_button" />
+            app:layout_constraintStart_toStartOf="@+id/btn_login_and_signup"
+            app:layout_constraintTop_toBottomOf="@+id/btn_login_and_signup" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -120,109 +108,201 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="서비스"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:textColor="@color/dark_blue"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_my_trip"
+        <ImageButton
+            android:id="@+id/ibtn_my_trip"
             android:layout_width="170dp"
-            android:layout_height="100dp"
+            android:layout_height="110dp"
             android:layout_marginTop="20dp"
-            android:background="@drawable/bell_icon"
-            android:scaleType="fitXY"
+            android:background="@drawable/btn_effect_user_detail_blue"
+            android:importantForAccessibility="no"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_service"
-            app:lottie_rawRes="@raw/animation_click_button" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_service" />
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_favorite"
+        <ImageView
+            android:id="@+id/iv_my_trip_white"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_airplane_white"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_my_trip"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_my_trip"
+            app:layout_constraintTop_toTopOf="@+id/ibtn_my_trip" />
+
+        <TextView
+            android:id="@+id/tv_my_trip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="내 여행"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ibtn_my_trip"
+            app:layout_constraintEnd_toEndOf="@+id/iv_my_trip_white"
+            app:layout_constraintStart_toStartOf="@+id/iv_my_trip_white"
+            app:layout_constraintTop_toBottomOf="@+id/iv_my_trip_white" />
+
+        <ImageButton
+            android:id="@+id/ibtn_schedule"
             android:layout_width="170dp"
-            android:layout_height="100dp"
-            android:background="@drawable/bell_icon"
-            android:scaleType="fitXY"
+            android:layout_height="110dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_effect_user_detail_purple"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_my_trip"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_my_trip"
+            app:layout_constraintTop_toBottomOf="@+id/ibtn_my_trip" />
+
+        <ImageView
+            android:id="@+id/iv_schedule"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_calendar_white"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_schedule"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_schedule"
+            app:layout_constraintTop_toTopOf="@+id/ibtn_schedule" />
+
+        <TextView
+            android:id="@+id/tv_schedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="내 일정"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ibtn_schedule"
+            app:layout_constraintEnd_toEndOf="@+id/iv_schedule"
+            app:layout_constraintStart_toStartOf="@+id/iv_schedule"
+            app:layout_constraintTop_toBottomOf="@+id/iv_schedule" />
+
+        <ImageButton
+            android:id="@+id/ibtn_my_favorite"
+            android:layout_width="170dp"
+            android:layout_height="110dp"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/btn_effect_user_detail_indigo"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/btn_my_trip"
-            app:lottie_rawRes="@raw/animation_click_button" />
+            app:layout_constraintTop_toTopOf="@+id/ibtn_my_trip" />
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_schedule_calendar"
-            android:layout_width="170dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bell_icon"
-            android:scaleType="fitXY"
-            app:layout_constraintEnd_toEndOf="@+id/btn_favorite"
-            app:layout_constraintStart_toStartOf="@+id/btn_favorite"
-            app:layout_constraintTop_toBottomOf="@+id/btn_favorite"
-            app:lottie_rawRes="@raw/animation_click_button" />
+        <ImageView
+            android:id="@+id/iv_favorite_white"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_star_white"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_my_favorite"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_my_favorite"
+            app:layout_constraintTop_toTopOf="@+id/ibtn_my_favorite" />
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/btn_reservation"
+        <TextView
+            android:id="@+id/tv_favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="내 즐겨찾기"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ibtn_my_favorite"
+            app:layout_constraintEnd_toEndOf="@+id/iv_favorite_white"
+            app:layout_constraintStart_toStartOf="@+id/iv_favorite_white"
+            app:layout_constraintTop_toBottomOf="@+id/iv_favorite_white" />
+
+
+        <ImageButton
+            android:id="@+id/ibtn_reservation"
             android:layout_width="170dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bell_icon"
-            android:scaleType="fitXY"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_trip"
-            app:layout_constraintStart_toStartOf="@+id/btn_my_trip"
-            app:layout_constraintTop_toBottomOf="@+id/btn_my_trip"
-            app:lottie_rawRes="@raw/animation_click_button" />
+            android:layout_height="110dp"
+            android:background="@drawable/btn_effect_user_detail_green"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_my_favorite"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_my_favorite"
+            app:layout_constraintTop_toTopOf="@+id/ibtn_schedule" />
+
+        <ImageView
+            android:id="@+id/iv_reservation"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="15dp"
+            android:src="@drawable/ic_checklist_white"
+            app:layout_constraintEnd_toEndOf="@+id/ibtn_reservation"
+            app:layout_constraintStart_toStartOf="@+id/ibtn_reservation"
+            app:layout_constraintTop_toTopOf="@+id/ibtn_reservation" />
+
+        <TextView
+            android:id="@+id/tv_reservation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="내 예약"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ibtn_reservation"
+            app:layout_constraintEnd_toEndOf="@+id/iv_reservation"
+            app:layout_constraintStart_toStartOf="@+id/iv_reservation"
+            app:layout_constraintTop_toBottomOf="@+id/iv_reservation" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray" />
+
+    <TextView
+        android:id="@+id/tv_user_schedule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/my_schedule"
+        android:textColor="@color/dark_blue"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp_user_schedule"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_info_announcement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/announcement"
+            android:textSize="18sp" />
+
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="10dp"
             android:background="@color/gray" />
 
         <TextView
-            android:id="@+id/tv_user_schedule"
-            android:layout_width="match_parent"
+            android:id="@+id/tv_info_customer_center"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/my_schedule"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/vp_user_schedule"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_info_announcement"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/announcement"
-                android:textSize="18sp" />
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="10dp"
-                android:background="@color/gray" />
-
-            <TextView
-                android:id="@+id/tv_info_customer_center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/customer_center"
-                android:textSize="18sp" />
-        </LinearLayout>
+            android:text="@string/terms"
+            android:textSize="18sp" />
+    </LinearLayout>
 
 
 </LinearLayout>

@@ -40,7 +40,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun setClickListener() {
-        binding.ivBtnClose.setOnClickListener {
+        binding.inclSearchBar.ivBtnClose.setOnClickListener {
             findNavController().navigateUp() // 현재 프래그먼트 종료
         }
     }

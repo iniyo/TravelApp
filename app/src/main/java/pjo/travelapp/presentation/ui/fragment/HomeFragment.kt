@@ -24,6 +24,8 @@ import pjo.travelapp.presentation.adapter.CategoryAdapter
 import pjo.travelapp.presentation.adapter.PopularAdapter
 import pjo.travelapp.presentation.adapter.RecommendedAdapter
 import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
+import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.PageDecoration
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -38,6 +40,7 @@ class HomeFragment : Fragment() {
     private lateinit var b: List<Int>
     private lateinit var c: List<Int>
     private lateinit var d: List<Int>
+    lateinit var items: Array<String>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +52,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        items = resources.getStringArray(R.array.arr_location)
         setSpinnerItems()
         startRollingTextAnimation()
         setLottieAnimation()
@@ -57,7 +61,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setSpinnerItems() {
-        val items = resources.getStringArray(R.array.arr_location)
+
         val mAdapter = ArrayAdapter(requireContext(), R.layout.sp_item, items)
         mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -89,12 +93,20 @@ class HomeFragment : Fragment() {
     }
 
     private fun setAdapter() {
+        val itemMargin = 24
+        val previewWidth = 30
+        val decoMargin = previewWidth + itemMargin
+        val pageTransX = decoMargin + previewWidth
+        val decoration = PageDecoration(decoMargin)
+
         binding.apply {
             vpTopSlider.apply {
-                val pageTransformer = CompositePageTransformer().apply {
-                    addTransformer(MarginPageTransformer(40))
+                addItemDecoration(decoration)
+
+                setPageTransformer { page, position ->
+                    page.translationX = position * - pageTransX
                 }
-                setPageTransformer(pageTransformer)
+
                 clipToPadding = false
                 clipChildren = false
                 adapter = ViewPagerTopSlideAdapter(a)

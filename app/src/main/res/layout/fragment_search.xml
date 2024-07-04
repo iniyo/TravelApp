@@ -2,8 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:id="@+id/cl_main_container"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray"
     tools:context=".presentation.ui.fragment.SearchFragment">
@@ -20,55 +20,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/white"
-                android:elevation="4dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingVertical="5dp">
-
-                <ImageView
-                    android:id="@+id/iv_btn_close"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:importantForAccessibility="no"
-                    android:scaleType="centerCrop"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel" />
-
-                <EditText
-                    android:id="@+id/editTextText"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_gray_corner"
-                    android:drawableStart="@drawable/search_icon"
-                    android:drawablePadding="8dp"
-                    android:ems="10"
-                    android:hint="@string/street_address_city"
-                    android:importantForAutofill="no"
-                    android:inputType="text"
-                    android:padding="8dp"
-                    android:textColor="@color/dark_blue"
-                    android:textColorHint="@color/dark_blue"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/tv_search"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="10dp"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:text="검색"
-                    android:textColor="@color/blue"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
+            <include android:id="@+id/incl_search_bar"
+                layout="@layout/search_bar"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -126,8 +79,8 @@
                     <androidx.appcompat.widget.AppCompatButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:stateListAnimator="@null"
                         android:background="@color/gray"
+                        android:stateListAnimator="@null"
                         android:text="후쿠오카"
                         android:textColor="@color/black" />
 
@@ -139,8 +92,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/white"
                 android:orientation="horizontal"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="16dp">
 
                 <TextView
                     android:id="@+id/tv_main1"
@@ -169,7 +121,7 @@
                 <LinearLayout
                     android:id="@+id/ll_pic_container1"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -179,7 +131,7 @@
                     <LinearLayout
                         android:id="@+id/ll_pic_item1"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -196,14 +148,15 @@
                     <View
                         android:id="@+id/v_1"
                         android:layout_width="1dp"
-                        android:layout_height="16dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:layout_marginVertical="10dp"
                         android:background="@color/gray" />
 
                     <LinearLayout
                         android:id="@+id/ll_pic_item2"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -220,14 +173,15 @@
                     <View
                         android:id="@+id/v_2"
                         android:layout_width="1dp"
-                        android:layout_height="16dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:layout_marginVertical="10dp"
                         android:background="@color/gray" />
 
                     <LinearLayout
                         android:id="@+id/ll_pic_item3"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -255,7 +209,7 @@
                 <LinearLayout
                     android:id="@+id/ll_pic_container2"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -265,7 +219,7 @@
                     <LinearLayout
                         android:id="@+id/ll_pic_item4"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -282,14 +236,15 @@
                     <View
                         android:id="@+id/v_3"
                         android:layout_width="1dp"
-                        android:layout_height="16dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:layout_marginVertical="10dp"
                         android:background="@color/gray" />
 
                     <LinearLayout
                         android:id="@+id/ll_pic_item5"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -306,14 +261,15 @@
                     <View
                         android:id="@+id/v_4"
                         android:layout_width="1dp"
-                        android:layout_height="16dp"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:layout_marginVertical="10dp"
                         android:background="@color/gray" />
 
                     <LinearLayout
                         android:id="@+id/ll_pic_item6"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="horizontal"
@@ -341,18 +297,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/white"
-                    app:tabMode="scrollable"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tabIndicatorAnimationMode="elastic"
                     app:tabIndicatorColor="@color/black"
                     app:tabIndicatorFullWidth="false"
                     app:tabIndicatorHeight="3dp"
-                    app:tabTextColor="@color/dark_blue"
+                    app:tabMode="scrollable"
+                    app:tabRippleColor="@android:color/transparent"
                     app:tabSelectedTextColor="@color/dark_blue"
                     app:tabTextAppearance="@style/merchandise_tab_text_appearance"
-                    app:tabIndicatorAnimationMode="elastic"
-                    app:tabRippleColor="@android:color/transparent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:tabTextColor="@color/dark_blue">
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
@@ -365,30 +321,30 @@
                         android:text="인기 검색어" />
 
                 </com.google.android.material.tabs.TabLayout>
-<!--                <TextView-->
-<!--                    android:id="@+id/textView"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginTop="16dp"-->
-<!--                    android:textSize="18sp"-->
-<!--                    android:text="이벤트"-->
-<!--                    android:textColor="@color/dark_blue"-->
-<!--                    android:textStyle="bold"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent" />-->
+                <!--                <TextView-->
+                <!--                    android:id="@+id/textView"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginStart="16dp"-->
+                <!--                    android:layout_marginTop="16dp"-->
+                <!--                    android:textSize="18sp"-->
+                <!--                    android:text="이벤트"-->
+                <!--                    android:textColor="@color/dark_blue"-->
+                <!--                    android:textStyle="bold"-->
+                <!--                    app:layout_constraintStart_toStartOf="parent"-->
+                <!--                    app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--                <TextView-->
-<!--                    android:id="@+id/textView2"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="24dp"-->
-<!--                    android:textSize="18sp"-->
-<!--                    android:text="인기 검색어"-->
-<!--                    android:textColor="@color/dark_blue"-->
-<!--                    android:textStyle="bold"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@+id/textView"-->
-<!--                    app:layout_constraintStart_toEndOf="@+id/textView" />-->
+                <!--                <TextView-->
+                <!--                    android:id="@+id/textView2"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginStart="24dp"-->
+                <!--                    android:textSize="18sp"-->
+                <!--                    android:text="인기 검색어"-->
+                <!--                    android:textColor="@color/dark_blue"-->
+                <!--                    android:textStyle="bold"-->
+                <!--                    app:layout_constraintBottom_toBottomOf="@+id/textView"-->
+                <!--                    app:layout_constraintStart_toEndOf="@+id/textView" />-->
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>

@@ -33,6 +33,11 @@
             android:value="${kakaoApiKey}"/>
 
         <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="${metaAppId}"
+            tools:replace="android:value"/>
+
+        <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="${metaClientToken}" />
 

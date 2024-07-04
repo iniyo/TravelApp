@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="test">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-06-27T01:43:29.369192400Z">
+        <DropdownSelection timestamp="2024-07-03T07:36:04.567096200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R3CW40JCZBV" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\pineone\.android\avd\Fold_34.avd" />
             </handle>
           </Target>
         </DropdownSelection>

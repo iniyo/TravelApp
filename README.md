@@ -70,11 +70,16 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 
 > DroidKnights
 - Application & YouTube ([Application-Github](https://github.com/droidknights/DroidKnightsApp), [YouTube](https://www.youtube.com/@DroidKnights))
+
 > UI/UX Design
 - UiLover Android(YouTube): ([UiLover Android(YouTube)](https://www.youtube.com/watch?v=KPIGmyp8Bt0))
 <<<<<<< .merge_file_8un9qT
 - Splash Screen(Velog): ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
 - Rolling Textview(Github): ([YvesCheung](https://github.com/YvesCheung/RollingText))
+- social login button design: ([stead](https://butsteadily.tistory.com/16))
+
+- material design 모음: ([](https://medium.com/@mmbialas/30-new-android-libraries-and-projects-released-in-summer-2017-which-should-catch-your-attention-d3702bd9bdc6))
+
 > Manifest 설정 관련
 - Android Development[permission 종류](https://developer.android.com/reference/android/Manifest.permission)
 - // 권한 종류 중 Protection level: dangerous 가 되어있는 경우 사용자에게 권한 허용을 받아야 함. 

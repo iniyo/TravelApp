@@ -31,4 +31,18 @@
     <string name="facebook_application_id" translatable="false">1518175629048040</string>
     <string name="facebook_login_protocol_scheme" translatable="false">fb1518175629048040</string>
     <string name="meta_client_token">0099472ecd0470fd45362119307d4b6c</string>
+    <string name="map">지도</string>
+    <string name="share">공유</string>
+    <string name="edit">편집</string>
+    <string name="budget_plan">예산계획</string>
+    <string name="check_list">체크리스트</string>
+    <string name="airline_ticket">항공권</string>
+    <string name="accommodation">숙소</string>
+    <string name="social_login_info_naver_client_id">ID_KEY</string>
+    <string name="social_login_info_naver_client_secret">SECREY_KEY</string>
+    <string name="social_login_info_naver_client_name">네이버아이디 로그인</string>
+    <string name="travelapp_terms">로그인 및 회원가입 진행 시 TravelApp의 <font color="#3F95EC">서비스 약관</font> 및 <font color="#3F95EC">개인정보처리방침에</font> 동의하게 됩니다.</string>
+    <string name="my_schedule">내 일정</string>
+    <string name="announcement">고객센터</string>
+    <string name="customer_center">고객센터</string>
 </resources>

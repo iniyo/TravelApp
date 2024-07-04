@@ -100,7 +100,7 @@
                         android:layout_margin="16dp"
                         android:layout_marginBottom="16dp"
                         android:scaleType="centerCrop"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.15"
                         app:srcCompat="@drawable/intro_pic" />
 
                     <TextView
@@ -222,7 +222,7 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.15"
                             app:srcCompat="@drawable/intro_pic" />
 
                         <TextView

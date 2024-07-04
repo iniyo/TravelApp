@@ -3,28 +3,38 @@ package pjo.travelapp.presentation.ui.fragment
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.CompositePageTransformer
+import androidx.viewpager2.widget.MarginPageTransformer
+import androidx.viewpager2.widget.ViewPager2
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.yy.mobile.rollingtextview.CharOrder
 import com.yy.mobile.rollingtextview.strategy.Strategy
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
+import pjo.travelapp.data.CategoryItem
 import pjo.travelapp.databinding.FragmentHomeBinding
-import pjo.travelapp.presentation.util.AppNavigator
-import pjo.travelapp.presentation.util.Fragments
+import pjo.travelapp.presentation.adapter.CategoryAdapter
+import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
-
+    private lateinit var binding: FragmentHomeBinding
     @Inject
     lateinit var navigator: AppNavigator
 
@@ -32,7 +42,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
         return binding.root
     }
 
@@ -40,11 +50,8 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setSpinnerItems()
         startRollingTextAnimation()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        setLottieAnimation()
+        setAdapter()
     }
 
     private fun setSpinnerItems() {
@@ -58,6 +65,44 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setAdapter() {
+
+        /*binding.vpTopSlider.apply {
+            val pageTransformer = CompositePageTransformer().apply {
+
+                addTransformer(MarginPageTransformer(40))
+
+            }
+            setPageTransformer(pageTransformer)
+            clipToPadding = false
+            clipChildren = false
+            adapter = ViewPagerTopSlideAdapter()
+            orientation = ViewPager2.ORIENTATION_HORIZONTAL
+            offscreenPageLimit = 2
+        }
+
+        binding.rvCategory.apply {
+
+            adapter = CategoryAdapter()
+        }*/
+    }
+
+   /* // firebase 인증상태 확인
+    private fun signInAnonymously() {
+        FirebaseAuth.getInstance().signInAnonymously()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    fetchImagesFromDatabase()
+                } else {
+                    Log.w("TAG", "signInAnonymously:failure", task.exception)
+                }
+            }
+    }*/
+
+
+    private fun setLottieAnimation() {
+        binding.lavBell.playAnimation()
+    }
 
     private fun startRollingTextAnimation() {
         val rollingText = resources.getStringArray(R.array.arr_rolling)

@@ -29,6 +29,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Manifest에 값을 전달
+        manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
         manifestPlaceholders["mapsApiKey"] = properties.getProperty("maps_api_key")
         manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")
@@ -85,6 +86,8 @@ dependencies {
     implementation(libs.converter.gson)
     // flexbox
     implementation(libs.flexbox)
+    //
+    implementation(libs.previewoffsetviewpager)
     /**
      * open source end
      */
@@ -112,6 +115,9 @@ dependencies {
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    // slidingpanelayout
+    implementation(libs.androidx.slidingpanelayout)
 
     // default
     implementation(libs.androidx.core.ktx)

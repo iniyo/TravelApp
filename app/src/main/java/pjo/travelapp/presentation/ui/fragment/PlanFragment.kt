@@ -52,22 +52,22 @@ class PlanFragment : Fragment() {
         itemManager.addItem("ll_fbl_item_1", "iv_map", "tv_map", R.drawable.ic_map, R.string.map) { view ->
 
         }
-        itemManager.addItem("ll_fbl_item_2", "iv_share", "tv_share", R.drawable.ic_map, R.string.share) { view ->
+        itemManager.addItem("ll_fbl_item_2", "iv_share", "tv_share", R.drawable.ic_share, R.string.share) { view ->
             // Handle click event for ll_fbl_item_2
         }
-        itemManager.addItem("ll_fbl_item_3", "iv_edit", "tv_edit", R.drawable.ic_map, R.string.edit) { view ->
+        itemManager.addItem("ll_fbl_item_3", "iv_edit", "tv_edit", R.drawable.ic_edit, R.string.edit) { view ->
             // Handle click event for ll_fbl_item_3
         }
-        itemManager.addItem("ll_fbl_item_4", "iv_budget_plan", "tv_budget_plan", R.drawable.ic_map, R.string.budget_plan) { view ->
+        itemManager.addItem("ll_fbl_item_4", "iv_budget_plan", "tv_budget_plan", R.drawable.ic_cache, R.string.budget_plan) { view ->
             // Handle click event for ll_fbl_item_4
         }
-        itemManager.addItem("ll_fbl_item_5", "iv_check_list", "tv_check_list", R.drawable.ic_map, R.string.check_list) { view ->
+        itemManager.addItem("ll_fbl_item_5", "iv_check_list", "tv_check_list", R.drawable.ic_checklist, R.string.check_list) { view ->
             // Handle click event for ll_fbl_item_5
         }
-        itemManager.addItem("ll_fbl_item_6", "iv_airline_ticket", "tv_airline_ticket", R.drawable.ic_map, R.string.airline_ticket) { view ->
+        itemManager.addItem("ll_fbl_item_6", "iv_airline_ticket", "tv_airline_ticket", R.drawable.ic_airplane, R.string.airline_ticket) { view ->
             // Handle click event for ll_fbl_item_6
         }
-        itemManager.addItem("ll_fbl_item_7", "iv_accommodation", "tv_accommodation", R.drawable.ic_map, R.string.accommodation) { view ->
+        itemManager.addItem("ll_fbl_item_7", "iv_accommodation", "tv_accommodation", R.drawable.ic_accommodation, R.string.accommodation) { view ->
             // Handle click event for ll_fbl_item_7
         }
     }

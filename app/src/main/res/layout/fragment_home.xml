@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".presentation.ui.fragment.HomeFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="viewModel"
+            type="pjo.travelapp.presentation.viewmodel.MainViewModel" />
 
-        <import type="android.view.View" />
-
+        <import type="android.view.View"/>
+        <variable
+            name="view"
+            type="pjo.travelapp.presentation.ui.fragment.HomeFragment" />
     </data>
 
     <ScrollView
@@ -46,6 +50,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <Spinner
+                    style="@style/Widget.My.Spinner"
                     android:id="@+id/sp_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -109,7 +114,6 @@
                     android:id="@+id/vp_top_slider"
                     android:layout_width="match_parent"
                     android:layout_height="160dp"
-                    android:paddingHorizontal="24dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -171,10 +175,10 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/textView6"
+                    android:id="@+id/tv_see_more"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/see_all"
+                    android:text="@string/see_more"
                     android:textColor="@color/blue"
                     android:textSize="14sp" />
 
@@ -228,7 +232,7 @@
                     android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/see_all"
+                    android:text="@string/see_more"
                     android:textColor="@color/blue" />
 
             </LinearLayout>

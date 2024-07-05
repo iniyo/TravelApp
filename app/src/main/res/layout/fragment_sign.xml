@@ -7,27 +7,8 @@
     android:background="@color/white"
     tools:context=".presentation.ui.fragment.SignFragment">
 
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/tb_sign_display_title"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:background="@color/white"
-        app:contentInsetStart="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="@color/white">
-
-        <ImageView
-            android:id="@+id/iv_sign_display_back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:importantForAccessibility="no"
-            android:src="@drawable/back_white" />
-
-    </androidx.appcompat.widget.Toolbar>
+    <include android:id="@+id/toolbar"
+        layout="@layout/top_toolbar"/>
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lav_sign_background"
@@ -36,7 +17,7 @@
         android:scaleType="fitXY"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tb_sign_display_title"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:lottie_autoPlay="true"
         app:lottie_rawRes="@raw/animation_bg_sign" />
 

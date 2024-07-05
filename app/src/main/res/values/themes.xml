@@ -9,4 +9,15 @@
         ....
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="S">@android:color/transparent</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="CheckFragmentToolbarTheme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorControlNormal">@color/dark_gray</item>
+    </style>
+
+    <style name="CheckFragmentButtonTheme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorPrimary">@color/dark_gray</item>
+    </style>
 </resources>

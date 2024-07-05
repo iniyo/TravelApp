@@ -60,6 +60,10 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         }
     }
 
+    override fun navigateUp() {
+        navController.navigateUp()
+    }
+
     override fun navigateTo(screen: Activitys) {
 //        when (screen) {
 //

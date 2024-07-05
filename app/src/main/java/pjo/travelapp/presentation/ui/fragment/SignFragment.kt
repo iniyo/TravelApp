@@ -49,7 +49,7 @@ class SignFragment : Fragment() {
 
     private fun setClickListner() {
         binding.apply {
-            ivSignDisplayBackButton.setOnClickListener {
+            toolbar.ivSignDisplayBackButton.setOnClickListener {
                 findNavController().navigateUp()
             }
         }

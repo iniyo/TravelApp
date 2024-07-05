@@ -21,6 +21,7 @@ import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentUserDetailBinding
 import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
 import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.PageDecoration
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import pjo.travelapp.presentation.util.signmanager.KakaoSignManager
@@ -78,12 +79,15 @@ class UserDetailFragment : Fragment() {
             R.drawable.banner2
         )
 
+        val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
+
         binding.apply {
             vpUserSchedule.apply {
-                val pageTransformer = CompositePageTransformer().apply {
-                    addTransformer(MarginPageTransformer(40))
+                addItemDecoration(decoration)
+
+                setPageTransformer { page, position ->
+                    page.translationX = position * - pageTransX
                 }
-                setPageTransformer(pageTransformer)
                 clipToPadding = false
                 clipChildren = false
                 adapter = ViewPagerTopSlideAdapter(a)

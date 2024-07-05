@@ -15,4 +15,8 @@
     <color name="kakao_yellow">#FEE500</color>
     <color name="light_purple">#9045E6</color>
     <color name="indigo">#F27136</color>
+    <color name="dark_purple">#3A284C</color>
+    <color name="color_primary_dark">#303F9F</color>
+    <color name="dark_light_gray">#474747</color>
+    <color name="continuous_selection">#0F000000</color>
 </resources>

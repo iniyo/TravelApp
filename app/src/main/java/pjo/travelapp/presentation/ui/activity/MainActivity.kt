@@ -9,10 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
+import pjo.travelapp.databinding.TopToolbarBinding
 import pjo.travelapp.presentation.ui.viewmodel.BaseViewModel
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.AppNavigatorImpl
@@ -35,10 +38,12 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
+        // splash 및 화면 초기화
         startSplash()
         initContentView()
+        // 기타 설정
+        setClickListener()
         setNavigationOnClick()
-        setFloatingButton()
         observeDestinationChanges()
     }
 
@@ -47,18 +52,15 @@ open class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-    private fun setFloatingButton() {
-        binding.apply {
-            Glide.with(baseContext)
-                .asGif()
-                .load(R.raw.gif_floating_button)
-                .into(ivFloatingAiButton)
+    private fun setClickListener() {
+        val abinding = TopToolbarBinding.inflate(layoutInflater)
+        abinding.ivSignDisplayBackButton.setOnClickListener {
+            navigator.navigateUp()
         }
     }
 
     private fun startSplash() {
         splashScreen = installSplashScreen()
-        startSplash()
     }
 
     private fun setNavigationOnClick() {
@@ -72,7 +74,7 @@ open class MainActivity : AppCompatActivity() {
                         navigator.navigateTo(Fragments.MAPS_PAGE)
                     }
                     R.id.nav_planner -> {
-                        navigator.navigateTo(Fragments.PLAN_PAGE)
+                        navigator.navigateTo(Fragments.CALENDAR_PAGE)
                     }
                     R.id.nav_profile -> {
                         navigator.navigateTo(Fragments.USER_PAGE)
@@ -92,11 +94,16 @@ open class MainActivity : AppCompatActivity() {
                 }
                 if (destinationId == R.id.signFragment || destinationId == R.id.searchFragment) {
                     tvFloatingAiText.visibility = View.GONE
-                    ivFloatingAiButton.visibility = View.GONE
+                    lavFloatingAiButton.visibility = View.GONE
                     cnbItem.visibility = View.GONE
                 } else {
                     tvFloatingAiText.visibility = View.VISIBLE
-                    ivFloatingAiButton.visibility = View.VISIBLE
+                    lavFloatingAiButton.visibility = View.VISIBLE
+                    cnbItem.visibility = View.VISIBLE
+                }
+                if(destinationId == R.id.checkFragment) {
+                    cnbItem.visibility = View.GONE
+                }else {
                     cnbItem.visibility = View.VISIBLE
                 }
             }

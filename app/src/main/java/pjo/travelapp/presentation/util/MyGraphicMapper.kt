@@ -19,6 +19,23 @@ object MyGraphicMapper {
             value * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
         }
     }
+
+    // px2
+    fun px2dp(px: Int): Int = convertDensity(px.toFloat(), true).toInt()
+    fun px2dp(px: Float): Float = convertDensity(px, true)
+
+    // dp2
+    fun dp2px(dp: Int): Int = convertDensity(dp.toFloat(), false).toInt()
+    fun dp2px(dp: Float): Float = convertDensity(dp, false)
+
+    // pageDecoration 반환
+    fun getDecoration(itemMargin: Int = 24, previewWidth: Int = 30): Pair<Int, PageDecoration> {
+        val decoMargin = previewWidth + itemMargin
+        val pageTransX = decoMargin + previewWidth
+        val decoration = PageDecoration(decoMargin)
+        return Pair(pageTransX, decoration)
+    }
+
     private val GESTURE_THRESHOLD_DP = 16.0f
 
     private var gestureThreshold: Int = 0
@@ -40,13 +57,7 @@ object MyGraphicMapper {
         }
     }
 
-    // px2
-    fun px2dp(px: Int): Int = convertDensity(px.toFloat(), true).toInt()
-    fun px2dp(px: Float): Float = convertDensity(px, true)
 
-    // dp2
-    fun dp2px(dp: Int): Int = convertDensity(dp.toFloat(), false).toInt()
-    fun dp2px(dp: Float): Float = convertDensity(dp, false)
 
     // offset - viewpager에서 간격으로 사용
     fun offsetPx(context: Context): Int {

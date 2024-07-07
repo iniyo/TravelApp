@@ -13,8 +13,7 @@ enum class Fragments {
 }
 
 enum class Activitys {
-    MAIN_ACTIVITY,
-    DetailActivity
+
 }
 
 /**
@@ -24,5 +23,6 @@ interface AppNavigator {
     // Navigate to a given screen.
     fun navigateTo(screen: Fragments)
     fun navigateTo(screen: Activitys)
+    fun navigateUp()
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
 }

@@ -93,11 +93,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setAdapter() {
-        val itemMargin = 24
-        val previewWidth = 30
-        val decoMargin = previewWidth + itemMargin
-        val pageTransX = decoMargin + previewWidth
-        val decoration = PageDecoration(decoMargin)
+
+        val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
         binding.apply {
             vpTopSlider.apply {

@@ -1,9 +1,10 @@
 // localProperties에서 값 읽어오기
 import java.util.Properties
-import java.io.FileInputStream
-val properties = Properties().apply {
-    load(FileInputStream(rootProject.file("local.properties")))
-}
+
+// localProperties에서 값 읽어오기
+val properties = Properties()
+file("../local.properties").inputStream().use { properties.load(it) }
+
 
 plugins {
     alias(libs.plugins.android.application)
@@ -29,10 +30,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Manifest에 값을 전달
-        manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")
+        manifestPlaceholders["maps_api_key"] = properties.getProperty("maps_api_key")
+        /*manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")*/
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
-        manifestPlaceholders["mapsApiKey"] = properties.getProperty("maps_api_key")
-        manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")
+        /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
     }
 
     buildTypes {
@@ -79,15 +80,17 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.facebook.login)
     implementation(libs.firebase.auth)
-    // google service
+    // google maps service
     implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
     // retrofit2
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     // flexbox
     implementation(libs.flexbox)
-    //
-    implementation(libs.previewoffsetviewpager)
+    // kizitonwose calendar
+    implementation(libs.view)
+
     /**
      * open source end
      */

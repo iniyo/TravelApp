@@ -31,9 +31,9 @@ android {
 
         // Manifest에 값을 전달
         manifestPlaceholders["maps_api_key"] = properties.getProperty("maps_api_key")
-        manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")
+        /*manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")*/
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
-        manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")
+        /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
     }
 
     buildTypes {

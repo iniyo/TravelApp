@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme.splash" parent="Theme.SplashEx">
-        <item name="android:windowSplashScreenBackground">@color/light_blue</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/avd_anim</item>
+    <style name="Theme.SplashEx" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowSplashScreenBackground">@color/theme_green</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/avd_splash</item>
         <item name="android:windowSplashScreenAnimationDuration">1000</item>
+        <!-- Splash 화면 중앙의 아이콘 주변 Background Color 지정 -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/white</item>
     </style>
 </resources>

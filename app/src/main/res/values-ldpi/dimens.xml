@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="bottom_navigation_height">17.5dp</dimen> <!-- 70dp * 0.25 -->
+    <dimen name="user_detail_button_img_size">12.5dp</dimen> <!-- 50dp * 0.25 -->
+    <dimen name="user_detail_button_width">42.5dp</dimen> <!-- 170dp * 0.25 -->
+    <dimen name="user_detail_button_height">27.5dp</dimen> <!-- 110dp * 0.25 -->
+</resources>

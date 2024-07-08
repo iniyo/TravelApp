@@ -50,4 +50,10 @@
     <string name="terms">이용약관</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
+    <string name="my_reservation">내 예약</string>
+    <string name="my_favorite">내 즐겨찾기</string>
+    <string name="mt_schedule">내 일정</string>
+    <string name="my_trip">내 여행</string>
+    <string name="service">서비스</string>
+    <string name="sign_up_info">회원가입하고 TravelApp의 다양한 서비스를 즐겨보세요!</string>
 </resources>

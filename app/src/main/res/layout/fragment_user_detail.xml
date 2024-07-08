@@ -8,6 +8,7 @@
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="vertical"
+    android:paddingBottom="@dimen/bottom_navigation_height"
     tools:context=".presentation.ui.fragment.UserDetailFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -87,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="회원가입하고 TravelApp의 다양한 서비스를 즐겨보세요!"
+            android:text="@string/sign_up_info"
             android:textColor="@color/dark_blue"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/btn_login_and_signup"
@@ -107,7 +108,7 @@
             android:id="@+id/tv_service"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="서비스"
+            android:text="@string/service"
             android:textColor="@color/dark_blue"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -116,8 +117,8 @@
 
         <ImageButton
             android:id="@+id/ibtn_my_trip"
-            android:layout_width="170dp"
-            android:layout_height="110dp"
+            android:layout_width="@dimen/user_detail_button_width"
+            android:layout_height="@dimen/user_detail_button_height"
             android:layout_marginTop="20dp"
             android:background="@drawable/btn_effect_user_detail_blue"
             android:importantForAccessibility="no"
@@ -126,8 +127,8 @@
 
         <ImageView
             android:id="@+id/iv_my_trip_white"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/user_detail_button_img_size"
+            android:layout_height="@dimen/user_detail_button_img_size"
             android:layout_marginTop="10dp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_airplane_white"
@@ -141,7 +142,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="내 여행"
+            android:text="@string/my_trip"
             android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/ibtn_my_trip"
@@ -151,19 +152,21 @@
 
         <ImageButton
             android:id="@+id/ibtn_schedule"
-            android:layout_width="170dp"
-            android:layout_height="110dp"
+            android:layout_width="@dimen/user_detail_button_width"
+            android:layout_height="@dimen/user_detail_button_height"
             android:layout_marginTop="20dp"
             android:background="@drawable/btn_effect_user_detail_purple"
+            android:importantForAccessibility="no"
             app:layout_constraintEnd_toEndOf="@+id/ibtn_my_trip"
             app:layout_constraintStart_toStartOf="@+id/ibtn_my_trip"
             app:layout_constraintTop_toBottomOf="@+id/ibtn_my_trip" />
 
         <ImageView
             android:id="@+id/iv_schedule"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/user_detail_button_img_size"
+            android:layout_height="@dimen/user_detail_button_img_size"
             android:layout_marginTop="10dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_calendar_white"
             app:layout_constraintEnd_toEndOf="@+id/ibtn_schedule"
             app:layout_constraintStart_toStartOf="@+id/ibtn_schedule"
@@ -175,7 +178,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="내 일정"
+            android:text="@string/mt_schedule"
             android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/ibtn_schedule"
@@ -185,18 +188,20 @@
 
         <ImageButton
             android:id="@+id/ibtn_my_favorite"
-            android:layout_width="170dp"
-            android:layout_height="110dp"
+            android:layout_width="@dimen/user_detail_button_width"
+            android:layout_height="@dimen/user_detail_button_height"
             android:layout_marginStart="20dp"
             android:background="@drawable/btn_effect_user_detail_indigo"
+            android:importantForAccessibility="no"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/ibtn_my_trip" />
 
         <ImageView
             android:id="@+id/iv_favorite_white"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/user_detail_button_img_size"
+            android:layout_height="@dimen/user_detail_button_img_size"
             android:layout_marginTop="10dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_star_white"
             app:layout_constraintEnd_toEndOf="@+id/ibtn_my_favorite"
             app:layout_constraintStart_toStartOf="@+id/ibtn_my_favorite"
@@ -208,7 +213,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="내 즐겨찾기"
+            android:text="@string/my_favorite"
             android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/ibtn_my_favorite"
@@ -219,18 +224,20 @@
 
         <ImageButton
             android:id="@+id/ibtn_reservation"
-            android:layout_width="170dp"
-            android:layout_height="110dp"
+            android:layout_width="@dimen/user_detail_button_width"
+            android:layout_height="@dimen/user_detail_button_height"
             android:background="@drawable/btn_effect_user_detail_green"
+            android:importantForAccessibility="no"
             app:layout_constraintEnd_toEndOf="@+id/ibtn_my_favorite"
             app:layout_constraintStart_toStartOf="@+id/ibtn_my_favorite"
             app:layout_constraintTop_toTopOf="@+id/ibtn_schedule" />
 
         <ImageView
             android:id="@+id/iv_reservation"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/user_detail_button_img_size"
+            android:layout_height="@dimen/user_detail_button_img_size"
             android:layout_marginTop="15dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_checklist_white"
             app:layout_constraintEnd_toEndOf="@+id/ibtn_reservation"
             app:layout_constraintStart_toStartOf="@+id/ibtn_reservation"
@@ -242,7 +249,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="내 예약"
+            android:text="@string/my_reservation"
             android:textColor="@color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/ibtn_reservation"

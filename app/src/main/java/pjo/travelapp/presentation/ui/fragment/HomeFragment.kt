@@ -152,9 +152,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
                 setHasFixedSize(true)
             }
 
-            vpTabItemsShow.apply {
+            /*vpTabItemsShow.apply {
                 adapter = MorePlacesViewPagerAdapter(requireContext())
-            }
+            }*/
         }
     }
 

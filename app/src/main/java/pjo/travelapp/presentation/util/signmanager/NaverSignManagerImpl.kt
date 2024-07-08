@@ -17,8 +17,8 @@ class NaverSignManagerImpl: NaverSignManager {
         var naverToken :String? = ""
 
         val profileCallback = object : NidProfileCallback<NidProfileResponse> {
-            override fun onSuccess(response: NidProfileResponse) {
-                val userId = response.profile?.id
+            override fun onSuccess(result: NidProfileResponse) {
+                val userId = result.profile?.id
 
             }
             override fun onFailure(httpStatus: Int, message: String) {

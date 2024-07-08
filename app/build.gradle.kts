@@ -1,7 +1,6 @@
 // localProperties에서 값 읽어오기
 import java.util.Properties
 
-// localProperties에서 값 읽어오기
 val properties = Properties()
 file("../local.properties").inputStream().use { properties.load(it) }
 
@@ -14,6 +13,7 @@ plugins {
     alias(libs.plugins.google.dev.ksp)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     alias(libs.plugins.android.navigation.safrargs)
+    kotlin("kapt")
 }
 
 android {
@@ -34,6 +34,16 @@ android {
         /*manifestPlaceholders["metaAppId"] = properties.getProperty("meta_app_id")*/
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
         /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments.putAll(mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas",
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                ))
+            }
+        }
     }
 
     buildTypes {
@@ -121,6 +131,9 @@ dependencies {
 
     // slidingpanelayout
     implementation(libs.androidx.slidingpanelayout)
+
+    // data binding
+    kapt(libs.androidx.databinding.compiler)
 
     // default
     implementation(libs.androidx.core.ktx)

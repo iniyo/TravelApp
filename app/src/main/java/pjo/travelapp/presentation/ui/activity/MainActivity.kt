@@ -3,7 +3,9 @@ package pjo.travelapp.presentation.ui.activity
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnticipateInterpolator
+import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
@@ -12,6 +14,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
@@ -33,7 +36,6 @@ open class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         init()
     }
 
@@ -41,7 +43,7 @@ open class MainActivity : AppCompatActivity() {
         // splash 및 화면 초기화
         startSplash()
         initContentView()
-        // 기타 설정
+        // 기타 초기화 설정
         setClickListener()
         setNavigationOnClick()
         observeDestinationChanges()

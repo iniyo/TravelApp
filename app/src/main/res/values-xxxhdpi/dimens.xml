@@ -1,4 +1,5 @@
 <resources>
+    <dimen name="tab_item_margin">45dp</dimen>
     <dimen name="bottom_navigation_height">96dp</dimen>
     <dimen name="user_detail_button_img_size">68dp</dimen>
     <dimen name="user_detail_button_width">216dp</dimen>

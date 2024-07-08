@@ -1,31 +1,18 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.CompositePageTransformer
-import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.IdpResponse
-import com.google.firebase.auth.ActionCodeSettings
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentUserDetailBinding
-import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
+import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
 import pjo.travelapp.presentation.util.MyGraphicMapper
-import pjo.travelapp.presentation.util.PageDecoration
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
-import pjo.travelapp.presentation.util.signmanager.KakaoSignManager
-import pjo.travelapp.presentation.util.signmanager.NaverSignManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -90,7 +77,7 @@ class UserDetailFragment : Fragment() {
                 }
                 clipToPadding = false
                 clipChildren = false
-                adapter = ViewPagerTopSlideAdapter(a)
+                adapter = TopSlideViewPagerAdapter(a)
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 offscreenPageLimit = 2
             }

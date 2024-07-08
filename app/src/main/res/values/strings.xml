@@ -56,4 +56,5 @@
     <string name="my_trip">내 여행</string>
     <string name="service">서비스</string>
     <string name="sign_up_info">회원가입하고 TravelApp의 다양한 서비스를 즐겨보세요!</string>
+    <string name="more_places">more places</string>
 </resources>

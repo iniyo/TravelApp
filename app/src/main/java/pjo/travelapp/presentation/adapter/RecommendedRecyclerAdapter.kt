@@ -3,12 +3,11 @@ package pjo.travelapp.presentation.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import pjo.travelapp.databinding.RecycleCategoryItemBinding
 import pjo.travelapp.databinding.RecycleRecommendedItemBinding
 
-class RecommendedAdapter(
+class RecommendedRecyclerAdapter(
     private val imgList: List<Int>
-) : RecyclerView.Adapter<RecommendedAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecommendedRecyclerAdapter.ViewHolder>() {
 
     class ViewHolder(private val binding: RecycleRecommendedItemBinding) :
         RecyclerView.ViewHolder(binding.root) {

@@ -8,69 +8,77 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ArrayAdapter
-import androidx.core.content.ContextCompat
+import android.widget.LinearLayout
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.CompositePageTransformer
-import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
 import com.yy.mobile.rollingtextview.CharOrder
 import com.yy.mobile.rollingtextview.strategy.Strategy
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentHomeBinding
-import pjo.travelapp.presentation.adapter.CategoryAdapter
-import pjo.travelapp.presentation.adapter.PopularAdapter
-import pjo.travelapp.presentation.adapter.RecommendedAdapter
-import pjo.travelapp.presentation.adapter.ViewPagerTopSlideAdapter
+import pjo.travelapp.presentation.adapter.CategoryRecyclerAdapter
+import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
+import pjo.travelapp.presentation.adapter.PopularRecyclerAdapter
+import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
+import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
 import pjo.travelapp.presentation.util.MyGraphicMapper
-import pjo.travelapp.presentation.util.PageDecoration
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
-@AndroidEntryPoint
-class HomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
+@AndroidEntryPoint
+class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
+
     @Inject
     lateinit var navigator: AppNavigator
     private lateinit var a: List<Int>
     private lateinit var b: List<Int>
     private lateinit var c: List<Int>
-    private lateinit var d: List<Int>
-    lateinit var items: Array<String>
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        items = resources.getStringArray(R.array.arr_location)
-        setSpinnerItems()
-        startRollingTextAnimation()
-        setLottieAnimation()
-        setImgaeList()
-        setAdapter()
-    }
-
-    private fun setSpinnerItems() {
-
-        val mAdapter = ArrayAdapter(requireContext(), R.layout.sp_item, items)
-        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        binding.spLocation.apply {
-            adapter = mAdapter
-            setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white))
+    override fun initView() {
+        super.initView()
+        binding.apply {
+            startRollingTextAnimation()
+            setLottieAnimation()
+            setImgaeList()
+            setAdapter()
+            setTabLayout()
         }
     }
 
+    private fun getForkFragment() : List<Fragment> {
+        val fragmentList: List<Fragment> = listOf(
+            RecycleItemFragment(),
+            RecycleItemFragment(),
+            RecycleItemFragment()
+        )
+        return fragmentList
+    }
+
+    private fun setTabLayout() {
+        val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
+        setTabItemMargin(binding.tlTop, marginSize, marginSize)
+    }
+
+    // TabLayout Tab 사이 간격 부여
+    private fun setTabItemMargin(tabLayout: TabLayout, marginStart: Int, marginEnd: Int) {
+        val tabs = tabLayout.getChildAt(0) as ViewGroup
+        for(i in 0 until tabs.childCount) {
+            val tab = tabs.getChildAt(i)
+            val lp = tab.layoutParams as LinearLayout.LayoutParams
+            lp.marginStart = marginStart
+            lp.marginEnd = marginEnd
+            tab.layoutParams = lp
+
+
+            tabLayout.requestLayout()
+        }
+    }
     private fun setImgaeList() {
         a = listOf(
             R.drawable.banner1,
@@ -106,13 +114,13 @@ class HomeFragment : Fragment() {
 
                 clipToPadding = false
                 clipChildren = false
-                adapter = ViewPagerTopSlideAdapter(a)
+                adapter = TopSlideViewPagerAdapter(a)
                 orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 offscreenPageLimit = 2
             }
 
             rvCategory.apply {
-                adapter = CategoryAdapter(b)
+                adapter = CategoryRecyclerAdapter(b)
                 layoutManager = LinearLayoutManager(
                     context,
                     LinearLayoutManager.HORIZONTAL,
@@ -123,7 +131,7 @@ class HomeFragment : Fragment() {
             }
 
             rvRecommended.apply {
-                adapter = RecommendedAdapter(c)
+                adapter = RecommendedRecyclerAdapter(c)
                 layoutManager = LinearLayoutManager(
                     context,
                     LinearLayoutManager.HORIZONTAL,
@@ -134,7 +142,7 @@ class HomeFragment : Fragment() {
             }
 
             rvPopular.apply {
-                adapter = PopularAdapter(c)
+                adapter = PopularRecyclerAdapter(c)
                 layoutManager = LinearLayoutManager(
                     context,
                     LinearLayoutManager.HORIZONTAL,
@@ -143,21 +151,12 @@ class HomeFragment : Fragment() {
                 setItemViewCacheSize(c.size)
                 setHasFixedSize(true)
             }
+
+            vpTabItemsShow.apply {
+                adapter = MorePlacesViewPagerAdapter(requireContext())
+            }
         }
     }
-
-    /* // firebase 인증상태 확인
-     private fun signInAnonymously() {
-         FirebaseAuth.getInstance().signInAnonymously()
-             .addOnCompleteListener { task ->
-                 if (task.isSuccessful) {
-                     fetchImagesFromDatabase()
-                 } else {
-                     Log.w("TAG", "signInAnonymously:failure", task.exception)
-                 }
-             }
-     }*/
-
 
     private fun setLottieAnimation() {
         binding.lavBell.playAnimation()
@@ -168,7 +167,7 @@ class HomeFragment : Fragment() {
         var textIndex = 0
 
         binding.rtvSearch.apply {
-            animationDuration = 2000L
+            animationDuration = 1500L
             animationInterpolator = AccelerateDecelerateInterpolator()
             addCharOrder(CharOrder.Alphabet)
             addCharOrder(CharOrder.UpperAlphabet)

@@ -5,12 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import pjo.travelapp.R
 import pjo.travelapp.databinding.VpMainTopSlideItemBinding
 
-class ViewPagerTopSlideAdapter(
+class TopSlideViewPagerAdapter(
     private val imgList: List<Int>
-) : RecyclerView.Adapter<ViewPagerTopSlideAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<TopSlideViewPagerAdapter.ViewHolder>() {
 
 
     init {

@@ -32,10 +32,43 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-class CheckFragment : Fragment() {
+class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check) {
 
-    private var _binding: FragmentCheckBinding? = null
-    private val binding get() = _binding!!
+    override fun initView() {
+        super.initView()
+        binding.apply {
+            addStatusBarColorUpdate(R.color.white)
+            val daysOfWeek = daysOfWeek()
+            binding.layoutLegend.root.children.forEachIndexed { index, child ->
+                (child as TextView).apply {
+                    text = daysOfWeek[index].displayText()
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+                    setTextColorRes(R.color.dark_light_gray)
+                }
+            }
+            configureBinders()
+
+            val currentMonth = YearMonth.now()
+            binding.exFourCalendar.setup(
+                currentMonth,
+                currentMonth.plusMonths(12),
+                daysOfWeek.first(),
+            )
+            binding.exFourCalendar.scrollToMonth(currentMonth)
+
+            // save button
+            binding.exFourSaveButton.setOnClickListener click@{
+                val (startDate, endDate) = selection
+                if (startDate != null && endDate != null) {
+                    val text = dateRangeDisplayText(startDate, endDate)
+                    Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
+                }
+                parentFragmentManager.popBackStack()
+            }
+
+            bindSummaryViews()
+        }
+    }
 
     private var initialView: View? = null
 
@@ -49,59 +82,6 @@ class CheckFragment : Fragment() {
 
     private val headerDateFormatter = DateTimeFormatter.ofPattern("EEE'\n'd MMM")
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        if (initialView != null) {
-            _binding = FragmentCheckBinding.bind(initialView!!)
-            return binding.root
-        } else {
-            _binding = FragmentCheckBinding.inflate(inflater, container, false)
-            return binding.root
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        addStatusBarColorUpdate(R.color.white)
-
-        val daysOfWeek = daysOfWeek()
-        binding.layoutLegend.root.children.forEachIndexed { index, child ->
-            (child as TextView).apply {
-                text = daysOfWeek[index].displayText()
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                setTextColorRes(R.color.dark_light_gray)
-            }
-        }
-        configureBinders()
-
-        val currentMonth = YearMonth.now()
-        binding.exFourCalendar.setup(
-            currentMonth,
-            currentMonth.plusMonths(12),
-            daysOfWeek.first(),
-        )
-        binding.exFourCalendar.scrollToMonth(currentMonth)
-
-        // save button
-        binding.exFourSaveButton.setOnClickListener click@{
-            val (startDate, endDate) = selection
-            if (startDate != null && endDate != null) {
-                val text = dateRangeDisplayText(startDate, endDate)
-                Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
-            }
-            parentFragmentManager.popBackStack()
-        }
-
-        bindSummaryViews()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {

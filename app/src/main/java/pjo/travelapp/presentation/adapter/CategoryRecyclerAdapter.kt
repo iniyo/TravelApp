@@ -4,19 +4,20 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.databinding.RecycleCategoryItemBinding
-import pjo.travelapp.databinding.RecyclePopularItemBinding
 
-class PopularAdapter(
+class CategoryRecyclerAdapter(
     private val imgList: List<Int>
-) : RecyclerView.Adapter<PopularAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder>() {
 
-    class ViewHolder(private val binding: RecyclePopularItemBinding) :
+    private var selectedItem: Int = -1
+
+    class ViewHolder(private val binding: RecycleCategoryItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int) {
+        fun bind(imgUrl: Int, position: Int, selectedItem: Int) {
 
             binding.apply {
 
-                sivPopularItemMainImg.setImageResource(imgUrl)
+                sivPic.setImageResource(imgUrl)
                 /*Glide.with(root.context)
                     .load(imgUrl)
                     .skipMemoryCache(false)
@@ -39,12 +40,12 @@ class PopularAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
-            RecyclePopularItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            RecycleCategoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(imgList[position % imgList.size])
+        holder.bind(imgList[position % imgList.size], position, selectedItem)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

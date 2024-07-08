@@ -29,6 +29,8 @@ import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentMapsBinding
 import java.io.IOException
 
+
+@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MapsFragment : Fragment() {
 
@@ -40,6 +42,7 @@ class MapsFragment : Fragment() {
     private val callback = OnMapReadyCallback { map ->
         googleMap = map
         val sydney = LatLng(32.557667, 126.926546)
+
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true
             mapType = GoogleMap.MAP_TYPE_NORMAL
@@ -71,13 +74,26 @@ class MapsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
-        setSearch()
+        init()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    private fun init() {
+        setSearch()
+        setClickListener()
+        setSlidingUpPanel()
+    }
+
+    private fun setClickListener() {
+        binding.ivTrack.setOnClickListener {
+            getDirections()
+        }
+    }
+
 
     private fun setSearch() {
         setAnimation()
@@ -104,7 +120,7 @@ class MapsFragment : Fragment() {
                                         googleMap.animateCamera(
                                             CameraUpdateFactory.newLatLngZoom(
                                                 latLng,
-                                                10F
+                                                15F // 카메라 이동시 확대되는 크기
                                             )
                                         )
                                     }
@@ -124,6 +140,9 @@ class MapsFragment : Fragment() {
         }
     }
 
+    private fun setSlidingUpPanel() {
+
+    }
 
     private fun setAnimation() {
         binding.apply {
@@ -146,7 +165,21 @@ class MapsFragment : Fragment() {
                         .alpha(1f)
                         .setDuration(500)
                         .start()
+                    svMapsSearch.requestFocus()
                 } else {
+                    svMapsSearch.animate()
+                        .translationY(-svMapsSearch.height.toFloat())
+                        .alpha(0f)
+                        .setDuration(500)
+                        .withEndAction {
+                            svMapsSearch.visibility = View.GONE
+                        }
+                        .start()
+                }
+            }
+
+            svMapsSearch.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus && svMapsSearch.visibility == View.VISIBLE) {
                     svMapsSearch.animate()
                         .translationY(-svMapsSearch.height.toFloat())
                         .alpha(0f)
@@ -159,6 +192,7 @@ class MapsFragment : Fragment() {
             }
         }
     }
+
 
     private fun checkLocatePermissionAndEnableMyLocation() {
         if (ContextCompat.checkSelfPermission(
@@ -198,4 +232,9 @@ class MapsFragment : Fragment() {
             }
         }
     }
+
+    private fun getDirections() {
+
+    }
+
 }

@@ -78,7 +78,9 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - Rolling Textview(Github): ([YvesCheung](https://github.com/YvesCheung/RollingText))
 - social login button design: ([stead](https://butsteadily.tistory.com/16))
 - viewpager between view ([king-jungin.log](https://velog.io/@king-jungin/Android-%EC%96%91-%EC%98%86%EC%9D%B4-%EB%AF%B8%EB%A6%AC%EB%B3%B4%EC%9D%B4%EB%8A%94-ViewPager2-%EB%A7%8C%EB%93%A4%EA%B8%B0))
-- material design 모음: ([](https://medium.com/@mmbialas/30-new-android-libraries-and-projects-released-in-summer-2017-which-should-catch-your-attention-d3702bd9bdc6))
+- material design 모음: ([for 2017](https://medium.com/@mmbialas/30-new-android-libraries-and-projects-released-in-summer-2017-which-should-catch-your-attention-d3702bd9bdc6))
+- sliding layout(Gituhb) ([AndroidSlidingUpPanel](https://github.com/hannesa2/AndroidSlidingUpPanel))
+
 
 > Manifest 설정 관련
 - Android Development[permission 종류](https://developer.android.com/reference/android/Manifest.permission)

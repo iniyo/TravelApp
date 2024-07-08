@@ -9,7 +9,7 @@
     app:cnb_iconColor="@color/white"
     />
     <item
-        android:id="@+id/nav_explorer"
+        android:id="@+id/nav_map"
         android:icon="@drawable/bottom_btn2"
         android:title="@string/explorer"
         app:cnb_backgroundColor="@color/blue"

@@ -53,10 +53,7 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setClickListener() {
-        val abinding = TopToolbarBinding.inflate(layoutInflater)
-        abinding.ivSignDisplayBackButton.setOnClickListener {
-            navigator.navigateUp()
-        }
+
     }
 
     private fun startSplash() {
@@ -70,7 +67,7 @@ open class MainActivity : AppCompatActivity() {
                     R.id.nav_home -> {
                         navigator.navigateTo(Fragments.HOME_PAGE)
                     }
-                    R.id.nav_explorer -> {
+                    R.id.nav_map -> {
                         navigator.navigateTo(Fragments.MAPS_PAGE)
                     }
                     R.id.nav_planner -> {
@@ -88,9 +85,19 @@ open class MainActivity : AppCompatActivity() {
 
         navigator.destinationChangedListener { destinationId ->
             binding.apply {
-                if(destinationId == R.id.homeFragment)
-                {
-                    cnbItem.setItemSelected(R.id.nav_home)
+                when (destinationId) {
+                    R.id.homeFragment -> {
+                        cnbItem.setItemSelected(R.id.nav_home)
+                    }
+                    R.id.mapsFragment -> {
+                        cnbItem.setItemSelected(R.id.nav_map)
+                    }
+                    R.id.planFragment -> {
+                        cnbItem.setItemSelected(R.id.nav_planner)
+                    }
+                    R.id.userDetailFragment -> {
+                        cnbItem.setItemSelected(R.id.nav_profile)
+                    }
                 }
                 if (destinationId == R.id.signFragment || destinationId == R.id.searchFragment) {
                     tvFloatingAiText.visibility = View.GONE
@@ -101,7 +108,7 @@ open class MainActivity : AppCompatActivity() {
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
                 }
-                if(destinationId == R.id.checkFragment) {
+                if(destinationId == R.id.checkFragment || destinationId == R.id.mapsFragment) {
                     cnbItem.visibility = View.GONE
                 }else {
                     cnbItem.visibility = View.VISIBLE

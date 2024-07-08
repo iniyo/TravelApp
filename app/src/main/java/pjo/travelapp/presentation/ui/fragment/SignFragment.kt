@@ -52,7 +52,9 @@ class SignFragment : Fragment() {
             toolbar.ivSignDisplayBackButton.setOnClickListener {
                 findNavController().navigateUp()
             }
+
         }
+
     }
 
     private fun sign() {

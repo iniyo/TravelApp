@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="bottom_navigation_height">35dp</dimen> <!-- 70dp * 0.5 -->
-    <dimen name="user_detail_button_img_size">25dp</dimen> <!-- 50dp * 0.5 -->
-    <dimen name="user_detail_button_width">85dp</dimen> <!-- 170dp * 0.5 -->
-    <dimen name="user_detail_button_height">55dp</dimen> <!-- 110dp * 0.5 -->
+    <dimen name="bottom_navigation_height">24dp</dimen>
+    <dimen name="user_detail_button_img_size">17dp</dimen>
+    <dimen name="user_detail_button_width">54dp</dimen>
+    <dimen name="user_detail_button_height">37dp</dimen>
 </resources>

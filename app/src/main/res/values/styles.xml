@@ -12,6 +12,9 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="AppTheme">
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
 
     <!-- spinner style -->
     <style name="Widget.My.Spinner" parent="Widget.AppCompat.Spinner">

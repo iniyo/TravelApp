@@ -36,5 +36,22 @@
         <item name="android:paddingTop">17dp</item>
         <item name="android:includeFontPadding">false</item>
     </style>
+    <style name="tabTextSizeBold" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <!-- bottomSheetFragment border 20dp 전용 테마 -->
+    <style name="AppBottomSheetDialogBorder20WhiteTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalBorder20WhiteStyle</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="AppModalBorder20WhiteStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bottom_sheet_white_corner</item>
+    </style>
 
 </resources>

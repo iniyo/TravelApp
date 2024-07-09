@@ -1,5 +1,7 @@
 package pjo.travelapp.presentation.util.navigator
 
+import androidx.navigation.NavController
+
 enum class Fragments {
     HOME_PAGE,
     SEARCH_PAGE,
@@ -24,5 +26,6 @@ interface AppNavigator {
     fun navigateTo(screen: Fragments)
     fun navigateTo(screen: Activitys)
     fun navigateUp()
+    fun retrieveNavController(): NavController
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
 }

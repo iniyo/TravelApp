@@ -100,7 +100,8 @@ dependencies {
     implementation(libs.flexbox)
     // kizitonwose calendar
     implementation(libs.view)
-
+    // google material
+    implementation(libs.material)
     /**
      * open source end
      */

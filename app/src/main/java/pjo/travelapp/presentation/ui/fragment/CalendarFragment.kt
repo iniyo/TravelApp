@@ -2,21 +2,22 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.util.TypedValue
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import com.kizitonwose.calendar.core.*
-import com.kizitonwose.calendar.view.*
+import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.CalendarMonth
+import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.core.daysOfWeek
+import com.kizitonwose.calendar.view.MonthDayBinder
+import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
+import com.kizitonwose.calendar.view.ViewContainer
 import pjo.travelapp.R
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
-import pjo.travelapp.databinding.FragmentCheckBinding
+import pjo.travelapp.databinding.FragmentCalendarBinding
 import pjo.travelapp.presentation.util.ContinuousSelectionHelper.getSelection
 import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isInDateBetweenSelection
 import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isOutDateBetweenSelection
@@ -24,15 +25,16 @@ import pjo.travelapp.presentation.util.DateSelection
 import pjo.travelapp.presentation.util.addStatusBarColorUpdate
 import pjo.travelapp.presentation.util.dateRangeDisplayText
 import pjo.travelapp.presentation.util.displayText
+import pjo.travelapp.presentation.util.formatDaysBetween
 import pjo.travelapp.presentation.util.getDrawableCompat
+import pjo.travelapp.presentation.util.headerDateFormatDisplayText
 import pjo.travelapp.presentation.util.makeInVisible
 import pjo.travelapp.presentation.util.makeVisible
 import pjo.travelapp.presentation.util.setTextColorRes
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
-class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check) {
+class CalendarFragment : BaseFragment<FragmentCalendarBinding>(R.layout.fragment_calendar) {
 
     override fun initView() {
         super.initView()
@@ -49,45 +51,29 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
             configureBinders()
 
             val currentMonth = YearMonth.now()
-            binding.exFourCalendar.setup(
+            binding.cvMain.setup(
                 currentMonth,
                 currentMonth.plusMonths(12),
                 daysOfWeek.first(),
             )
-            binding.exFourCalendar.scrollToMonth(currentMonth)
+            binding.cvMain.scrollToMonth(currentMonth)
 
             // save button
-            binding.exFourSaveButton.setOnClickListener click@{
-                val (startDate, endDate) = selection
-                if (startDate != null && endDate != null) {
-                    val text = dateRangeDisplayText(startDate, endDate)
-                    Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
-                }
-                parentFragmentManager.popBackStack()
-            }
+            binding.btnSave.setOnClickListener {
 
+            }
             bindSummaryViews()
         }
     }
 
-    private var initialView: View? = null
-
-    fun setInitialView(view: View) {
-        initialView = view
-    }
-
     private val today = LocalDate.now()
-
-    private var selection = DateSelection()
-
-    private val headerDateFormatter = DateTimeFormatter.ofPattern("EEE'\n'd MMM")
-
+    private var selection = DateSelection() // data class
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {
-        binding.exFourStartDateText.apply {
+        binding.tvStartDate.apply {
             if (selection.startDate != null) {
-                text = headerDateFormatter.format(selection.startDate)
+                text = headerDateFormatDisplayText(selection, true)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
                 text = getString(R.string.start_date)
@@ -95,9 +81,9 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
             }
         }
 
-        binding.exFourEndDateText.apply {
+        binding.tvEndDate.apply {
             if (selection.endDate != null) {
-                text = headerDateFormatter.format(selection.endDate)
+                text = headerDateFormatDisplayText(selection, false)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
                 text = getString(R.string.end_date)
@@ -105,7 +91,14 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
             }
         }
 
-        binding.exFourSaveButton.isEnabled = selection.daysBetween != null
+        if(selection.daysBetween != null){
+            binding.tvTourDate.text = formatDaysBetween(selection.daysBetween)
+        }else {
+            binding.tvTourDate.text = resources.getText(R.string.tour_date)
+        }
+
+        binding.btnSave.isEnabled = selection.daysBetween != null
+
     }
 
     private fun configureBinders() {
@@ -134,24 +127,26 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
                     if (day.position == DayPosition.MonthDate &&
                         (day.date == today || day.date.isAfter(today))
                     ) {
+                        // click date와 now date 값에 따라 data 클래스에 값 설정.
                         selection = getSelection(
                             clickedDate = day.date,
                             dateSelection = selection,
                         )
-                        this@CheckFragment.binding.exFourCalendar.notifyCalendarChanged()
+                        // calendar view 갱신
+                        this@CalendarFragment.binding.cvMain.notifyCalendarChanged()
                         bindSummaryViews()
                     }
                 }
             }
         }
 
-        binding.exFourCalendar.dayBinder = object : MonthDayBinder<DayViewContainer> {
+        binding.cvMain.dayBinder = object : MonthDayBinder<DayViewContainer> {
             override fun create(view: View) = DayViewContainer(view)
             override fun bind(container: DayViewContainer, data: CalendarDay) {
                 container.day = data
-                val textView = container.binding.exFourDayText
-                val roundBgView = container.binding.exFourRoundBackgroundView
-                val continuousBgView = container.binding.exFourContinuousBackgroundView
+                val textView = container.binding.tvDay
+                val roundBgView = container.binding.vRoundBackground
+                val continuousBgView = container.binding.viewContinuousBackground
 
                 textView.text = null
                 roundBgView.makeInVisible()
@@ -170,24 +165,29 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
                                     textView.setTextColorRes(R.color.white)
                                     roundBgView.applyBackground(singleBackground)
                                 }
+
                                 data.date == startDate -> {
                                     textView.setTextColorRes(R.color.white)
                                     continuousBgView.applyBackground(rangeStartBackground)
                                     roundBgView.applyBackground(singleBackground)
                                 }
+
                                 startDate != null && endDate != null && (data.date > startDate && data.date < endDate) -> {
                                     textView.setTextColorRes(R.color.dark_light_gray)
                                     continuousBgView.applyBackground(rangeMiddleBackground)
                                 }
+
                                 data.date == endDate -> {
                                     textView.setTextColorRes(R.color.white)
                                     continuousBgView.applyBackground(rangeEndBackground)
                                     roundBgView.applyBackground(singleBackground)
                                 }
+
                                 data.date == today -> {
                                     textView.setTextColorRes(R.color.dark_light_gray)
                                     roundBgView.applyBackground(todayBackground)
                                 }
+
                                 else -> textView.setTextColorRes(R.color.dark_light_gray)
                             }
                         }
@@ -200,6 +200,7 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
                         ) {
                             continuousBgView.applyBackground(rangeMiddleBackground)
                         }
+
                     DayPosition.OutDate ->
                         if (startDate != null && endDate != null &&
                             isOutDateBetweenSelection(data.date, startDate, endDate)
@@ -215,14 +216,16 @@ class CheckFragment : BaseFragment<FragmentCheckBinding>(R.layout.fragment_check
             }
         }
 
+
+        // 여기서 달력 header 설정.
         class MonthViewContainer(view: View) : ViewContainer(view) {
-            val textView = CalendarHeaderBinding.bind(view).exFourHeaderText
+            val textView = CalendarHeaderBinding.bind(view).tvYearMonthHeader
         }
-        binding.exFourCalendar.monthHeaderBinder =
+        binding.cvMain.monthHeaderBinder =
             object : MonthHeaderFooterBinder<MonthViewContainer> {
                 override fun create(view: View) = MonthViewContainer(view)
                 override fun bind(container: MonthViewContainer, data: CalendarMonth) {
-                    container.textView.text = data.yearMonth.displayText()
+                    container.textView.text = data.yearMonth.displayText() // 포맷 형식
                 }
             }
     }

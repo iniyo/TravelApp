@@ -7,6 +7,7 @@ import com.kizitonwose.calendar.core.yearMonth
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import kotlin.LazyThreadSafetyMode.NONE
 
 /**
@@ -24,13 +25,34 @@ data class DateSelection(val startDate: LocalDate? = null, val endDate: LocalDat
     }
 }
 
-// 형식 변환
-private val rangeFormatter = DateTimeFormatter.ofPattern("yyyy d MMMM")
+
+/**
+ * format 형식 함수
+ */
+private val rangeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
+private val headerDateFormatter = DateTimeFormatter.ofPattern("yy년 M월 d일 (E)").withLocale(Locale.KOREAN)
 
 // Local date 형식 format, Local date - 달력 시간 이므로 불변임.
 fun dateRangeDisplayText(startDate: LocalDate, endDate: LocalDate): String {
     return "Selected: ${rangeFormatter.format(startDate)} - ${rangeFormatter.format(endDate)}"
 }
+
+fun formatDaysBetween(daysBetween: Long?): String {
+    return daysBetween?.let { "$it 일간 여행" } ?: "날짜가 설정되지 않았습니다."
+}
+
+// headerDateFormatter 형식으로 text 반환
+fun headerDateFormatDisplayText(selection: DateSelection, bool: Boolean): CharSequence {
+    return if (bool) {
+        selection.startDate?.let { headerDateFormatter.format(it) } ?: "시작 날짜 없음"
+    } else {
+        selection.endDate?.let { headerDateFormatter.format(it) } ?: "종료 날짜 없음"
+    }
+}
+
+/**
+ * format 형식 함수 끝
+ */
 
 // 날짜 선택 헬퍼
 object ContinuousSelectionHelper {

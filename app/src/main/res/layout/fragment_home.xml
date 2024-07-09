@@ -66,7 +66,6 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="50dp"
                         android:icon="@drawable/ic_burn_color"
                         android:text="인기" />
 

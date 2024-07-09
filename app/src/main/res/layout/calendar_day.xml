@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <View
-        android:id="@+id/exFourContinuousBackgroundView"
+        android:id="@+id/view_continuous_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="4dp"
@@ -16,18 +16,20 @@
      setting an oval background (single selection / today) on it will result in
      the background not being a perfect circle since the view is not square in shape.
      So we set the background on this view which has a margin on all sides instead-->
+
     <View
-        android:id="@+id/exFourRoundBackgroundView"
+        android:id="@+id/v_round_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="4dp" />
 
     <TextView
-        android:id="@+id/exFourDayText"
+        android:id="@+id/tv_day"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="16sp"
         tools:text="22" />
+
 </FrameLayout>
 

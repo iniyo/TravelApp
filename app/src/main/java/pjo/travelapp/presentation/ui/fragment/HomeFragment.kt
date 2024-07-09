@@ -60,6 +60,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
         return fragmentList
     }
 
+
     private fun setTabLayout() {
         val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
         setTabItemMargin(binding.tlTop, marginSize, marginSize)

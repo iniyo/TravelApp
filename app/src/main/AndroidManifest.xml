@@ -41,7 +41,8 @@
         <activity
             android:name=".presentation.ui.activity.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SplashEx">
+            android:theme="@style/Theme.SplashEx"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

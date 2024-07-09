@@ -24,9 +24,9 @@
         tools:layout="@layout/fragment_accommodation_detail" />
     <fragment
         android:id="@+id/checkFragment"
-        android:name="pjo.travelapp.presentation.ui.fragment.CheckFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.CalendarFragment"
         android:label="fragment_check"
-        tools:layout="@layout/fragment_check" />
+        tools:layout="@layout/fragment_calendar" />
     <fragment
         android:id="@+id/mapsFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.MapsFragment"

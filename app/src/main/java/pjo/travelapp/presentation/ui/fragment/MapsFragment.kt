@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import DirectionsResponse
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -20,13 +21,19 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
+import pjo.travelapp.data.DirectionsService
 import pjo.travelapp.databinding.FragmentMapsBinding
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 
@@ -193,7 +200,7 @@ class MapsFragment : Fragment() {
         }
     }
 
-
+    // 내 위치 설정 및 권한 없으면 권한 요청
     private fun checkLocatePermissionAndEnableMyLocation() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -210,6 +217,7 @@ class MapsFragment : Fragment() {
         }
     }
 
+    // 내 위치 설정
     private fun enableMyLocation() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -233,8 +241,55 @@ class MapsFragment : Fragment() {
         }
     }
 
+    // 선택 위치간 거리 및 동선 표시
     private fun getDirections() {
+        //
+        val origin = LatLng(32.557667, 126.926546)
+        val destination = LatLng(33.557667, 127.926546)
 
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://maps.googleapis.com/maps/api/directions/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val service = retrofit.create(DirectionsService::class.java)
+
+        val call = service.getDirections(
+            "${origin.latitude},${origin.longitude}",
+            "${destination.latitude},${destination.longitude}",
+            BuildConfig.maps_api_key
+        )
+
+        call.enqueue(object : retrofit2.Callback<DirectionsResponse> {
+            override fun onResponse(
+                call: retrofit2.Call<DirectionsResponse>,
+                response: retrofit2.Response<DirectionsResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val directions = response.body()
+                    directions?.let {
+                        val points = ArrayList<LatLng>()
+                        val path = it.routes[0].legs[0].steps
+                        for (step in path) {
+                            val decodedPath = PolyUtil.decode(step.polyline.points)
+                            points.addAll(decodedPath)
+                        }
+                        val polylineOptions = PolylineOptions().addAll(points).color(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.color_primary_dark
+                            )
+                        )
+                        googleMap.addPolyline(polylineOptions)
+                    }
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<DirectionsResponse>, t: Throwable) {
+                // Handle error
+                t.printStackTrace()
+            }
+        })
     }
 
 }

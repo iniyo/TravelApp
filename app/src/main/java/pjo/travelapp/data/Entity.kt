@@ -1,5 +1,3 @@
-package pjo.travelapp.data
-
 data class DirectionsResponse(
     val routes: List<Route>
 )
@@ -14,10 +12,15 @@ data class Leg(
 
 data class Step(
     val start_location: Location,
-    val end_location: Location
+    val end_location: Location,
+    val polyline: Polyline
 )
 
 data class Location(
     val lat: Double,
     val lng: Double
+)
+
+data class Polyline(
+    val points: String
 )

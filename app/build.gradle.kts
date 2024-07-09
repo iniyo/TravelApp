@@ -93,6 +93,7 @@ dependencies {
     // google maps service
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.android.maps.utils)
     // retrofit2
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

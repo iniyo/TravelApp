@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
@@ -80,6 +81,7 @@ open class MainActivity : AppCompatActivity() {
         // Implement any click listeners for views in MainActivity
     }
 
+    // chip nav bar 이동
     private fun setNavigationOnClick() {
         binding.apply {
             cnbItem.setOnItemSelectedListener { id ->
@@ -93,6 +95,7 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 현재 프래그먼트 계산
     private fun observeDestinationChanges() {
         navigator.destinationChangedListener { destinationId ->
             handleBackStack()
@@ -121,6 +124,7 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 뒤로가기 버튼
     private fun setupOnBackPressedDispatcher() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -130,8 +134,8 @@ open class MainActivity : AppCompatActivity() {
                         finish()
                     } else {
                         backPressedOnce = true
-                        Toast.makeText(this@MainActivity, "Press back again to exit", Toast.LENGTH_SHORT).show()
-                        handler.postDelayed({ backPressedOnce = false }, 2000)
+                        Snackbar.make(binding.root, "한번 더 누르면 앱이 종료됩니다.", Snackbar.LENGTH_SHORT).show()
+                        handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
                     }
                 } else {
                     navController.navigateUp()

@@ -64,4 +64,14 @@
             app:enterAnim="@anim/anim_slide_on_top"
             app:exitAnim="@anim/anim_slide_on_bottom" />
     </fragment>
+    <fragment
+        android:id="@+id/popularPlaceFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.PopularPlaceFragment"
+        android:label="fragment_popular_place"
+        tools:layout="@layout/fragment_popular_place" />
+    <fragment
+        android:id="@+id/scehduleFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.ScehduleFragment"
+        android:label="fragment_scehdule"
+        tools:layout="@layout/fragment_scehdule" />
 </navigation>

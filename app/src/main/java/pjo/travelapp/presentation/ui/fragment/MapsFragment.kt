@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.SearchView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.ActionBar.LayoutParams
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -30,8 +32,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
-import pjo.travelapp.data.DirectionsService
+import pjo.travelapp.data.remote.MapsDirectionsService
 import pjo.travelapp.databinding.FragmentMapsBinding
+import pjo.travelapp.presentation.util.NavigationBarUtils
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
@@ -92,13 +95,59 @@ class MapsFragment : Fragment() {
     private fun init() {
         setSearch()
         setClickListener()
-        setSlidingUpPanel()
+        setBottomSheet()
     }
 
     private fun setClickListener() {
         binding.ivTrack.setOnClickListener {
             getDirections()
         }
+    }
+
+    private fun setBottomSheet() {
+        val n = NavigationBarUtils(requireContext())
+        binding.apply {
+            val a = clMapsContainer.layoutParams as LayoutParams
+            a.bottomMargin = n.getNavigationBarHeight()
+
+            // BottomSheetBehavior 설정
+            val bottomSheet = binding.bottomSheet.root
+            val behavior = BottomSheetBehavior.from(bottomSheet)
+
+            behavior.maxHeight = (resources.displayMetrics.heightPixels * 0.6).toInt()
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+            // 상태 변경 시 동작 추가
+            behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            // 중간 상태일 때의 동작
+                        }
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            // 완전히 확장되었을 때의 동작
+                        }
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            // 축소되었을 때의 동작
+                        }
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            // 숨겨졌을 때의 동작
+                        }
+                        BottomSheetBehavior.STATE_DRAGGING -> {
+                            // 드래그 중일 때의 동작
+                        }
+                        BottomSheetBehavior.STATE_SETTLING -> {
+                            // 정착 중일 때의 동작
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    // 슬라이딩 중일 때의 동작
+                }
+            })
+        }
+
     }
 
 
@@ -145,10 +194,6 @@ class MapsFragment : Fragment() {
                 }
             })
         }
-    }
-
-    private fun setSlidingUpPanel() {
-
     }
 
     private fun setAnimation() {
@@ -252,7 +297,7 @@ class MapsFragment : Fragment() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val service = retrofit.create(DirectionsService::class.java)
+        val service = retrofit.create(MapsDirectionsService::class.java)
 
         val call = service.getDirections(
             "${origin.latitude},${origin.longitude}",

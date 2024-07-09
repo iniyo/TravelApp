@@ -1,11 +1,11 @@
-package pjo.travelapp.data
+package pjo.travelapp.data.remote
 
 import DirectionsResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface DirectionsService {
+interface MapsDirectionsService {
     @GET("json")
     fun getDirections(
         @Query("origin") origin: String,

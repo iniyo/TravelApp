@@ -1,6 +1,5 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import androidx.fragment.app.Fragment
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentRecycleItemBinding
 

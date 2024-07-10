@@ -35,6 +35,9 @@ android {
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
         /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
 
+        buildConfigField("String", "maps_api_url", properties.getProperty("maps_api_url"))
+
+
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments.putAll(mapOf(
@@ -94,15 +97,17 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     implementation(libs.android.maps.utils)
-    // retrofit2
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
     // flexbox
     implementation(libs.flexbox)
     // kizitonwose calendar
     implementation(libs.view)
     // google material
     implementation(libs.material)
+    // retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit2.converter.gson)
+    // okhttp loggin interceptor
+    implementation(libs.logging.interceptor)
     /**
      * open source end
      */
@@ -130,9 +135,6 @@ dependencies {
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)
-
-    // slidingpanelayout
-    implementation(libs.androidx.slidingpanelayout)
 
     // data binding
     kapt(libs.androidx.databinding.compiler)

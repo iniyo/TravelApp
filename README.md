@@ -79,7 +79,10 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - social login button design: ([stead](https://butsteadily.tistory.com/16))
 - viewpager between view ([king-jungin.log](https://velog.io/@king-jungin/Android-%EC%96%91-%EC%98%86%EC%9D%B4-%EB%AF%B8%EB%A6%AC%EB%B3%B4%EC%9D%B4%EB%8A%94-ViewPager2-%EB%A7%8C%EB%93%A4%EA%B8%B0))
 - material design 모음: ([for 2017](https://medium.com/@mmbialas/30-new-android-libraries-and-projects-released-in-summer-2017-which-should-catch-your-attention-d3702bd9bdc6))
-- sliding layout(Gituhb) ([AndroidSlidingUpPanel](https://github.com/hannesa2/AndroidSlidingUpPanel))
+- sliding layout(Github) ([AndroidSlidingUpPanel](https://github.com/hannesa2/AndroidSlidingUpPanel))
+
+> network
+- coroutine 통신(t-story): ([seokzoo](https://seokzoo.tistory.com/4))
 
 
 > Manifest 설정 관련
@@ -89,7 +92,7 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 
 > 각종 오류 및 이슈 해결
 - search fragment로 전환 시 duration이 적용되지 않는 문제 ([StackOverFlow](https://stackoverflow.com/questions/69396539/using-jetpack-navigation-component-transition-animation-is-not-working)(issue해결)[https://github.com/iniyo/TravelApp/issues/3])
-- 
+- ※ coroutine 에러 처리하기(t-story) ([카미유 테크](https://june0122.tistory.com/20))
 
 
 =======
@@ -97,4 +100,5 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 
 > 각종 이슈 대응:
 - navControll 사용 시 action(애니메이션) 적용 안됨: ([stackoverflow](https://stackoverflow.com/questions/69396539/using-jetpack-navigation-component-transition-animation-is-not-working))
->>>>>>> .merge_file_PW3w05
+- sandwich library 사용 시 jvm target 에러 -> wrapper 업그레이드 시도(안됨)
+

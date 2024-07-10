@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="pjo.travelapp.presentation.viewmodel.MainViewModel" />
+            type="pjo.travelapp.presentation.ui.viewmodel.MainViewModel" />
 
         <import type="android.view.View" />
 

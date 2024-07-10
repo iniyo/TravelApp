@@ -8,8 +8,8 @@
     app:behavior_peekHeight="32dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <ScrollView
-        android:id="@+id/nestedScrollView"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/ns_cotainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
@@ -356,6 +356,7 @@
                             android:src="@drawable/ic_single_location_color" />
 
                         <TextView
+                            android:id="@+id/tv_maps_location"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
@@ -375,6 +376,7 @@
                             android:src="@drawable/ic_world_color" />
 
                         <TextView
+                            android:id="@+id/tv_maps_website"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
@@ -394,6 +396,7 @@
                             android:src="@drawable/ic_call_color" />
 
                         <TextView
+                            android:id="@+id/tv_call_number"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
@@ -402,7 +405,8 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
                         android:layout_marginVertical="10dp"
                         android:orientation="horizontal">
 
@@ -413,6 +417,14 @@
                             android:src="@drawable/ic_time_color" />
 
                         <TextView
+                            android:id="@+id/tv_open_close_check"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:text="운영중" />
+
+                        <TextView
+                            android:id="@+id/tv_open_close_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
@@ -423,7 +435,7 @@
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <ImageView
         android:id="@+id/iv_up_arrow"

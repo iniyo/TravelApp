@@ -23,6 +23,7 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
         savedInstanceState: Bundle?
     ): View? {
         _binding = createBinding(inflater, container)
+        initCreate()
         return binding.root
     }
 
@@ -57,6 +58,7 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
         _binding = null
     }
 
+    protected open fun initCreate() {}
     protected open fun initView() {}
     protected open fun initViewModel() {}
     protected open fun initListener() {}

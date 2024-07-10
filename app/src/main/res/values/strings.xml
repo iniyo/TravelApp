@@ -60,4 +60,6 @@
     <string name="tour_date">여행일</string>
     <string name="pick">근처 추천 pick!</string>
     <string name="next_trip">다음 여행지</string>
+    <string name="opening">운영중</string>
+    <string name="closed">운영안함</string>
 </resources>

@@ -36,20 +36,23 @@ interface MapsDirectionsService {
         @Query("location") location: String,
         @Query("radius") radius: Int,
         @Query("type") type: String,
-        @Query("key") apiKey: String = BuildConfig.maps_api_key
+        @Query("key") apiKey: String = BuildConfig.maps_api_key,
+        @Query("language") language: String = "ko"
     ): NearbySearchResponse
 
     // 선택한 장소 id로 장소 세부 정보 가져오기
     @GET("maps/api/place/details/json")
     suspend fun getPlaceDetails(
         @Query("place_id") placeId: String,
-        @Query("key") apiKey: String = BuildConfig.maps_api_key
+        @Query("key") apiKey: String = BuildConfig.maps_api_key,
+        @Query("language") language: String = "ko"
     ): PlaceDetailsResponse
 
     // 장소 id 가져오기
     @GET("maps/api/geocode/json")
     suspend fun getPlaceId(
         @Query("latlng") latLng: String,
-        @Query("key") apiKey: String = BuildConfig.maps_api_key
+        @Query("key") apiKey: String = BuildConfig.maps_api_key,
+        @Query("language") language: String = "ko"
     ): PlaceIdResponse
 }

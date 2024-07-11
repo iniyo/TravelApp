@@ -3,13 +3,13 @@ package pjo.travelapp.presentation.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import pjo.travelapp.databinding.RecycleRecommendedItemBinding
+import pjo.travelapp.databinding.RvRecommendedItemBinding
 
 class RecommendedRecyclerAdapter(
     private val imgList: List<Int>
 ) : RecyclerView.Adapter<RecommendedRecyclerAdapter.ViewHolder>() {
 
-    class ViewHolder(private val binding: RecycleRecommendedItemBinding) :
+    class ViewHolder(private val binding: RvRecommendedItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(imgUrl: Int) {
 
@@ -38,7 +38,7 @@ class RecommendedRecyclerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
-            RecycleRecommendedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            RvRecommendedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 

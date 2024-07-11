@@ -1,3 +1,5 @@
+package pjo.travelapp.data.entity
+
 import java.util.Date
 
 data class DirectionsRequest(

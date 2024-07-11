@@ -17,7 +17,6 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 kotlinxCoroutinesCore = "1.7.1"
-lifecycleViewmodelKtx = "2.8.3"
 loggingInterceptor = "4.12.0"
 lottie = "6.4.1"
 material = "1.12.0"
@@ -38,6 +37,7 @@ googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 playServicesMaps = "19.0.0"
 firebaseAuth = "23.0.0"
 safeargs = "2.7.7"
+places = "3.5.0"
 
 
 [libraries]
@@ -45,7 +45,6 @@ android-maps-utils = { module = "com.google.maps.android:android-maps-utils", ve
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-databinding-compiler = { module = "androidx.databinding:databinding-compiler", version.ref = "databindingCompiler" }
-androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationUiKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationUiKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }
@@ -77,6 +76,7 @@ rollingtext = { module = "com.github.YvesCheung.RollingText:RollingText", versio
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 view = { module = "com.kizitonwose.calendar:view", version.ref = "view" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 
 [plugins]

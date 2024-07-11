@@ -2,10 +2,13 @@ package pjo.travelapp.domain.di
 
 
 import DirectionsRepositoryImpl
+import android.content.Context
+import android.location.Geocoder
 import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -86,5 +89,10 @@ object ObjectModuleSingleton {
     /**
      * map service api end
      */
+
+    @Provides
+    fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
+        return Geocoder(context)
+    }
 
 }

@@ -1,6 +1,7 @@
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import pjo.travelapp.data.datasource.MapsDirectionDataSource
+import pjo.travelapp.data.entity.DirectionsRequest
 import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.repo.DirectionsRepository
 import javax.inject.Inject

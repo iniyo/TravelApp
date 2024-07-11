@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     implementation(libs.android.maps.utils)
+    implementation(libs.places)
     // flexbox
     implementation(libs.flexbox)
     // kizitonwose calendar
@@ -121,9 +122,6 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
-    // viewmodel
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // coroutine
     implementation(libs.kotlinx.coroutines.core)

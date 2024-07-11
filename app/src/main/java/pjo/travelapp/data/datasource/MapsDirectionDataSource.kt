@@ -1,13 +1,12 @@
 package pjo.travelapp.data.datasource
 
-import DirectionsRequest
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import pjo.travelapp.BuildConfig
+import pjo.travelapp.data.entity.DirectionsRequest
 import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.remote.MapsDirectionsService
 import retrofit2.HttpException
-import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
@@ -45,8 +44,10 @@ class MapsDirectionDataSource @Inject constructor(
                 if (request.avoidTolls) "tolls" else null
             ).joinToString("|").takeIf { it.isNotEmpty() }
 
-            val transitRoutingPreference = request.transitOptions?.routingPreference?.name?.lowercase(Locale.getDefault())
-            val departureTime = request.transitOptions?.departureTime?.time?.div(1000)  // Unix timestamp로 변환
+            val transitRoutingPreference =
+                request.transitOptions?.routingPreference?.name?.lowercase(Locale.getDefault())
+            val departureTime =
+                request.transitOptions?.departureTime?.time?.div(1000)  // Unix timestamp로 변환
             val units = request.unitSystem?.name?.lowercase(Locale.getDefault())
 
             val response = service.getDirections(
@@ -67,7 +68,10 @@ class MapsDirectionDataSource @Inject constructor(
             Log.d("MapsDirectionDataSource", "HTTP Response: $response")
             response
         } catch (e: HttpException) {
-            Log.e("MapsDirectionDataSource", "HTTP Exception: ${e.response()?.errorBody()?.string()}")
+            Log.e(
+                "MapsDirectionDataSource",
+                "HTTP Exception: ${e.response()?.errorBody()?.string()}"
+            )
             DirectionsResponse(emptyList())
         } catch (e: Throwable) {
             Log.e("MapsDirectionDataSource", "Exception: ${e.message}")

@@ -62,4 +62,13 @@
     <string name="next_trip">다음 여행지</string>
     <string name="opening">운영중</string>
     <string name="closed">운영안함</string>
+    <string name="location_not_found">위치를 찾지 못했습니다.</string>
+    <string name="type">type</string>
+    <string name="overview">개요</string>
+    <string name="price">요금</string>
+    <string name="review">리뷰</string>
+    <string name="info">정보</string>
+    <string name="route">경로</string>
+    <string name="save">저장</string>
+    <string name="around">주변</string>
 </resources>

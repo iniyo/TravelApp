@@ -15,3 +15,4 @@ data class GeocodeResult(
     val geometry: Geometry?,
     val types: List<String>?
 )
+

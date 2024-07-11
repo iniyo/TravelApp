@@ -6,7 +6,9 @@
     android:layout_height="match_parent"
     app:behavior_hideable="false"
     app:behavior_peekHeight="32dp"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".presentation.ui.fragment.MapsBottomSheetDialogFragment">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/ns_cotainer"
@@ -38,7 +40,7 @@
                 android:layout_height="220dp"
                 android:importantForAccessibility="no"
                 android:scaleType="centerCrop"
-                android:src="@drawable/intro_pic"
+                android:src="@drawable/img_bg_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +50,7 @@
                 android:id="@+id/ll_maps_bottom_sheet_main_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingBottom="50dp"
                 android:orientation="vertical"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/iv_store_title">
@@ -57,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
-                    android:text="부산과학체험관"
+                    android:text="@string/title"
                     android:textColor="@color/black"
                     android:textSize="28sp" />
 
@@ -66,7 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
-                    android:text="과학박물관"
+                    android:text="@string/type"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -82,7 +85,7 @@
                         android:id="@+id/tv_rating_score"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5"
+                        android:text="@string/zero_number"
                         android:textSize="18sp" />
 
                     <RatingBar
@@ -120,22 +123,22 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="개요" />
+                        android:text="@string/overview" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="요금" />
+                        android:text="@string/price" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="리뷰" />
+                        android:text="@string/review" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="정보" />
+                        android:text="@string/info" />
 
                 </com.google.android.material.tabs.TabLayout>
 
@@ -186,7 +189,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:text="경로"
+                            android:text="@string/route"
                             android:textColor="@color/blue"
                             android:textSize="13sp"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -230,7 +233,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:text="저장"
+                            android:text="@string/save"
                             android:textColor="@color/blue"
                             android:textSize="13sp"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -274,7 +277,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:text="주변"
+                            android:text="@string/around"
                             android:textColor="@color/blue"
                             android:textSize="13sp"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -318,7 +321,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:text="공유"
+                            android:text="@string/share"
                             android:textColor="@color/blue"
                             android:textSize="13sp"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -342,7 +345,6 @@
                     android:paddingHorizontal="20dp"
                     android:paddingVertical="10dp">
 
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -360,7 +362,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
-                            android:text="부산광역시 동구 중앙대로260번길 11" />
+                            android:text="" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -380,7 +382,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
-                            android:text="부산광역시 동구 중앙대로260번길 11" />
+                            android:text="" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -400,14 +402,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
-                            android:text="부산광역시 동구 중앙대로260번길 11" />
+                            android:text="" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
                         android:layout_marginVertical="10dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -421,19 +423,21 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
-                            android:text="운영중" />
+                            android:text="" />
 
                         <TextView
                             android:id="@+id/tv_open_close_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
-                            android:text="부산광역시 동구 중앙대로260번길 11" />
+                            android:text="" />
                     </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -444,7 +448,7 @@
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
         android:src="@drawable/ic_arrow_up"
-        app:layout_constraintBottom_toTopOf="@+id/nestedScrollView"
+        app:layout_constraintBottom_toTopOf="@+id/ns_cotainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

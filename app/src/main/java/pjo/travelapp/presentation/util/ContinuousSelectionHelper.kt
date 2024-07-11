@@ -20,7 +20,7 @@ data class DateSelection(val startDate: LocalDate? = null, val endDate: LocalDat
         if (startDate == null || endDate == null) {
             null
         } else {
-            ChronoUnit.DAYS.between(startDate, endDate) // start date 및 end date 사이의 일수를 반환
+            ChronoUnit.DAYS.between(startDate, endDate).inc() // start date 및 end date 사이의 일수를 반환
         }
     }
 }

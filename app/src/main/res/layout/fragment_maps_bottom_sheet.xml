@@ -4,14 +4,10 @@
 
     <data>
         <variable
-            name="main"
-            type="pjo.travelapp.presentation.ui.fragment.MapsBottomSheetDialogFragment" />
+            name="place"
+            type="pjo.travelapp.data.entity.PlaceResult" />
 
-        <variable
-            name="viewmodel"
-            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
     </data>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/AppModalBorder20WhiteStyle"
@@ -51,7 +47,7 @@
                     android:layout_height="220dp"
                     android:importantForAccessibility="no"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/img_bg_title"
+                    app:imageUrl="@{place.photos[0]}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -71,7 +67,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
-                        android:text="@{viewmodel.placeDetails.result.name}"
+                        android:text="@{place.name}"
                         android:textColor="@color/black"
                         android:textSize="28sp" />
 
@@ -80,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
-                        android:text="@{viewmodel.placeDetails.result.types[0]}"
+                        android:text="@{place.types[0]}"
                         android:textSize="16sp" />
 
                     <LinearLayout
@@ -96,7 +92,7 @@
                             android:id="@+id/tv_rating_score"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@{viewmodel.placeDetails.result.rating}"
+                            android:text="@{place.rating}"
                             android:textSize="18sp" />
 
                         <RatingBar
@@ -108,12 +104,11 @@
                             android:indeterminate="false"
                             android:numStars="5"
                             android:progressTint="@color/yellow"
-                            android:rating="@{viewmodel.placeDetails.result.rating}"
+                            android:rating="@{place.rating}"
                             android:stepSize="0.5"
                             android:transformPivotX="0dp"
                             android:transformPivotY="25dp" />
                     </LinearLayout>
-
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tl_maps_info"
@@ -373,7 +368,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:text="" />
+                                android:text="@{place.vicinity}" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -393,7 +388,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:text="" />
+                                android:text="@{place.website}" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -413,7 +408,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:text="" />
+                                android:text="@{place.formattedPhoneNumber}" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -434,22 +429,23 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:text="" />
+                                app:openCloseStatus="@{place.openingHours.openNow}"
+                                />
 
                             <TextView
                                 android:id="@+id/tv_open_close_time"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
-                                android:text="" />
+                                android:text="@{place.openingHours.weekdayText.get(0)}" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.core.widget.NestedScrollView>
 
         <ImageView

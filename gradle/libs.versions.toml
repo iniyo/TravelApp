@@ -4,7 +4,6 @@ androidMapsUtils = "3.8.2"
 chipNavigationBar = "1.4.0"
 converterGso = "2.11.0"
 coreSplashscreen = "1.0.1"
-databindingCompiler = "8.5.0"
 facebookLogin = "17.0.0"
 firebaseUiAuth = "7.2.0"
 flexbox = "3.0.0"
@@ -44,7 +43,6 @@ places = "3.5.0"
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-androidx-databinding-compiler = { module = "androidx.databinding:databinding-compiler", version.ref = "databindingCompiler" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationUiKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationUiKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUiKtx" }

@@ -72,11 +72,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 moveCamera(CameraUpdateFactory.zoomTo(15F))
                 fetchPlaceIdAndDetails(latLng)
             }
+
             setOnPoiClickListener { poi ->
                 moveCamera(CameraUpdateFactory.newLatLng(poi.latLng))
                 moveCamera(CameraUpdateFactory.zoomTo(15F))
                 fetchPlaceIdAndDetails(poi.latLng)
             }
+
             setOnMarkerClickListener { marker ->
                 moveCamera(CameraUpdateFactory.newLatLng(marker.position))
                 moveCamera(CameraUpdateFactory.zoomTo(15F))
@@ -107,16 +109,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     override fun initView() {
         super.initView()
         bind {
-
             val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
-
 
             setBottomSheet()
             setSearch()
             setAdapter()
             setFocus()
-
         }
     }
 
@@ -282,9 +281,9 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                     viewModel.placeDetails.collect{ res ->
                         when(res){
                             is LatestUiState.Error -> { }
-                            LatestUiState.Loading -> TODO()
+                            LatestUiState.Loading -> { }
                             is LatestUiState.Success -> {
-                                placeDetailsList.add(res.data.result)
+                                res.data?.let { placeDetailsList.add(it.result) }
                                 if (placeDetailsList.size == predictions.size) {
                                     autoCompleteAdapter.updateData(placeDetailsList)
                                 }
@@ -297,7 +296,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     }
 
     private fun performSearch(query: String) {
-        currentLatLng?.let { currentLocation ->
+        currentLatLng.let { currentLocation ->
             val token = AutocompleteSessionToken.newInstance()
             val bounds = RectangularBounds.newInstance(
                 LatLng(currentLocation.latitude - 20.7, currentLocation.longitude - 20.7),

@@ -3,17 +3,17 @@ package pjo.travelapp.presentation.ui.fragment
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.SearchView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -24,7 +24,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PointOfInterest
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.PlaceTypes
@@ -34,32 +33,28 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
-import pjo.travelapp.data.datasource.MapsPlaceInfoDataSource
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.FragmentMapsBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
-import javax.inject.Inject
+import pjo.travelapp.presentation.util.LatestUiState
 
 
 @AndroidEntryPoint
 class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private val viewModel: MapsViewModel by viewModels()
     private lateinit var placesClient: PlacesClient
-    private var currentLatLng: LatLng? = null
-    @Inject
-    lateinit var mapsPlaceInfoDataSource: MapsPlaceInfoDataSource
-    private var selectedMarker: Marker? = null // 선택된 마커를 저장할 변수
     private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
     private var query = ""
-
+    private lateinit var currentLatLng: LatLng
 
     @SuppressLint("PotentialBehaviorOverride")
     private val callback = OnMapReadyCallback { map ->
@@ -68,19 +63,23 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true
+
             mapType = GoogleMap.MAP_TYPE_NORMAL
             moveCamera(CameraUpdateFactory.newLatLng(sydney))
             moveCamera(CameraUpdateFactory.zoomTo(15F))
             setOnMapClickListener { latLng ->
-                selectedMarker?.remove()
+                moveCamera(CameraUpdateFactory.newLatLng(latLng))
+                moveCamera(CameraUpdateFactory.zoomTo(15F))
                 fetchPlaceIdAndDetails(latLng)
             }
             setOnPoiClickListener { poi ->
-                selectedMarker?.remove()
-                fetchPoiDetails(poi)
+                moveCamera(CameraUpdateFactory.newLatLng(poi.latLng))
+                moveCamera(CameraUpdateFactory.zoomTo(15F))
+                fetchPlaceIdAndDetails(poi.latLng)
             }
             setOnMarkerClickListener { marker ->
-                selectedMarker?.remove()
+                moveCamera(CameraUpdateFactory.newLatLng(marker.position))
+                moveCamera(CameraUpdateFactory.zoomTo(15F))
                 fetchPlaceIdAndDetails(marker.position)
                 true
             }
@@ -107,14 +106,17 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
     override fun initView() {
         super.initView()
-        binding.apply {
+        bind {
+
             val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
+
 
             setBottomSheet()
             setSearch()
             setAdapter()
             setFocus()
+
         }
     }
 
@@ -158,71 +160,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     }
 
     private fun fetchPlaceIdAndDetails(latLng: LatLng) {
-        viewModel.fetchPlaceId(latLng) { placeId ->
-            placeId?.let {
-                fetchPlaceDetails(latLng, it)
-            }
-        }
-    }
-
-    private fun fetchPoiDetails(poi: PointOfInterest) {
-        fetchPlaceDetails(poi.latLng, poi.placeId)
-    }
-
-    private fun fetchPlaceDetails(latLng: LatLng, placeId: String) {
-        viewModel.fetchPlaceDetails(placeId) { response ->
-            response?.let { placeDetails ->
-
-                selectedMarker = googleMap.addMarker(
-                    MarkerOptions()
-                        .position(latLng)
-                        .anchor(0.5f, 1.0f)
-                        .title(placeDetails.result.name)
-                        .snippet(placeDetails.result.rating.toString())
-                        .snippet("Population: 4,137,400")
-                )
-
-                binding.bottomSheet.apply {
-                    tvStoreTitle.text = placeDetails.result.name.ifEmpty { "" }
-                    tvStoreType.text = placeDetails.result.types[0].ifEmpty { "" }
-                    tvRatingScore.text = placeDetails.result.rating.toString().ifEmpty { "" }
-                    rbScore.rating = if (placeDetails.result.rating.toString()
-                            .isNotEmpty()
-                    ) placeDetails.result.rating.toFloat() else 0f
-
-                    placeDetails.result.photos.getOrNull(0)?.let { photo ->
-                        val photoRef = photo.photoReference
-                        Log.d("TAG", "fetchPlaceIdAndDetails: $photoRef")
-                        Glide.with(requireContext())
-                            .load(photo.getPhotoUrl())
-                            .placeholder(R.drawable.img_bg_title)
-                            .into(ivStoreTitle)
-                    }
-
-                    tvMapsLocation.text = placeDetails.result.vicinity.ifEmpty { "" }
-                    tvMapsWebsite.text = placeDetails.result.website?.ifEmpty { "" }
-                    tvCallNumber.text = placeDetails.result.formattedPhoneNumber?.ifEmpty { "" }
-
-                    if (placeDetails.result.openingHours?.openNow == true) {
-                        tvOpenCloseCheck.text = resources.getString(R.string.opening)
-                        val color =
-                            ContextCompat.getColor(requireContext(), R.color.selected_icon_color)
-                        tvOpenCloseCheck.setTextColor(ColorStateList.valueOf(color))
-                    } else {
-                        tvOpenCloseCheck.text = resources.getString(R.string.closed)
-                        val color = ContextCompat.getColor(requireContext(), R.color.dark_light_gray)
-                        tvOpenCloseCheck.setTextColor(ColorStateList.valueOf(color))
-                    }
-
-                    val weekdayTextList = placeDetails.result.openingHours?.weekdayText
-                    tvOpenCloseTime.text = if (!weekdayTextList.isNullOrEmpty()) {
-                        weekdayTextList.joinToString("\n")
-                    } else {
-                        ""
-                    }
-                }
-            }
-        }
+        viewModel.fetchLatLngToPlaceId(latLng = latLng)
+        viewModel.fetchPlaceDetails()
     }
 
     private fun setBottomSheet() {
@@ -269,12 +208,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             googleMap.isMyLocationEnabled = true
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    currentLatLng = LatLng(location.latitude, location.longitude)
+                    viewModel.fetchCurrentLatLng(LatLng(location.latitude, location.longitude))
+                    currentLatLng = viewModel.currentLatLng.value!!
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
                     googleMap.addMarker(
                         MarkerOptions().position(currentLatLng!!).title("Current Location")
                     )
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng!!, 15f))
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
             }
         }
@@ -334,12 +274,22 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     private fun getPlaceIdToPlaceDetail(predictions: List<AutocompletePredictionItem>) {
         val placeDetailsList = mutableListOf<PlaceResult>()
 
-        predictions.forEach { prediction ->
-            viewModel.fetchPlaceDetails(prediction.placeId) { response ->
-                response?.let { placeDetails ->
-                    placeDetailsList.add(placeDetails.result)
-                    if (placeDetailsList.size == predictions.size) {
-                        autoCompleteAdapter.updateData(placeDetailsList)
+        lifecycleScope.launch {
+            predictions.forEach { prediction ->
+                viewModel.fetchLatLngToPlaceId(getPlaceId = prediction.placeId)
+                viewModel.fetchPlaceDetails()
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.placeDetails.collect{ res ->
+                        when(res){
+                            is LatestUiState.Error -> { }
+                            LatestUiState.Loading -> TODO()
+                            is LatestUiState.Success -> {
+                                placeDetailsList.add(res.data.result)
+                                if (placeDetailsList.size == predictions.size) {
+                                    autoCompleteAdapter.updateData(placeDetailsList)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -379,7 +329,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                     }
 
                     Log.d("TAG", "performSearch: $predictions")
-                    getPlaceIdToPlaceDetail(predictions)
+
+                    viewModel.fetchPredictions(predictions)
 
                 }
                 .addOnFailureListener { exception: Exception? ->

@@ -2,6 +2,13 @@ package pjo.travelapp.data.entity
 
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
+import retrofit2.http.Query
+
+data class PlaceDetailRequest(
+    @SerializedName("place_id") val placeId: String,
+    @SerializedName("key") val apiKey: String = BuildConfig.maps_api_key,
+    @SerializedName("language") val language: String = "ko"
+)
 
 data class PlaceDetailsResponse(
     @SerializedName("html_attributions") val htmlAttributions: List<String>,
@@ -40,7 +47,11 @@ data class PlaceResult(
     @SerializedName("utc_offset") val utcOffset: Int,
     @SerializedName("vicinity") val vicinity: String,
     @SerializedName("website") val website: String?
-)
+) {
+    fun getRatingToStr(): String {
+        return rating.toString()
+    }
+}
 
 data class AddressComponent(
     @SerializedName("long_name") val longName: String,

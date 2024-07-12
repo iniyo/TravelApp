@@ -1,9 +1,11 @@
 package pjo.travelapp.domain.di
 
+import MapsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import pjo.travelapp.data.repo.MapsRepository
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.AppNavigatorImpl
 import pjo.travelapp.presentation.util.signmanager.KakaoSignManager

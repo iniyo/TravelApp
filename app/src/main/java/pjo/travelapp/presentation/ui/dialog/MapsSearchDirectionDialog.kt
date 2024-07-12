@@ -4,7 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.view.Window
 import pjo.travelapp.databinding.DialogMapsSearchDirectionBinding
-import pjo.travelapp.presentation.util.layoutInflater
+import pjo.travelapp.presentation.util.extension.layoutInflater
 
 class MapsSearchDirectionDialog(private val context: Context) {
 

@@ -1,7 +1,7 @@
 package pjo.travelapp.domain.di
 
 
-import DirectionsRepositoryImpl
+import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
 import android.util.Log
@@ -13,14 +13,16 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
-import pjo.travelapp.data.datasource.MapsDirectionDataSource
-import pjo.travelapp.data.remote.MapsDirectionsService
-import pjo.travelapp.data.repo.DirectionsRepository
+import pjo.travelapp.data.remote.MapsApiService
+import pjo.travelapp.data.repo.MapsRepository
+import pjo.travelapp.domain.model.UseCases
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
+import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
+import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
+import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -67,29 +69,39 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
-    fun provideGoogleMap(retrofit: Retrofit): MapsDirectionsService{
-        return retrofit.create(MapsDirectionsService::class.java)
+    fun provideGoogleMap(retrofit: Retrofit): MapsApiService {
+        return retrofit.create(MapsApiService::class.java)
     }
 
-    @Provides
-    @Singleton
-    fun provideDirectionsRepository(
-        datasource: MapsDirectionDataSource
-    ): DirectionsRepository {
-        return DirectionsRepositoryImpl(datasource)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetDirectionsUseCase(
-        repo: DirectionsRepository
-    ): GetDirectionsUseCase {
-        return GetDirectionsUseCase(repo)
-    }
     /**
      * map service api end
      */
 
+    /**
+     * use case
+     */
+    @Provides
+    @Singleton
+    fun provideMapsRepository(
+        service: MapsApiService
+    ): MapsRepository {
+        return MapsRepositoryImpl(service)
+    }
+    @Provides
+    @Singleton
+    fun provideUseCases(
+        repo: MapsRepository
+    ): UseCases {
+        return UseCases(
+            getDirectionsUseCase = GetDirectionsUseCase(repo),
+            getPlaceIdUseCase = GetPlaceIdUseCase(repo),
+            getPlaceDetailUseCase = GetPlaceDetailUseCase(repo),
+            getNearbyPlaces = GetNearbyPlaceUseCase(repo)
+        )
+    }
+    /**
+     * use case end
+     */
     @Provides
     fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
         return Geocoder(context)

@@ -6,19 +6,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import pjo.travelapp.data.entity.DirectionsRequest
-import pjo.travelapp.data.entity.DirectionsResponse
+import pjo.travelapp.data.entity.PlaceDetailRequest
+import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.repo.MapsRepository
 import javax.inject.Inject
 
-class GetDirectionsUseCase @Inject constructor(
+class GetPlaceDetailUseCase @Inject constructor(
     private val repository: MapsRepository
 ) {
-    suspend operator fun invoke(request: DirectionsRequest): Flow<DirectionsResponse> = flow {
-        val response = repository.getDirections(request)
+    suspend operator fun invoke(placeId: String): Flow<PlaceDetailsResponse> = flow {
+        val response = repository.getPlaceDetail(PlaceDetailRequest(placeId))
         emit(response)
     }.flowOn(Dispatchers.IO).catch { e ->
         // 예외 처리
-        Log.e("GetDirectionsUseCase", "Exception: ${e.message}")
+        Log.e("GetPlaceDetailUseCase", "Exception: ${e.message}")
     }
 }

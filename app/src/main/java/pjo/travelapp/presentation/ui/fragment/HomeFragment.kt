@@ -2,16 +2,10 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.ArrayAdapter
 import android.widget.LinearLayout
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -21,11 +15,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentHomeBinding
 import pjo.travelapp.presentation.adapter.CategoryRecyclerAdapter
-import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
 import pjo.travelapp.presentation.adapter.PopularRecyclerAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
 import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
-import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject

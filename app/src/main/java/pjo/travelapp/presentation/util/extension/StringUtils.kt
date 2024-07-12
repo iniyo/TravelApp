@@ -1,4 +1,4 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.extension
 
 import com.kizitonwose.calendar.core.Week
 import com.kizitonwose.calendar.core.yearMonth

@@ -1,7 +1,17 @@
 package pjo.travelapp.data.entity
 
 import com.google.gson.annotations.SerializedName
+import pjo.travelapp.BuildConfig
+import retrofit2.http.Query
 import java.time.Period
+
+data class NearbySearchRequest(
+    @SerializedName("location") val location: String,
+    @SerializedName("radius") val radius: Int,
+    @SerializedName("type") val type: String,
+    @SerializedName("key") val apiKey: String = BuildConfig.maps_api_key,
+    @SerializedName("language") val language: String = "ko"
+)
 
 data class NearbySearchResponse(
     @SerializedName("html_attributions") val htmlAttributions: List<String>,

@@ -10,6 +10,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import pjo.travelapp.R
+import pjo.travelapp.presentation.util.extension.getColorCompat
 import java.lang.ref.WeakReference
 
 

@@ -8,7 +8,12 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
@@ -65,5 +70,12 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
     protected open fun afterViewCreated() {}
     protected inline fun bind(block: T.() -> Unit) {
         binding.apply(block)
+    }
+    protected fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                block()
+            }
+        }
     }
 }

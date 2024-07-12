@@ -1,9 +1,13 @@
+package pjo.travelapp.data.entity
+
+import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class DirectionsRequest(
-    val origin: Any, // LatLng | String | google.maps.Place
-    val destination: Any, // LatLng | String | google.maps.Place
-    val travelMode: TravelMode,
+    val origin: directLocation, // LatLng | String | google.maps.Place
+    val destination: directLocation, // LatLng | String | google.maps.Place
+    val travelMode: TravelMode = TravelMode.DRIVING,
+    val languageCode: String = "",
     val transitOptions: TransitOptions? = null,
     val drivingOptions: DrivingOptions? = null,
     val unitSystem: UnitSystem? = null,
@@ -14,6 +18,16 @@ data class DirectionsRequest(
     val avoidHighways: Boolean = false,
     val avoidTolls: Boolean = false,
     val region: String? = null
+)
+
+data class directLocation (
+    @SerializedName("LatLng")
+    val latlng: List<directLatlng>
+)
+
+data class directLatlng (
+    val latitude: Double,
+    val longitude: Double
 )
 
 enum class TravelMode {

@@ -6,7 +6,6 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.core.view.children
-import com.google.android.material.snackbar.Snackbar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
@@ -22,15 +21,14 @@ import pjo.travelapp.presentation.util.ContinuousSelectionHelper.getSelection
 import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isInDateBetweenSelection
 import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isOutDateBetweenSelection
 import pjo.travelapp.presentation.util.DateSelection
-import pjo.travelapp.presentation.util.addStatusBarColorUpdate
-import pjo.travelapp.presentation.util.dateRangeDisplayText
-import pjo.travelapp.presentation.util.displayText
+import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
+import pjo.travelapp.presentation.util.extension.displayText
 import pjo.travelapp.presentation.util.formatDaysBetween
-import pjo.travelapp.presentation.util.getDrawableCompat
+import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.headerDateFormatDisplayText
-import pjo.travelapp.presentation.util.makeInVisible
-import pjo.travelapp.presentation.util.makeVisible
-import pjo.travelapp.presentation.util.setTextColorRes
+import pjo.travelapp.presentation.util.extension.makeInVisible
+import pjo.travelapp.presentation.util.extension.makeVisible
+import pjo.travelapp.presentation.util.extension.setTextColorRes
 import java.time.LocalDate
 import java.time.YearMonth
 

@@ -10,7 +10,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentUserDetailBinding
 import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
-import pjo.travelapp.presentation.util.MyGraphicMapper
+import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject

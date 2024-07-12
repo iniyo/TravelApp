@@ -47,13 +47,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:focusableInTouchMode="true"
             android:background="@drawable/bg_search_view"
             android:elevation="3dp"
             android:iconifiedByDefault="false"
             android:queryBackground="@null"
             android:queryHint="@string/search"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="@+id/map" />
+            app:layout_constraintTop_toTopOf="@+id/map"/>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/map"
@@ -62,12 +62,24 @@
             android:layout_height="0dp"
             android:focusableInTouchMode="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintVertical_bias="0.937"
+            tools:layout_editor_absoluteX="0dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_search_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sv_maps_search" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include
         android:id="@+id/bottom_sheet"
-        layout="@layout/maps_bottom_sheet" />
+        layout="@layout/fragment_maps_bottom_sheet" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

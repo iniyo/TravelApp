@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
 import android.view.View
@@ -9,12 +10,14 @@ import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import pjo.travelapp.R
+import pjo.travelapp.presentation.util.extension.getColorCompat
 import java.lang.ref.WeakReference
 
 
 /**
  * 상태 표시줄 색상 업데이트 옵저버
  */
+@SuppressLint("ObsoleteSdkInt")
 @Suppress("DEPRECATION") // API 레벨 30 이하에서도 사용이 가능하도록
 class StatusBarColorLifecycleObserver(
     activity: Activity,

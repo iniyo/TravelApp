@@ -1,4 +1,4 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.mapper
 
 import android.content.Context
 import android.content.res.Resources
@@ -6,6 +6,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
 import android.util.TypedValue.COMPLEX_UNIT_DIP
+import pjo.travelapp.presentation.util.PageDecoration
 
 
 object MyGraphicMapper {

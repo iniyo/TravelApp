@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.util.bindadapter
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.widget.ImageView
 import android.widget.RatingBar
@@ -15,6 +16,17 @@ object BindAdapter {
     @BindingAdapter("android:text")
     fun setText(view: TextView, rating: Double?) {
         view.text = rating?.toString() ?: ""
+    }
+
+    @SuppressLint("SetTextI18n")
+    @JvmStatic
+    @BindingAdapter("getPhotosSize")
+    fun getPhotoSize(view: TextView, photos: List<Photo>?) {
+        if(photos != null){
+            view.text = photos.size.toString() + "장"
+        }else{
+            view.text = "0장"
+        }
     }
 
     @JvmStatic
@@ -42,10 +54,26 @@ object BindAdapter {
     @JvmStatic
     @BindingAdapter("imageUrl")
     fun loadImage(view: ImageView, photo: Photo?) {
-        photo?.getPhotoUrl()?.let {
-            Glide.with(view.context)
-                .load(it)
-                .into(view)
+        var ph: String? = null
+        if(photo!=null){
+            ph = photo.getPhotoUrl()
+        }else {
+            ph = null
+        }
+        Glide.with(view.context)
+            .load(ph)
+            .error(R.drawable.img_bg_title)
+            .placeholder(R.drawable.img_bg_title)
+            .into(view)
+    }
+
+    @JvmStatic
+    @BindingAdapter("allWeekdayInfo")
+    fun loadWeekday(view: TextView,  weekDay: List<String>?) {
+        view.text = if(!weekDay.isNullOrEmpty()) {
+            weekDay.joinToString("\n")
+        }else {
+            ""
         }
     }
 }

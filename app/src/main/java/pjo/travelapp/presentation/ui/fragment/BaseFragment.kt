@@ -73,7 +73,7 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
     }
     protected fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit) {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 block()
             }
         }

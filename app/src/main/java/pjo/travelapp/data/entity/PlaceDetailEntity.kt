@@ -80,7 +80,7 @@ data class TimeDetail(
 
 data class Geometry(
     @SerializedName("location") val location: Location,
-    @SerializedName("viewport") val viewport: Viewport
+    @SerializedName("viewport") val viewport: Viewport? = null
 )
 
 data class Location(

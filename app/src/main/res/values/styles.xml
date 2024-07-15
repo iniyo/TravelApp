@@ -54,4 +54,11 @@
         <item name="android:background">@drawable/bottom_sheet_white_corner</item>
     </style>
 
+    <!-- dialog -->
+    <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
 </resources>

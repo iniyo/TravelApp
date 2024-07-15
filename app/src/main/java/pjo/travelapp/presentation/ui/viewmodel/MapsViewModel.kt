@@ -4,10 +4,18 @@ import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -32,7 +40,8 @@ class MapsViewModel @Inject constructor(
     private val getPlaceIdUseCase: GetPlaceIdUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val getNearbyPlaceUseCase: GetNearbyPlaceUseCase,
-    private val geocoder: Geocoder
+    private val geocoder: Geocoder,
+    private var placeCli: PlacesClient
 ) : ViewModel() {
     /**
      * 변수 세팅
@@ -58,20 +67,28 @@ class MapsViewModel @Inject constructor(
     private val _placeDetailsResult = MutableStateFlow<PlaceResult?>(null)
     val placeDetailsResult: StateFlow<PlaceResult?> get() = _placeDetailsResult
 
-    private val _currentLatLng = MutableStateFlow<LatLng?>(null)
-    val currentLatLng: StateFlow<LatLng?> get() = _currentLatLng
+    private val _lat = MutableStateFlow<LatLng?>(null)
+    val lat: StateFlow<LatLng?> get() = _lat
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> get() = _query
 
-    private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>?>(null)
-    val predictionList: StateFlow<List<AutocompletePredictionItem>?> get() = _predictionList
+    private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>>(emptyList())
+    val predictionList: StateFlow<List<AutocompletePredictionItem>> get() = _predictionList
 
-    private val _placeId = MutableStateFlow("")
-    val placeId: StateFlow<String> get() = _placeId
+    private var _placeId = MutableStateFlow<String?>("")
+    val placeId: StateFlow<String?> get() = _placeId
+
+    private val _placeLoc = MutableStateFlow("")
+    val placeLoc: StateFlow<String> get() = _placeLoc
+
     /**
      * 변수 세팅 끝
      */
+
+    init {
+        fetchPlaceDetails()
+    }
 
     fun fetchDirections(request: DirectionsRequest) {
         viewModelScope.launch {
@@ -81,86 +98,86 @@ class MapsViewModel @Inject constructor(
         }
     }
 
+    fun fetchPlaceLoc(placeName: String) {
+        viewModelScope.launch {
+            getDirectionsUseCase.getPlaceLocation(placeName).collectLatest { res ->
+                _placeLoc.value = res.results.toString()
+            }
+        }
+    }
+
     fun fetchSelectedMarker() {
 
     }
 
-    // 검색 결과 저장
-    fun fetchPredictions(itemList: List<AutocompletePredictionItem>) {
+    fun fetchLocation( location: LatLng) {
         viewModelScope.launch {
-            try {
-                _predictionList.value = itemList
-            }catch (e: NullPointerException){
-                e.printStackTrace()
-            }
-
+            _lat.value = location
         }
     }
 
-    // 현재 위치 저장
-    fun fetchCurrentLatLng(latLng: LatLng) {
+    // 검색 결과 저장
+    fun fetchPredictions(itemList: List<AutocompletePredictionItem>) {
+        Log.d("TAG", "fetchPredictions: $itemList")
         viewModelScope.launch {
-            try {
-                _currentLatLng.value = latLng
-            }catch (e: NullPointerException){
-                e.printStackTrace()
-            }
+            _predictionList.value = itemList
         }
+
     }
 
     // 장소 세부정보 갱신
     fun fetchPlaceDetails() {
         viewModelScope.launch {
-            try {
-                _placeId.collectLatest {
-                     getPlaceDetailUseCase(_placeId.value)
-                         .onStart { _placeDetails.value = LatestUiState.Loading }
-                         .catch {
-                             e -> e.printStackTrace()
-                             _placeDetails.value = LatestUiState.Error(e)
-                         }
-                         .collectLatest {
-                         Log.d("TAG", "fetchPlaceDetails: _placeId: ${_placeId.value}")
-                         Log.d("TAG", "fetchPlaceDetails: _placeDetails: ${_placeDetails.value}")
-                         _placeDetails.value = LatestUiState.Success(it)
-                         _placeDetailsResult.value = it.result
-                     }
+            _placeId.collectLatest {
+                _placeId.value?.let { it1 ->
+                    getPlaceDetailUseCase(it1)
+                        .onStart { _placeDetails.value = LatestUiState.Loading }
+                        .catch { e ->
+                            e.printStackTrace()
+                            _placeDetails.value = LatestUiState.Error(e)
+                        }
+                        .collectLatest {
+                            _placeDetails.value = LatestUiState.Success(it)
+                            _placeDetailsResult.emit(it.result)
+                        }
                 }
-            }catch (e: Throwable){
-                e.printStackTrace()
             }
         }
     }
 
+    fun fetchPlaceDetails(placeId: String) {
+        viewModelScope.launch {
+            getPlaceDetailUseCase(placeId)
+                .catch { e ->
+                    e.printStackTrace()
+                }
+                .collectLatest {
+                    _placeDetailsResult.emit(it.result)
+                }
+        }
+    }
+    fun clearPlaceDetails() {
+        viewModelScope.launch {
+            _placeDetailsResult.emit(null)
+        }
+    }
     // 위치 정보 가져오기
     fun fetchLatLngToPlaceId(latLng: LatLng? = null, getPlaceId: String = "") {
         viewModelScope.launch {
-            Log.d("TAG", "fetchLatLngToPlaceId: launch")
-            try {
-                if (latLng != null){
-                    Log.d("TAG", "fetchLatLngToPlaceId: ${latLng.latitude},${latLng.longitude}")
-                    val latLng = "${latLng.latitude},${latLng.longitude}"
-                    getPlaceIdUseCase(latLng).collect {
-                        val placeId = it.results.firstOrNull()?.placeId
-                        if (placeId != null) {
-                            _placeId.value = placeId
-                        } else {
-                            Log.d("TAG", "fetchPlaceId: null ")
-                            _placeId.value = "Place ID is null"
-                        }
+            if (latLng != null) {
+                val latLngString = "${latLng.latitude},${latLng.longitude}"
+                getPlaceIdUseCase(latLngString).collect {
+                    val placeId = it.results.firstOrNull()?.placeId
+                    if (placeId != null) {
+                        Log.d("TAG", "fetchLatLngToPlaceId: latLng")
+                        _placeId.value = placeId
                     }
                 }
-                else if(getPlaceId.isEmpty()){
-                    Log.d("TAG", "fetchPlaceId: empty ")
-                    _placeId.value = "nothing insert"
-                }else {
-                    Log.d("TAG", "fetchPlaceId: $getPlaceId ")
-                    _placeId.value = getPlaceId
-                }
-            } catch (e: Exception) {
-
-                Log.d("TAG", "fetchPlaceId: ${ e.printStackTrace()}")
-                _placeId.value = e.toString()
+            } else if (getPlaceId.isNotEmpty()) {
+                Log.d("TAG", "fetchLatLngToPlaceId: placeid")
+                _placeId.value = getPlaceId
+            } else {
+                Log.d("TAG", "fetchLatLngToPlaceId: empty twice ")
             }
         }
     }
@@ -183,5 +200,43 @@ class MapsViewModel @Inject constructor(
                 callback(null)
             }
         }
+    }
+
+    fun performSearch(query: String, currentLatLng: LatLng? = null) {
+        val token = AutocompleteSessionToken.newInstance()
+        val request = if(currentLatLng != null) {
+            val bounds = RectangularBounds.newInstance(
+                LatLng(currentLatLng.latitude - 1.7, currentLatLng.longitude - 1.7),
+                LatLng(currentLatLng.latitude + 1.7, currentLatLng.longitude + 1.7)
+            )
+
+            FindAutocompletePredictionsRequest.builder()
+                .setLocationBias(bounds)
+                .setOrigin(currentLatLng)
+                .setSessionToken(token)
+                .setQuery(query)
+                .build()
+        } else{
+            FindAutocompletePredictionsRequest.builder()
+                .setSessionToken(token)
+                .setQuery(query)
+                .build()
+        }
+
+        placeCli.findAutocompletePredictions(request)
+            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                val predictions = response.autocompletePredictions.map { prediction ->
+                    AutocompletePredictionItem(
+                        prediction.placeId,
+                        prediction.getPrimaryText(null).toString()
+                    )
+                }
+                fetchPredictions(predictions)
+            }
+            .addOnFailureListener { exception: Exception? ->
+                if (exception is ApiException) {
+                    Log.e("MapsFragment", "Place not found: ${exception.statusCode}")
+                }
+            }
     }
 }

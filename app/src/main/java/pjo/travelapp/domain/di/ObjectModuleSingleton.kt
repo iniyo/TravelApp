@@ -5,6 +5,8 @@ import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
 import android.util.Log
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,6 +73,15 @@ object ObjectModuleSingleton {
     @Singleton
     fun provideGoogleMap(retrofit: Retrofit): MapsApiService {
         return retrofit.create(MapsApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
+        if (!Places.isInitialized()) {
+            Places.initialize(context, BuildConfig.maps_api_key)
+        }
+        return Places.createClient(context)
     }
 
     /**

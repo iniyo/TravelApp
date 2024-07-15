@@ -1,5 +1,6 @@
 package pjo.travelapp.data.repo
 
+import pjo.travelapp.data.entity.AddressResponse
 import pjo.travelapp.data.entity.DirectionsRequest
 import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.NearbySearchRequest
@@ -14,4 +15,5 @@ interface MapsRepository {
     suspend fun getNearbyPlaces(request: NearbySearchRequest): NearbySearchResponse?
     suspend fun getPlaceDetail(request: PlaceDetailRequest): PlaceDetailsResponse
     suspend fun getPlaceId(request: PlaceIdRequest): PlaceIdResponse
+    suspend fun getPlaceAddress(placeName: String): AddressResponse
 }

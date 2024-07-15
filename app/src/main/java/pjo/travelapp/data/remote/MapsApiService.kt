@@ -1,11 +1,11 @@
 package pjo.travelapp.data.remote
 
 import pjo.travelapp.BuildConfig
+import pjo.travelapp.data.entity.AddressResponse
 import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.NearbySearchResponse
 import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.entity.PlaceIdResponse
-import pjo.travelapp.data.entity.directLocation
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -13,10 +13,10 @@ import retrofit2.http.Query
 interface MapsApiService {
 
     // 경로 정보 가져오기, null은 선택사항.
-    @GET("json")
+    @GET("maps/api/directions/json")
     suspend fun getDirections(
-        @Query("origin") origin: directLocation,
-        @Query("destination") destination: directLocation,
+        @Query("origin") origin: Double,
+        @Query("destination") destination: Double,
         @Query("mode") mode: String? = null,
         @Query("transit_routing_preference") transitRoutingPreference: String? = null,
         @Query("departure_time") departureTime: String? = null,
@@ -50,11 +50,18 @@ interface MapsApiService {
         @Query("language") language: String = "ko"
     ): PlaceDetailsResponse
 
-    // 장소 id 가져오기
+    // 장소 위치로 id 가져오기
     @GET("maps/api/geocode/json")
     suspend fun getPlaceId(
         @Query("latlng") latLng: String,
         @Query("key") apiKey: String = BuildConfig.maps_api_key,
         @Query("language") language: String = "ko"
     ): PlaceIdResponse
+
+    // 장소 이름으로 위치 가져오기
+    @GET("geocode/json")
+    fun getPlaceAddress(
+        @Query("address") address: String,
+        @Query("key") apiKey: String = BuildConfig.maps_api_key
+    ): AddressResponse
 }

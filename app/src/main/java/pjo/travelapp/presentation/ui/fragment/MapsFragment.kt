@@ -10,9 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -34,7 +31,9 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
@@ -58,34 +57,37 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     private var currentLatLng: LatLng = LatLng(35.1179923, 129.0419654)
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    private val placeDetailsList = mutableListOf<PlaceResult>()
+    private var placeDetailsList = mutableListOf<PlaceResult>()
     private var currentLocationMarker: Marker? = null
     private var searchMarker: Marker? = null
 
     @SuppressLint("PotentialBehaviorOverride")
     private val callback = OnMapReadyCallback { map ->
         googleMap = map
+
         startLocationMove(lat)
 
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true
             mapType = GoogleMap.MAP_TYPE_NORMAL
-
-            setOnMapClickListener { latLng ->
+            startLocationMove(lat)
+           /* setOnMapClickListener { latLng ->
                 moveCamera(CameraUpdateFactory.newLatLng(latLng))
                 lat = latLng
                 fetchPlaceIdAndDetails(latLng)
-            }
+            }*/
 
             setOnPoiClickListener { poi ->
                 moveCamera(CameraUpdateFactory.newLatLng(poi.latLng))
                 lat = poi.latLng
+                clearList()
                 fetchPlaceIdAndDetails(placeId = poi.placeId)
             }
 
             setOnMarkerClickListener { marker ->
-                lat = marker.position
                 moveCamera(CameraUpdateFactory.newLatLng(marker.position))
+                lat = marker.position
+                clearList()
                 fetchPlaceIdAndDetails(marker.position)
                 true
             }
@@ -128,23 +130,18 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         bind {
             launchWhenStarted {
                 launch {
-                    viewModel.predictionList.collectLatest {
-                        viewModel.placeDetailsResult.collectLatest { placeResult ->
-                            Log.d("TAG", "initViewModel:")
-                            if (placeResult != null) {
-                                if (placeDetailsList.none { it.name == placeResult.name }) {
-                                    placeDetailsList.add(placeResult)  // 누적하여 리스트에 추가
-                                    autoCompleteAdapter.updateData(placeDetailsList)
-                                }
-                                lat = LatLng(
-                                    placeResult.geometry.location.lat,
-                                    placeResult.geometry.location.lng
-                                )
-                            } else {
-                                placeDetailsList.clear()
-                            }
+                    viewModel.placeDetailsList.collectLatest {
+                        Log.d("TAG", "placeDetailsResult updated: ")
+                        placeDetailsList = it.toMutableList()
+                        autoCompleteAdapter.updateData(placeDetailsList)
+                    }
+                }
 
-                            place = placeResult
+                launch {
+                    viewModel.placeDetailsResult.collectLatest {
+                        it?.let {
+                            lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
+                            place = it
                         }
                     }
                 }
@@ -159,6 +156,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             }
         }
     }
+
 
     private fun setAdapter() {
         autoCompleteAdapter = AutoCompleteItemAdapter(emptyList()) { prediction ->
@@ -197,7 +195,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                     svMapsSearch.visibility = View.GONE
                 } else {
                     svMapsSearch.visibility = View.VISIBLE
-                    performSearch(query)
+                    viewModel.performSearch(query)
                 }
             }
             ivTrack.setOnClickListener {
@@ -273,7 +271,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
             }
-        } else {
+        } else{
             // 위치 권한이 없는 경우 다시 요청
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
@@ -281,19 +279,17 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
     private fun getPlaceIdToPlaceDetail(predictions: List<AutocompletePredictionItem>) {
         launchWhenStarted {
-            if (predictions.isEmpty()) {
-                // 모든 항목을 지우도록 ViewModel에 명령
-                viewModel.clearPlaceDetails()
-            } else {
-                predictions.forEach { prediction ->
-                    viewModel.fetchPlaceDetails(prediction.placeId)
-                }
+            predictions.forEach { prediction ->
+                viewModel.fetchPlaceDetails(prediction.placeId)
+              /*  viewModel.fetchLatLngToPlaceId(getPlaceId = prediction.placeId)*/
             }
         }
     }
 
     private fun setSearch() {
         binding.apply {
+            val queryTextFlow = MutableSharedFlow<String>()
+
             svMapsSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(queryString: String?): Boolean {
                     queryString?.let {
@@ -304,22 +300,44 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                             }
                         }
                     }
+                    startLocationMove(lat)
                     return false
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
                     newText?.let {
-                        if (newText.isEmpty()) {
-                            rvSearchList.visibility = View.GONE
-                            getPlaceIdToPlaceDetail(emptyList())
+                        launchWhenStarted {
+                            queryTextFlow.emit(it)
                         }
-                        performSearch(it)
                     }
                     return false
                 }
             })
+
+            launchWhenStarted {
+                queryTextFlow
+                    .debounce(500)
+                    .collectLatest { newText ->
+                        if (newText.isEmpty()) {
+                            rvSearchList.visibility = View.GONE
+                            clearList()
+                        } else {
+                            clearList()
+                            viewModel.performSearch(newText)
+                        }
+                    }
+            }
         }
     }
+
+
+    // 검색 결과 초기화
+    private fun clearList() {
+        viewModel.clearPlaceDetails()
+        placeDetailsList.clear()
+        autoCompleteAdapter.updateData(emptyList())
+    }
+
 
     private fun startLocationMove(latLng: LatLng) {
         searchMarker?.remove()
@@ -335,41 +353,5 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 16F
             )
         )
-    }
-
-    private fun performSearch(query: String) {
-        val token = AutocompleteSessionToken.newInstance()
-        val bounds = RectangularBounds.newInstance(
-            LatLng(currentLatLng.latitude - 1.7, currentLatLng.longitude - 1.7),
-            LatLng(currentLatLng.latitude + 1.7, currentLatLng.longitude + 1.7)
-        )
-
-        val request = FindAutocompletePredictionsRequest.builder()
-            .setLocationBias(bounds)
-            .setOrigin(currentLatLng)
-            /*.setCountries("KR", "JP", "AU")*/
-            /*   .setTypesFilter(listOf(PlaceTypes.GEOCODE))*/
-            .setSessionToken(token)
-            .setQuery(query)
-            .build()
-
-        placesClient.findAutocompletePredictions(request)
-            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
-                val predictions = response.autocompletePredictions.map { prediction ->
-                    AutocompletePredictionItem(
-                        prediction.placeId,
-                        prediction.getPrimaryText(null).toString()
-                    )
-                }
-                Log.d("TAG", "performSearch: $predictions")
-
-                viewModel.fetchPredictions(predictions)
-            }
-            .addOnFailureListener { exception: Exception? ->
-                if (exception is ApiException) {
-                    Log.e("MapsFragment", "Place not found: ${exception.statusCode}")
-                    binding.rvSearchList.visibility = View.GONE
-                }
-            }
     }
 }

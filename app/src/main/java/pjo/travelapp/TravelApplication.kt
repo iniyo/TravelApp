@@ -7,14 +7,15 @@ import com.facebook.appevents.AppEventsLogger
 import com.kakao.sdk.common.KakaoSdk
 import com.navercorp.nid.NaverIdLoginSDK
 import dagger.hilt.android.HiltAndroidApp
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @HiltAndroidApp
 class TravelApplication : Application() {
+
+
     override fun onCreate() {
         super.onCreate()
-
-
-
     }
 
     private fun setNaverSdk() {

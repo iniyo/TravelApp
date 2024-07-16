@@ -1,7 +1,5 @@
 package pjo.travelapp.presentation.ui.dialog
 
-import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,22 +12,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.actionCodeSettings
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
-import pjo.travelapp.data.entity.DirectLocation
 import pjo.travelapp.data.entity.DirectionsRequest
 import pjo.travelapp.databinding.DialogMapsSearchDirectionBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
-
-
-class DialogInterface {
-    interface CustomDialogListener {
-        fun onOkButtonClicked()
-    }
-}
 
 class MapsSearchDirectionDialog : DialogFragment() {
 
@@ -51,6 +40,7 @@ class MapsSearchDirectionDialog : DialogFragment() {
         )
         return binding.root
     }
+
     companion object {
         private const val ARG_TEXT = "arg_text"
 
@@ -63,19 +53,19 @@ class MapsSearchDirectionDialog : DialogFragment() {
             }
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-
-        /*    viewLifecycleOwner.lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED){
-                    viewModel.placeDetailsResult.collectLatest {
-                        it?.let {
-                            viewModel.performSearch(it.name)
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.placeDetailsResult.collectLatest { placeResult ->
+                        placeResult?.let { it ->
+                            etStart.setText(it.name) // Set the last selected place name in etStart
                         }
                     }
                 }
-            }*/
+            }
 
             val autoCompleteAdapter = AutoCompleteItemAdapter(emptyList()) { prediction ->
                 val query = prediction.name
@@ -85,22 +75,30 @@ class MapsSearchDirectionDialog : DialogFragment() {
                 layoutManager = LinearLayoutManager(context)
                 setHasFixedSize(true)
             }
-            btnSearchDirection.setOnClickListener {
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.placeDetailsList.collectLatest { placeDetailsList ->
+                    autoCompleteAdapter.updateData(placeDetailsList)
+                }
+            }
+
+            /*btnSearchDirection.setOnClickListener {
                 viewModel.apply {
                     searchLocation(etStart.text.toString()) { lat ->
-                        lat?.let{
+                        lat?.let {
                             fetchDirections(
                                 DirectionsRequest(
-                                origin =lat.latitude,
-                                destination =  lat.longitude
+                                    origin = lat.latitude,
+                                    destination = lat.longitude
                                 )
                             )
                         }
                     }
                 }
-            }
+            }*/
         }
     }
+
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(
@@ -108,6 +106,7 @@ class MapsSearchDirectionDialog : DialogFragment() {
             WindowManager.LayoutParams.WRAP_CONTENT
         )
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

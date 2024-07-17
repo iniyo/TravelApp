@@ -107,16 +107,16 @@
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_light_gray">
 
-                    <com.yy.mobile.rollingtextview.RollingTextView
+                    <pjo.travelapp.presentation.util.RollingTextView
                         android:id="@+id/rtv_search"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:paddingStart="5dp"
+                        android:paddingStart="10dp"
                         android:text="@string/fukuoka"
                         android:textColor="#1d1d1d"
                         android:textSize="16sp"
-                        android:textStyle="bold"
+                        android:textStyle="normal"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"

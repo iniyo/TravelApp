@@ -17,4 +17,9 @@
     <style name="CheckFragmentButtonTheme" parent="ThemeOverlay.MaterialComponents.Light">
         <item name="colorPrimary">@color/light_blue</item>
     </style>
+
+    <!-- rolling textview attr -->
+    <declare-styleable name="RollingTextView">
+        <attr name="duration" format="integer" />
+    </declare-styleable>
 </resources>

@@ -15,8 +15,8 @@ interface MapsApiService {
     // 경로 정보 가져오기, null은 선택사항.
     @GET("maps/api/directions/json")
     suspend fun getDirections(
-        @Query("origin") origin: Double,
-        @Query("destination") destination: Double,
+        @Query("origin") origin: String,
+        @Query("destination") destination: String,
         @Query("mode") mode: String? = null,
         @Query("transit_routing_preference") transitRoutingPreference: String? = null,
         @Query("departure_time") departureTime: String? = null,

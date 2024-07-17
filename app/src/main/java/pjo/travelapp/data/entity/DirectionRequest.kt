@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class DirectionsRequest(
-    val origin: Double, // LatLng | String | google.maps.Place
-    val destination: Double, // LatLng | String | google.maps.Place
+    val origin: String, // LatLng | String | google.maps.Place
+    val destination: String, // LatLng | String | google.maps.Place
     val travelMode: TravelMode = TravelMode.DRIVING,
     val languageCode: String = "",
     val transitOptions: TransitOptions? = null,
@@ -20,12 +20,12 @@ data class DirectionsRequest(
     val region: String? = null
 )
 
-data class DirectLocation (
+data class DirectLocation(
     @SerializedName("LatLng")
     val latlng: List<directLatlng>
 )
 
-data class directLatlng (
+data class directLatlng(
     val latitude: Double,
     val longitude: Double
 )

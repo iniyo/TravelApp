@@ -18,28 +18,36 @@ class AutoCompleteItemAdapter(
 
         fun bind(item: PlaceResult?) {
             try {
-                if (item != null) {
-                    binding.tvSearchListItemTitle.text = item.name
-                    binding.tvRating.text = item.rating.toString()
-                    binding.rbScore.rating = item.rating.toFloat()
+                binding.apply {
+                    if (item != null) {
+                        tvSearchListItemTitle.text = item.name
+                        tvRating.text = item.rating.toString()
+                        rbScore.rating = item.rating.toFloat()
+                        tvSearchListItemInfo.text = item.vicinity
 
-                    val photoUrl = item.photos?.firstOrNull()?.getPhotoUrl()
-                    if (photoUrl != null) {
-                        Glide.with(binding.root)
-                            .load(photoUrl)
-                            .error(R.drawable.img_bg_title)
-                            .placeholder(R.drawable.img_bg_title)
-                            .into(binding.sivSearchListItem)
+                        val photoUrl = item.photos?.firstOrNull()?.getPhotoUrl()
+                        if (photoUrl != null) {
+                            Glide.with(root)
+                                .load(photoUrl)
+                                .error(R.drawable.img_bg_title)
+                                .placeholder(R.drawable.img_bg_title)
+                                .into(sivSearchListItem)
+                        }else {
+                            sivSearchListItem.setImageResource(R.drawable.img_bg_title) //
+                        }
+                        itemView.setOnClickListener { itemClickListener(item) }
                     }
-                    itemView.setOnClickListener { itemClickListener(item) }
-                } else {
-                    // 아이템이 null일 경우 기본값 설정
-                    binding.tvSearchListItemTitle.text = "No result"
-                    binding.tvRating.text = "-"
-                    binding.rbScore.rating = 0f
-                    binding.sivSearchListItem.setImageResource(R.drawable.ic_launcher_foreground) // 기본 이미지 설정
-                    itemView.setOnClickListener(null) // 클릭 이벤트 제거
+                    else {
+                        // 아이템이 null일 경우 기본값 설정
+                        tvSearchListItemTitle.text = "정보 없음"
+                        tvRating.text = "-"
+                        rbScore.rating = 0f
+                        tvSearchListItemInfo.text = "정보 없음"
+                        sivSearchListItem.setImageResource(R.drawable.ic_launcher_foreground) // 기본 이미지 설정
+                        itemView.setOnClickListener(null) // 클릭 이벤트 제거
+                    }
                 }
+
             } catch (e: Throwable) {
                 e.printStackTrace()
             }

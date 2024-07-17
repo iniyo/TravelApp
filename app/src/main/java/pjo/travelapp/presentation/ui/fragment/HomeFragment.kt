@@ -2,6 +2,7 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.graphics.Color
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
@@ -161,7 +162,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
         var textIndex = 0
 
         binding.rtvSearch.apply {
-            animationDuration = 1500L
+           /* animationDuration = 1500L
             animationInterpolator = AccelerateDecelerateInterpolator()
             addCharOrder(CharOrder.Alphabet)
             addCharOrder(CharOrder.UpperAlphabet)
@@ -179,7 +180,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
                     setText(rollingText[textIndex])
                 }
             })
-            setText(rollingText[textIndex]) // 초기 텍스트 설정 및 애니메이션 시작
+            setText(rollingText[textIndex]) // 초기 텍스트 설정 및 애니메이션 시작*/
+
+            setTextArray(rollingText)
+            setDuration(3000L) // 2 seconds duration
+
 
             setOnClickListener {
                 navigator.navigateTo(Fragments.SEARCH_PAGE)

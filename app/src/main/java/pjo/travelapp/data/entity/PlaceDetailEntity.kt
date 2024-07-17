@@ -1,5 +1,6 @@
 package pjo.travelapp.data.entity
 
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
 import retrofit2.http.Query

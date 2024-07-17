@@ -19,4 +19,19 @@
         android:importantForAccessibility="no"
         android:src="@drawable/back_white" />
 
+    <TextView
+        android:id="@+id/tv_search_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="10dp"
+        android:padding="15dp"
+        android:text="@string/search"
+        android:textColor="@color/dark_blue"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/ll_maps_toolbar_container"
+        app:layout_constraintEnd_toStartOf="@+id/iv_track"
+        app:layout_constraintTop_toTopOf="@+id/ll_maps_toolbar_container" />
+
+
 </androidx.appcompat.widget.Toolbar>

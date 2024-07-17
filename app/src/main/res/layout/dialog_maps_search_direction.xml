@@ -18,10 +18,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_search_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:background="@color/gray"
+            android:layout_height="250dp"
             app:layout_constraintEnd_toEndOf="@+id/et_start"
             app:layout_constraintStart_toStartOf="@+id/et_start"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
         <EditText
             android:id="@+id/et_start"
@@ -29,6 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@null"
+            android:hint="@string/direction_start"
             android:importantForAutofill="no"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rv_search_list" />
@@ -45,6 +48,7 @@
             android:id="@+id/et_end"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:hint="@string/direction_end"
             android:layout_marginTop="30dp"
             android:background="@null"
             app:layout_constraintTop_toBottomOf="@+id/et_start" />

@@ -13,12 +13,12 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.IOException
@@ -27,13 +27,13 @@ import pjo.travelapp.data.entity.DirectionsRequest
 import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.Route
+import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
-import pjo.travelapp.data.entity.TravelMode
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
-import pjo.travelapp.domain.usecase.GetRoutesUseCase
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
@@ -43,7 +43,6 @@ class MapsViewModel @Inject constructor(
     private val getPlaceIdUseCase: GetPlaceIdUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val getNearbyPlaceUseCase: GetNearbyPlaceUseCase,
-    private val getRoutesUseCase: GetRoutesUseCase,
     private val geocoder: Geocoder,
     private var placeClient: PlacesClient
 ) : ViewModel() {
@@ -57,8 +56,8 @@ class MapsViewModel @Inject constructor(
      * @param: _placeId: 검색, 선택으로 받아오는 place의 고유값
      */
     private val _directions =
-        MutableStateFlow<LatestUiState<DirectionsResponse?>>(LatestUiState.Loading)
-    val directions: StateFlow<LatestUiState<DirectionsResponse?>> get() = _directions
+        MutableStateFlow<LatestUiState<Pair<RoutesResponse?, Int>>>(LatestUiState.Loading)
+    val directions: StateFlow<LatestUiState<Pair<RoutesResponse?, Int>>> get() = _directions
 
     private val _placeDetails =
         MutableStateFlow<LatestUiState<PlaceDetailsResponse?>>(LatestUiState.Loading)
@@ -72,9 +71,6 @@ class MapsViewModel @Inject constructor(
     private val _placeDetailsList = MutableStateFlow<List<PlaceResult>>(emptyList())
     val placeDetailsList: StateFlow<List<PlaceResult>> get() = _placeDetailsList
 
-    private val _dialogPlaceDetailsList = MutableStateFlow<List<PlaceResult>>(emptyList())
-    val dialogPlaceDetailsList: StateFlow<List<PlaceResult>> get() = _dialogPlaceDetailsList
-
     private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>>(emptyList())
     val predictionList: StateFlow<List<AutocompletePredictionItem>> get() = _predictionList
 
@@ -86,30 +82,20 @@ class MapsViewModel @Inject constructor(
     private var _placeIdDirection = MutableStateFlow<String?>("")
     val placeIdDirection: StateFlow<String?> get() = _placeIdDirection
 
-    private var _routeResponse = MutableStateFlow<RoutesResponse?>(null)
-    val routeResponse: StateFlow<RoutesResponse?> get() = _routeResponse
     /**
      * 변수 선언
      */
 
     init {
         fetchPlaceDetailsList()
-       /* fetchQueryToDebounce()*/
-    }
-
-    fun fetchRoute(origin: String, destination: String) {
-       viewModelScope.launch {
-           getRoutesUseCase(origin, destination).collectLatest {
-               _routeResponse.value = it
-           }
-       }
+        /* fetchQueryToDebounce()*/
     }
 
     fun resetDirectionsState() {
         _directions.value = LatestUiState.Loading
     }
 
-    fun fetchDirections(directionsRequest: DirectionsRequest) {
+    fun fetchDirections(directionsRequest: RoutesRequest, color: Int) {
         viewModelScope.launch {
             getDirectionsUseCase(directionsRequest)
                 .onStart {
@@ -120,8 +106,7 @@ class MapsViewModel @Inject constructor(
                     _directions.value = LatestUiState.Error(e)
                 }
                 .collectLatest {
-
-                    _directions.value = LatestUiState.Success(it)
+                    _directions.value = LatestUiState.Success(Pair(it, color))
                 }
         }
     }
@@ -210,7 +195,6 @@ class MapsViewModel @Inject constructor(
                     if (currentList.none { it.name == placeResult.name }) {
                         currentList.add(placeResult)
                         _placeDetailsList.value = currentList
-                        _dialogPlaceDetailsList.value = currentList
                     }
                 }
             }
@@ -229,6 +213,12 @@ class MapsViewModel @Inject constructor(
                 .collectLatest {
                     _placeDetailsResultDirection.value = it.result
                 }
+        }
+    }
+
+    fun fetchPlaceResult(res: PlaceResult) {
+        viewModelScope.launch {
+            _placeDetailsResult.value = res
         }
     }
 
@@ -254,6 +244,26 @@ class MapsViewModel @Inject constructor(
     fun clearPlaceDetails() {
         _placeDetailsList.value = emptyList()
         _predictionList.value = emptyList()
+    }
+
+    fun getStartAndEndPlaceId(start: String, end: String, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
+        viewModelScope.launch {
+            val startDeferred = CompletableDeferred<LatLng?>()
+            val endDeferred = CompletableDeferred<LatLng?>()
+
+            searchLocation(start) { result ->
+                startDeferred.complete(result)
+            }
+
+            searchLocation(end) { result ->
+                endDeferred.complete(result)
+            }
+
+            val startLocation = startDeferred.await()
+            val endLocation = endDeferred.await()
+
+            callback(Pair(startLocation, endLocation))
+        }
     }
 
     fun fetchLatLngToPlaceId(latLng: LatLng? = null, getPlaceId: String = "") {

@@ -1,68 +1,55 @@
 package pjo.travelapp.data.entity
 
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
-import java.util.Date
 
 data class DirectionsRequest(
-    val origin: String, // LatLng | String | google.maps.Place
-    val destination: String, // LatLng | String | google.maps.Place
-    val travelMode: TravelMode = TravelMode.DRIVING,
-    val languageCode: String = "",
-    val transitOptions: TransitOptions? = null,
-    val drivingOptions: DrivingOptions? = null,
-    val unitSystem: UnitSystem? = null,
-    val waypoints: List<Waypoint>? = null,
-    val optimizeWaypoints: Boolean = false,
-    val provideRouteAlternatives: Boolean = false,
-    val avoidFerries: Boolean = false,
-    val avoidHighways: Boolean = false,
-    val avoidTolls: Boolean = false,
-    val region: String? = null
+    @SerializedName("origin") val origin: DirectLocation, // LatLng | String | google.maps.Place
+    @SerializedName("destination") val destination: DirectLocation, // LatLng | String | google.maps.Place
+    @SerializedName("mode") val travelMode: String = "transit, walking, bicycling, driving",
+   /* @SerializedName("language") val language: String = "en",*/
+    @SerializedName("units") val units: UnitSystem? = null,
+    @SerializedName("waypoints") val waypoints: List<Waypoint>? = null,
+    @SerializedName("optimizeWaypoints") val optimizeWaypoints: Boolean = false,
+    @SerializedName("alternatives") val alternatives: Boolean = false,
+    @SerializedName("avoid") val avoid: List<AvoidType>? = null,
+    @SerializedName("region") val region: String? = null,
+    @SerializedName("departure_time") val departureTime: String? = null, // Use ISO 8601 format or "now"
+    @SerializedName("arrival_time") val arrivalTime: String? = null // Use ISO 8601 format
 )
 
-data class DirectLocation(
-    @SerializedName("LatLng")
-    val latlng: List<directLatlng>
-)
-
-data class directLatlng(
-    val latitude: Double,
-    val longitude: Double
-)
+sealed class DirectLocation {
+    data class Address(@SerializedName("address") val address: String) : DirectLocation() {
+        override fun toString() = address
+    }
+    data class Coordinates(@SerializedName("latLng") val latLng: LatLng?) : DirectLocation() {
+        override fun toString() = "${latLng?.latitude},${latLng?.longitude}"
+    }
+    data class Place(@SerializedName("place_id") val placeId: String?) : DirectLocation() {
+        override fun toString() = "place_id:${placeId}"
+    }
+    data class PlaceName(@SerializedName("place_name") val placeName: String) : DirectLocation() {
+        override fun toString() = placeName
+    }
+}
 
 enum class TravelMode {
     DRIVING, WALKING, BICYCLING, TRANSIT
 }
 
+enum class TransitRoutingPreference {
+    LESS_WALKING
+}
+
 data class Waypoint(
-    val location: Any, // LatLng | String | google.maps.Place
-    val stopover: Boolean
+    @SerializedName("location") val location: DirectLocation, // LatLng | String | google.maps.Place
+    @SerializedName("stopover") val stopover: Boolean
 )
-
-data class TransitOptions(
-    val arrivalTime: Date? = null,
-    val departureTime: Date? = null,
-    val modes: List<TransitMode>? = null,
-    val routingPreference: TransitRoutePreference? = null
-)
-
-enum class TransitMode {
-    BUS, SUBWAY, TRAIN, TRAM, RAIL
-}
-
-enum class TransitRoutePreference {
-    LESS_WALKING, FEWER_TRANSFERS
-}
-
-data class DrivingOptions(
-    val departureTime: String, // Use ISO 8601 format
-    val trafficModel: TrafficModel
-)
-
-enum class TrafficModel {
-    BEST_GUESS, PESSIMISTIC, OPTIMISTIC
-}
 
 enum class UnitSystem {
     METRIC, IMPERIAL
+}
+
+enum class AvoidType {
+    TOLLS, HIGHWAYS, FERRIES
 }

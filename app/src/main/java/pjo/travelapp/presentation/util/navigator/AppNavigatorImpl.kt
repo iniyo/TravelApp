@@ -17,10 +17,10 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         (activity.supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment).navController
     }
 
-    override fun navigateTo(screen: Fragments) {
+    override fun navigateTo(screen: Fragments, putString: String) {
         when (screen) {
             Fragments.HOME_PAGE -> navController.navigate(R.id.homeFragment)
-            Fragments.SEARCH_PAGE -> navController.navigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+            Fragments.SEARCH_PAGE -> navController.navigate(HomeFragmentDirections.actionHomeFragmentToMainSearchFragment())
             Fragments.TICKET_PAGE -> navController.navigate(R.id.ticketFragment)
             Fragments.ACCOMMODATION_PAGE -> navController.navigate(R.id.accommodationDetailFragment)
             Fragments.MAPS_PAGE -> navController.navigate(R.id.mapsFragment)
@@ -28,6 +28,7 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             Fragments.PLAN_PAGE -> navController.navigate(R.id.planFragment)
             Fragments.SIGN_PAGE -> navController.navigate(UserDetailFragmentDirections.actionUserDetailFragmentToSignFragment())
             Fragments.CALENDAR_PAGE -> navController.navigate(R.id.checkFragment)
+            Fragments.DEFAULT_SEARCH_PAGE -> navController.navigate(R.id.defaultSearchFragment)
         }
     }
 
@@ -39,7 +40,7 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         navController.navigateUp()
     }
 
-    override fun navigateTo(screen: Activitys) {
+    override fun navigateTo(screen: Fragments) {
         // For handling activity navigation if required
     }
 

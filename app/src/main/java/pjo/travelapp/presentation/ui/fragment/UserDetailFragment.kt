@@ -55,7 +55,7 @@ class UserDetailFragment : Fragment() {
     private fun setClickListner() {
         binding.apply {
             btnLoginAndSignup.setOnClickListener {
-                navigator.navigateTo(Fragments.SIGN_PAGE)
+                navigator.navigateTo(Fragments.SIGN_PAGE, "")
             }
         }
     }

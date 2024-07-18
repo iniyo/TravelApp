@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    android:paddingBottom="20dp">
+    android:padding="10dp">
 
     <EditText
-        android:id="@+id/et_start"
+        android:id="@+id/tv_start"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
@@ -16,26 +17,32 @@
         android:importantForAutofill="no"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlSymmetry" />
 
 
     <View
         android:layout_width="2dp"
         android:layout_height="0dp"
         android:background="@color/dark_gray"
-        app:layout_constraintBottom_toTopOf="@+id/et_end"
-        app:layout_constraintStart_toStartOf="@+id/et_start"
-        app:layout_constraintTop_toBottomOf="@+id/et_start" />
+        app:layout_constraintBottom_toTopOf="@+id/tv_end"
+        app:layout_constraintStart_toStartOf="@+id/tv_start"
+        app:layout_constraintTop_toBottomOf="@+id/tv_start" />
 
     <EditText
-        android:id="@+id/et_end"
+        android:id="@+id/tv_end"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginTop="30dp"
         android:background="@null"
         android:hint="@string/direction_end"
+        android:importantForAutofill="no"
         android:paddingStart="10dp"
-        app:layout_constraintTop_toBottomOf="@+id/et_start" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_start"
+        tools:ignore="RtlSymmetry,TextFields" />
 
 
     <RadioGroup
@@ -48,7 +55,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_end">
+        app:layout_constraintTop_toBottomOf="@+id/tv_end">
 
         <RadioButton
             android:id="@+id/rb_car"
@@ -59,7 +66,7 @@
             android:drawableTop="@drawable/ic_car"
             android:gravity="center"
             android:padding="10dp"
-            android:text="자동차"
+            android:text="@string/car"
             android:textColor="@color/black" />
 
         <RadioButton
@@ -72,7 +79,7 @@
             android:drawableTop="@drawable/ic_subway"
             android:gravity="center"
             android:padding="10dp"
-            android:text="지하철"
+            android:text="@string/subway"
             android:textColor="@color/black" />
 
         <RadioButton
@@ -84,7 +91,7 @@
             android:drawableTop="@drawable/ic_walk"
             android:gravity="center"
             android:padding="10dp"
-            android:text="도보"
+            android:text="@string/walk"
             android:textColor="@color/black" />
 
     </RadioGroup>
@@ -101,21 +108,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rg_transport_modes" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_search_list1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintEnd_toEndOf="@+id/et_start"
-        app:layout_constraintHeight_max="200dp"
-        app:layout_constraintStart_toStartOf="@+id/et_start"
-        app:layout_constraintTop_toBottomOf="@+id/et_start" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_search_list2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintEnd_toEndOf="@+id/et_end"
-        app:layout_constraintHeight_max="200dp"
-        app:layout_constraintStart_toStartOf="@+id/et_end"
-        app:layout_constraintTop_toBottomOf="@+id/et_end" />
 </androidx.constraintlayout.widget.ConstraintLayout>

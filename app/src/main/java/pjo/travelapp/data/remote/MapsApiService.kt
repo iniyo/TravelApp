@@ -3,9 +3,11 @@ package pjo.travelapp.data.remote
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.data.entity.AddressResponse
 import pjo.travelapp.data.entity.DirectionsResponse
+import pjo.travelapp.data.entity.Location
 import pjo.travelapp.data.entity.NearbySearchResponse
 import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.entity.PlaceIdResponse
+import pjo.travelapp.data.entity.TravelMode
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -17,19 +19,18 @@ interface MapsApiService {
     suspend fun getDirections(
         @Query("origin") origin: String,
         @Query("destination") destination: String,
-        @Query("mode") mode: String? = null,
-        @Query("transit_routing_preference") transitRoutingPreference: String? = null,
-        @Query("departure_time") departureTime: String? = null,
-        @Query("arrival_time") arrivalTime: String? = null,
-        @Query("traffic_model") trafficModel: String? = null,
-        @Query("units") units: String? = null,
-        @Query("waypoints") waypoints: String? = null,
-        @Query("optimizeWaypoints") optimizeWaypoints: Boolean = false,
-        @Query("alternatives") alternatives: Boolean = false,
-        @Query("avoid") avoid: String? = null,
-        @Query("region") region: String? = null,
+        @Query("mode") travelMode: String?,
+        @Query("transit_routing_preference") transitRoutingPreference: String?,
+        @Query("departure_time") departureTime: String?,
+        @Query("arrival_time") arrivalTime: String?,
+        @Query("traffic_model") trafficModel: String?,
+        @Query("units") units: String?,
+        @Query("waypoints") waypoints: String?,
+        @Query("optimizeWaypoints") optimizeWaypoints: Boolean,
+        @Query("alternatives") alternatives: Boolean,
+        @Query("avoid") avoid: String?,
+        @Query("region") region: String?,
         @Query("key") apiKey: String = BuildConfig.maps_api_key,
-        @Query("language") language: String = "ko"
     ): DirectionsResponse
 
     // 주변 일정 거리 내의 장소 정보 가져오기

@@ -4,17 +4,16 @@ import android.Manifest
 import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.SearchView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -26,7 +25,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,15 +35,20 @@ import kotlinx.coroutines.launch
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.data.entity.DirectionsRequest
-import pjo.travelapp.data.entity.DirectionsResponse
+import pjo.travelapp.data.entity.DLocation
+import pjo.travelapp.data.entity.LatLngObject
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
-import pjo.travelapp.data.entity.TravelMode
 import pjo.travelapp.databinding.FragmentMapsBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
@@ -53,21 +56,18 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private val viewModel: MapsViewModel by activityViewModels()
-    private lateinit var placesClient: PlacesClient
     private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
-    private lateinit var autoCompleteAdapter1: AutoCompleteItemAdapter
-    private lateinit var autoCompleteAdapter2: AutoCompleteItemAdapter
     private var query = ""
     private var isStarted: Boolean = true
     private var currentLatLng: LatLng = LatLng(35.1179923, 129.0419654)
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
-    private var directoinLat: Double = 0.0
-    private var directoinLng: Double = 0.0
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private var placeDetailsList = mutableListOf<PlaceResult>()
     private var currentLocationMarker: Marker? = null
     private var searchMarker: Marker? = null
     private var isTextChanging = false
+    @Inject
+    lateinit var navigate: AppNavigator
 
 
     @SuppressLint("PotentialBehaviorOverride")
@@ -75,28 +75,20 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         googleMap = map
 
         startLocationMove(lat)
-
         googleMap.apply {
             uiSettings.isZoomControlsEnabled = true
             mapType = GoogleMap.MAP_TYPE_NORMAL
             startLocationMove(lat)
-            /* setOnMapClickListener { latLng ->
-                 moveCamera(CameraUpdateFactory.newLatLng(latLng))
-                 lat = latLng
-                 fetchPlaceIdAndDetails(latLng)
-             }*/
 
             setOnPoiClickListener { poi ->
                 moveCamera(CameraUpdateFactory.newLatLng(poi.latLng))
                 lat = poi.latLng
-                clearList()
                 fetchPlaceIdAndDetails(placeId = poi.placeId)
             }
 
             setOnMarkerClickListener { marker ->
                 moveCamera(CameraUpdateFactory.newLatLng(marker.position))
                 lat = marker.position
-                clearList()
                 fetchPlaceIdAndDetails(marker.position)
                 true
             }
@@ -117,7 +109,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             Places.initialize(requireContext(), BuildConfig.maps_api_key)
         }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        placesClient = Places.createClient(requireContext())
     }
 
     override fun initView() {
@@ -127,12 +118,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 childFragmentManager.findFragmentById(R.id.fcv_map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
 
-            setView()
-            setClickListener()
-            setBottomSheet()
-            setSearch()
             setAdapter()
-            setFocus()
+            setBottomSheet()
+            setTextStartAndEnd()
+            setClickListener()
         }
     }
 
@@ -140,21 +129,17 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         super.initViewModel()
         bind {
             launchWhenStarted {
-
                 // 장소 세부정보 리스트
                 launch {
                     viewModel.placeDetailsList.collectLatest {
                         Log.d("TAG", "placeDetailsList: ")
                         placeDetailsList = it.toMutableList()
-                        autoCompleteAdapter.updateData(placeDetailsList)
-                        autoCompleteAdapter1.updateData(placeDetailsList)
-                        autoCompleteAdapter2.updateData(placeDetailsList)
+                        autoCompleteAdapter.submitList(placeDetailsList)
                     }
                 }
 
                 // 장소 세부정보
                 launch {
-
                     viewModel.placeDetailsResult.collectLatest {
                         it?.let {
                             lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
@@ -165,31 +150,23 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 }
 
                 launch {
-                    viewModel.routeResponse.collectLatest { response ->
-                        response?.let {
-                            drawRouteOnMap(it)
-                        }
+                    viewModel.placeDetailsResultDirection.collectLatest {
+                       /* var placeDetail: PlaceResult? = null
+                        placeDetail = it
+                        viewModel.placeIdDirection.collectLatest {
+                            if (placeDetail != null) {
+                                if (placeDetail.placeId == it) {
+                                    if (!isStarted) {
+                                        toolbarMapsDirection.tvEnd.setText(placeDetail.name)
+                                    } else {
+                                        toolbarMapsDirection.tvStart.setText(placeDetail.name)
+                                    }
+                                }
+                            } else {
+                                Log.d("TAG", "initViewModel: placeDetailsResultDirection is null ")
+                            }
+                        }*/
                     }
-                }
-
-                launch {
-                   viewModel.placeDetailsResultDirection.collectLatest {
-                       var placeDetail: PlaceResult? = null
-                       placeDetail = it
-                       viewModel.placeIdDirection.collectLatest {
-                           if(placeDetail != null){
-                               if(placeDetail.placeId == it){
-                                   if (!isStarted) {
-                                       toolbarMapsDirection.etEnd.setText(placeDetail.formattedAddress)
-                                   } else {
-                                       toolbarMapsDirection.etStart.setText(placeDetail.formattedAddress)
-                                   }
-                               }
-                           }else {
-                               Log.d("TAG", "initViewModel: placeDetailsResultDirection is null ")
-                           }
-                       }
-                   }
                 }
 
                 // 장소 세부정보 검색 결과
@@ -201,20 +178,20 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                     }
                 }
 
-                // 위치 계산
+                // 경로
                 launch {
                     viewModel.directions.collectLatest {
                         when (it) {
                             is LatestUiState.Loading -> {
-                                showLoad(it.toString())
+                                Log.d("TAG", "maps dialog showLoad: $it")
                             }
 
                             is LatestUiState.Error -> {
-                                showError(it.exception)
+                                Log.d("TAG", "maps dialog showError: ${it.exception}")
                             }
 
                             is LatestUiState.Success -> {
-                                it.data?.let { it1 -> updateDirection(it1) }
+                                it.data?.let { response -> updateDirection(response) }
                             }
                         }
                     }
@@ -222,162 +199,122 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             }
         }
     }
-    private fun drawRouteOnMap(routeResponse: RoutesResponse) {
-        googleMap.clear() // 기존 마커와 경로 삭제
-        routeResponse.routes.forEach { route ->
-            route.legs.forEach { leg ->
-                leg.steps.forEach { step ->
-                    val polyline = PolyUtil.decode(step.polyline.points)
-                    googleMap.addPolyline(PolylineOptions().addAll(polyline))
-                }
-            }
-        }
-    }
-    private fun setView() {
-        bind {
-            toolbarMapsDirection.apply {
 
-                /*if(etStart.text.isNotEmpty() && etEnd.text.isNotEmpty()) {
-                    btnSearchDirection.isEnabled = true
-                } else {
-                    btnSearchDirection.isEnabled = false
-                }*/
-            }
-        }
+    private fun setTextStartAndEnd() {
+       bind {
+           setFragmentResultListener("start") { requestKey, bundle ->
+               val result = bundle.getString("start_address")
+               // result를 사용하여 원하는 작업 수행
+               toolbarMapsDirection.tvStart.setText(result)
+           }
+           setFragmentResultListener("end") { requestKey, bundle ->
+               val result = bundle.getString("end_address")
+               // result를 사용하여 원하는 작업 수행
+               toolbarMapsDirection.tvEnd.setText(result)
+           }
+       }
     }
 
-    // 모든
-    private fun fetchDirectionsForAllModes(request: DirectionsRequest) {
-        Log.d("TAG", "fetchDirectionsForAllModes: ")
-        val travelModes = TravelMode.entries.toTypedArray()
-        viewLifecycleOwner.lifecycleScope.launch {
-            travelModes.forEach { mode ->
-                val modifiedRequest = request.copy(travelMode = mode)
-                viewModel.fetchDirections(modifiedRequest)
+    private fun updateDirection(data: Pair<RoutesResponse?, Int>) {
+        Log.d("TAG", "maps dialog updateDirection: ${data.first}")
+        data.first?.routes?.forEach { route ->
+            route.polyline?.encodedPolyline?.let {
+                drawPolyline(
+                    it,
+                    route.distanceMeters,
+                    data.second
+                )
             }
         }
     }
 
-    private fun showLoad(load: String) {
-        Log.d("TAG", "maps dialog showLoad: $load")
-    }
-
-    private fun showError(exception: Throwable) {
-        Log.d("TAG", "maps dialog showError: $exception")
-    }
-
-    private fun updateDirection(data: DirectionsResponse) {
-        Log.d("TAG", "maps dialog updateDirection: $data")
-        data.routes.forEach { route ->
-            drawPolyline(route.overviewPolyline.points)
-        }
-    }
-
-    private fun drawPolyline(encodedPolyline: String) {
+    private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
         val decodedPath = PolyUtil.decode(encodedPolyline)
-        googleMap.addPolyline(PolylineOptions().addAll(decodedPath))
+        val polyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+
+        // 경로의 중간지점에 거리 마커 추가
+        distanceMeters?.let {
+            val midPoint = decodedPath[decodedPath.size / 2]
+            googleMap.addMarker(
+                MarkerOptions()
+                    .position(midPoint)
+                    .title("Distance: ${distanceMeters / 1000} km")
+                    .visible(true)
+            )
+        }
     }
 
     private fun setAdapter() {
-        autoCompleteAdapter = AutoCompleteItemAdapter(emptyList()) { prediction ->
+        autoCompleteAdapter = AutoCompleteItemAdapter { prediction ->
             isTextChanging = true
             viewModel.fetchPlaceDetails(prediction.placeId)
             startLocationMove(lat)
         }
-        autoCompleteAdapter1 = AutoCompleteItemAdapter(emptyList()) { prediction ->
-            isTextChanging = true
-            viewModel.fetchPlaceIdDirection(prediction.placeId)
-            viewModel.fetchPlaceDetailsDirections(prediction.placeId)
-            isStarted = true
-            binding.toolbarMapsDirection.rvSearchList1.visibility = View.GONE
-        }
-        autoCompleteAdapter2 = AutoCompleteItemAdapter(emptyList()) { prediction ->
-            isTextChanging = true
-            viewModel.fetchPlaceIdDirection(prediction.placeId)
-            viewModel.fetchPlaceDetailsDirections(prediction.placeId)
-            isStarted = false
-            binding.toolbarMapsDirection.rvSearchList2.visibility = View.GONE
-        }
         bind {
-            rvSearchList.apply {
-                adapter = autoCompleteAdapter
-                layoutManager = LinearLayoutManager(context)
-                setHasFixedSize(true)
-            }
-            toolbarMapsDirection.rvSearchList1.apply {
-                adapter = autoCompleteAdapter1
-                layoutManager = LinearLayoutManager(context)
-                setHasFixedSize(true)
-            }
-            toolbarMapsDirection.rvSearchList2.apply {
-                adapter = autoCompleteAdapter2
-                layoutManager = LinearLayoutManager(context)
-                setHasFixedSize(true)
-            }
+
         }
     }
 
-    private fun updateAdapterData(newData: List<PlaceResult>) {
-        autoCompleteAdapter.updateData(newData)
-        autoCompleteAdapter1.updateData(newData)
-        autoCompleteAdapter2.updateData(newData)
-    }
-
-    private fun setFocus() {
-        binding.apply {
-            view?.viewTreeObserver?.addOnGlobalFocusChangeListener { _, newFocus ->
-                if (newFocus != svMapsSearch || newFocus != rvSearchList) {
-                    rvSearchList.visibility = View.GONE
-                }
-                if (newFocus != toolbarMapsDirection.etStart) {
-                    toolbarMapsDirection.rvSearchList1.visibility = View.GONE
-                } else {
-                    toolbarMapsDirection.rvSearchList1.visibility = View.VISIBLE
-                }
-                if (newFocus != toolbarMapsDirection.etEnd) {
-                    toolbarMapsDirection.rvSearchList2.visibility = View.GONE
-                } else {
-                    toolbarMapsDirection.rvSearchList2.visibility = View.VISIBLE
-                }
-            }
-
-            svMapsSearch.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                if (svMapsSearch.visibility != View.VISIBLE) {
-                    rvSearchList.visibility = View.GONE
-                } else {
-                    rvSearchList.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
 
     private fun setClickListener() {
         bind {
             toolbarMapsDirection.apply {
-                btnSearchDirection.setOnClickListener{
+                btnSearchDirection.setOnClickListener {
                     viewModel.apply {
-                        searchLocation(etStart.text.toString()) { latlng ->
-                            latlng?.let {
-                                directoinLat = latlng.latitude
+                        getStartAndEndPlaceId(
+                            tvStart.text.toString(),
+                            tvEnd.text.toString()
+                        ) { locations ->
+                            val startLatLng = locations.first
+                            val endLatLng = locations.second
+
+                            if (startLatLng != null && endLatLng != null) {
+                                startLocationMove(startLatLng)
+
+                                val travelModes =
+                                    arrayOf("DRIVE", "BICYCLE", "WALK", "TRANSIT", "TWO_WHEELER")
+                                travelModes.forEachIndexed { index, mode ->
+                                    val (routingPreference, color) = when (mode) {
+                                        "DRIVE" -> "TRAFFIC_AWARE" to Color.RED
+                                        "BICYCLE" -> null to Color.BLUE
+                                        "WALK" -> null to Color.GREEN
+                                        "TRANSIT" -> null to Color.YELLOW
+                                        "TWO_WHEELER" -> null to Color.MAGENTA
+                                        else -> null to Color.BLACK
+                                    }
+
+                                    val departureTime = if (mode == "DRIVE") {
+                                        Instant.now().plus(10, ChronoUnit.MINUTES).toString()
+                                    } else {
+                                        null
+                                    }
+
+                                    val req = RoutesRequest(
+                                        origin = DLocation(LatLngObject(startLatLng)),
+                                        destination = DLocation(LatLngObject(endLatLng)),
+                                        travelMode = mode,
+                                        routingPreference = routingPreference,
+                                        departureTime = departureTime
+                                    )
+                                    fetchDirections(req, color)
+                                }
+                            } else {
+                                Log.d("TAG", "Exception: Invalid start or end location")
                             }
                         }
-                        searchLocation(etEnd.text.toString()) { latlng ->
-                            latlng?.let {
-                                directoinLat = latlng.longitude
-                            }
-                        }
-                        fetchRoute( etStart.text.toString(), etEnd.text.toString())
                     }
+                }
+
+                tvStart.setOnClickListener {
+                    navigate.navigateTo(Fragments.DEFAULT_SEARCH_PAGE, "start")
+                }
+                tvEnd.setOnClickListener {
+                    navigate.navigateTo(Fragments.DEFAULT_SEARCH_PAGE, "end")
                 }
             }
 
-            toolbarDefault.tvSearchMap.setOnClickListener {
-                if (svMapsSearch.isVisible) {
-                    svMapsSearch.visibility = View.GONE
-                } else {
-                    svMapsSearch.visibility = View.VISIBLE
-                    viewModel.performSearch(query)
-                }
+            tvSearch.setOnClickListener {
+                navigate.navigateTo(Fragments.DEFAULT_SEARCH_PAGE, "main")
             }
 
             bottomSheet.clTabContainer1.setOnClickListener {
@@ -390,14 +327,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         bind {
             if (showDefault) {
                 animateView(toolbarMapsDirection.root, false)
-                animateView(toolbarDefault.root, true)
-                toolbarDefault.tvSearchMap.visibility = View.VISIBLE
-                svMapsSearch.visibility = View.VISIBLE
             } else {
-                animateView(toolbarDefault.root, false)
-                toolbarDefault.tvSearchMap.visibility = View.GONE
-                svMapsSearch.visibility = View.GONE
-                rvSearchList.visibility = View.GONE
                 animateView(toolbarMapsDirection.root, true)
             }
         }
@@ -431,7 +361,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             }
         }
     }
-
 
     private fun fetchPlaceIdAndDetails(latLng: LatLng? = null, placeId: String = "") {
         if (placeId.isNotEmpty()) {
@@ -509,119 +438,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             }
         }
     }
-
-    private fun setSearch() {
-        bind {
-            val queryTextFlow = MutableSharedFlow<Pair<String, Int>>() // Pair of query text and source
-
-            svMapsSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(queryString: String?): Boolean {
-                    queryString?.let {
-                        query = queryString
-                        viewModel.searchLocation(it) { latLng ->
-                            latLng?.let {
-                                lat = latLng
-                            }
-                        }
-                    }
-                    startLocationMove(lat)
-                    return false
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    if (!isTextChanging) {
-                        newText?.let {
-                            lifecycleScope.launch {
-                                queryTextFlow.emit(Pair(it, 0)) // 0 for svMapsSearch
-                            }
-                        }
-                    }
-                    return false
-                }
-            })
-            toolbarMapsDirection.etStart.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (!isTextChanging) {
-                        s?.let {
-                            lifecycleScope.launch {
-                                queryTextFlow.emit(Pair(it.toString(), 1)) // 1 for etStart
-                            }
-                        }
-                    }
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                    isTextChanging = false
-                }
-            })
-            toolbarMapsDirection.etEnd.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (!isTextChanging) {
-                        s?.let {
-                            lifecycleScope.launch {
-                                queryTextFlow.emit(Pair(it.toString(), 2)) // 2 for etEnd
-                            }
-                        }
-                    }
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                    isTextChanging = false
-                }
-            })
-
-            lifecycleScope.launch {
-                queryTextFlow
-                    .debounce(500)
-                    .collectLatest { (newText, source) ->
-                        when (source) {
-                            0 -> {
-                                if (newText.isEmpty()) {
-                                    rvSearchList.visibility = View.GONE
-                                    clearList()
-                                } else {
-                                    clearList()
-                                    rvSearchList.visibility = View.VISIBLE
-                                    viewModel.performSearch(newText)
-                                }
-                            }
-                            1 -> {
-                                if (newText.isEmpty()) {
-                                    toolbarMapsDirection.rvSearchList1.visibility = View.GONE
-                                    clearList()
-                                } else {
-                                    toolbarMapsDirection.rvSearchList1.visibility = View.VISIBLE
-                                    viewModel.performSearch(newText)
-                                }
-                            }
-                            2 -> {
-                                if (newText.isEmpty()) {
-                                    toolbarMapsDirection.rvSearchList2.visibility = View.GONE
-                                    clearList()
-                                } else {
-                                    toolbarMapsDirection.rvSearchList2.visibility = View.VISIBLE
-                                    viewModel.performSearch(newText)
-                                }
-                            }
-                        }
-                    }
-            }
-        }
-    }
-
-
-
-    // 검색 결과 초기화
-    private fun clearList() {
-        viewModel.clearPlaceDetails()
-        placeDetailsList.clear()
-        updateAdapterData(emptyList())
-    }
-
 
     private fun startLocationMove(latLng: LatLng) {
         searchMarker?.remove()

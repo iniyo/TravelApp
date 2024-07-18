@@ -2,10 +2,10 @@ package pjo.travelapp.presentation.ui.fragment
 
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
-import pjo.travelapp.databinding.FragmentSearchBinding
+import pjo.travelapp.databinding.FragmentMainSearchBinding
 
 @AndroidEntryPoint
-class SearchFragment : BaseFragment<FragmentSearchBinding>(R.layout.fragment_search) {
+class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>(R.layout.fragment_main_search) {
     override fun initView() {
         super.initView()
     }

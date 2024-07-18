@@ -24,7 +24,6 @@ import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
-import pjo.travelapp.domain.usecase.GetRoutesUseCase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
@@ -106,20 +105,20 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
-    fun provideRoutesMap(okHttpClient: OkHttpClient): RoutesApiService {
-        val retrofit = Retrofit.Builder()
+    fun provideGoogleMap(retrofit: Retrofit): MapsApiService {
+        return retrofit.create(MapsApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoogleMapRoute(okHttpClient: OkHttpClient): RoutesApiService {
+        val retro = Retrofit.Builder()
             .baseUrl("https://routes.googleapis.com/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        return retrofit.create(RoutesApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGoogleMap(retrofit: Retrofit): MapsApiService {
-        return retrofit.create(MapsApiService::class.java)
+        return retro.create(RoutesApiService::class.java)
     }
 
     @Provides
@@ -141,22 +140,21 @@ object ObjectModuleSingleton {
     @Provides
     @Singleton
     fun provideMapsRepository(
-        service: MapsApiService,
-        routeService: RoutesApiService
+        service: MapsApiService
     ): MapsRepository {
-        return MapsRepositoryImpl(service, routeService)
+        return MapsRepositoryImpl(service)
     }
     @Provides
     @Singleton
     fun provideUseCases(
-        repo: MapsRepository
+        repo: MapsRepository,
+        rs: RoutesApiService
     ): UseCases {
         return UseCases(
-            getDirectionsUseCase = GetDirectionsUseCase(repo),
+            getDirectionsUseCase = GetDirectionsUseCase(repo, rs),
             getPlaceIdUseCase = GetPlaceIdUseCase(repo),
             getPlaceDetailUseCase = GetPlaceDetailUseCase(repo),
-            getNearbyPlaces = GetNearbyPlaceUseCase(repo),
-            getRouteUseCase = GetRoutesUseCase(repo)
+            getNearbyPlaces = GetNearbyPlaceUseCase(repo)
         )
     }
     /**

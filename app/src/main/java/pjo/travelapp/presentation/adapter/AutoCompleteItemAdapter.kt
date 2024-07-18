@@ -1,25 +1,27 @@
 package pjo.travelapp.presentation.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvMapsSearchListBinding
 
 class AutoCompleteItemAdapter(
-    private var predictions: List<PlaceResult>,
     private val itemClickListener: (PlaceResult) -> Unit
-) : RecyclerView.Adapter<AutoCompleteItemAdapter.ViewHolder>() {
+) : ListAdapter<PlaceResult, AutoCompleteItemAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: RvMapsSearchListBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: PlaceResult?) {
             try {
                 binding.apply {
                     if (item != null) {
+                        Log.d("TAG", "AutoCompleteItemAdapter bind: $item")
                         tvSearchListItemTitle.text = item.name
                         tvRating.text = item.rating.toString()
                         rbScore.rating = item.rating.toFloat()
@@ -32,12 +34,11 @@ class AutoCompleteItemAdapter(
                                 .error(R.drawable.img_bg_title)
                                 .placeholder(R.drawable.img_bg_title)
                                 .into(sivSearchListItem)
-                        }else {
-                            sivSearchListItem.setImageResource(R.drawable.img_bg_title) //
+                        } else {
+                            sivSearchListItem.setImageResource(R.drawable.img_bg_title)
                         }
                         itemView.setOnClickListener { itemClickListener(item) }
-                    }
-                    else {
+                    } else {
                         // 아이템이 null일 경우 기본값 설정
                         tvSearchListItemTitle.text = "정보 없음"
                         tvRating.text = "-"
@@ -47,7 +48,6 @@ class AutoCompleteItemAdapter(
                         itemView.setOnClickListener(null) // 클릭 이벤트 제거
                     }
                 }
-
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -61,13 +61,21 @@ class AutoCompleteItemAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(predictions.getOrNull(position))
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount(): Int = predictions.size
+    // DiffUtil.ItemCallback 구현
+    companion object{
+        private val diffUtil = object: DiffUtil.ItemCallback<PlaceResult>() {
+            override fun areItemsTheSame(oldItem: PlaceResult, newItem: PlaceResult): Boolean {
+                // 아이템 고유 ID로 비교 (예: placeId)
+                return oldItem.placeId === newItem.placeId
+            }
 
-    fun updateData(newPredictions: List<PlaceResult>?) {
-        predictions = newPredictions ?: emptyList()
-        notifyDataSetChanged()
+            override fun areContentsTheSame(oldItem: PlaceResult, newItem: PlaceResult): Boolean {
+                // 아이템의 내용이 같은지 비교
+                return oldItem == newItem
+            }
+        }
     }
 }

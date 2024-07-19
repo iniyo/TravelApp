@@ -4,16 +4,15 @@ import java.util.Properties
 val properties = Properties()
 file("../local.properties").inputStream().use { properties.load(it) }
 
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.dev.ksp)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     alias(libs.plugins.android.navigation.safrargs)
-    kotlin("kapt")
+    alias(libs.plugins.google.dev.ksp)
+    id("kotlin-kapt")
 }
 
 android {
@@ -121,7 +120,7 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    kapt(libs.hilt.compiler)
 
     // coroutine
     implementation(libs.kotlinx.coroutines.core)
@@ -134,8 +133,10 @@ dependencies {
     // splash screen
     implementation(libs.androidx.core.splashscreen)
 
-    // data binding
-    kapt(libs.androidx.databinding.compiler)
+    // room
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // default
     implementation(libs.androidx.core.ktx)
@@ -150,4 +151,7 @@ dependencies {
     /**
      * jetpack, androidx, default end
      */
+}
+kapt {
+    correctErrorTypes = true
 }

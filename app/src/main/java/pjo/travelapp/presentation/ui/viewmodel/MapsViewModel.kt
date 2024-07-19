@@ -1,25 +1,39 @@
+// MapsViewModel.kt
 package pjo.travelapp.presentation.ui.viewmodel
 
 import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.IOException
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.data.entity.DirectionsRequest
-import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.PlaceDetailsResponse
+import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.RoutesRequest
+import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
+import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,131 +42,239 @@ class MapsViewModel @Inject constructor(
     private val getPlaceIdUseCase: GetPlaceIdUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     private val getNearbyPlaceUseCase: GetNearbyPlaceUseCase,
-    private val geocoder: Geocoder
+    private val geocoder: Geocoder,
+    private var placeClient: PlacesClient
 ) : ViewModel() {
+
     /**
-     * 변수 세팅
-     * @param direction: 경로 검색 결과
-     * @param placeDetails: 장소 세부 정보
-     * @param currentLatLng: 현재 위치
-     * @param selectedMarker: 현재 선택된 마커 정보
-     * @param query: 검색 텍스트 ex) 부산, 레스토랑 등
-     * @param predictionList: 검색 결과
-     * @param placeId: 검색된 장소의 id값
+     * 변수 선언
+     * @param: direction: 출발지 목적지로 얻어오는 경로
+     * @param: placeDetails: 장소 세부정보에 대한 상태, 결과값, 주소, 데이터 출처 저장
+     * @param: placeDetailResult: 장소 세부정보 결과
+     * @param: predictionList: 검색 결과 리스트
+     * @param: _placeId: 검색, 선택으로 받아오는 place의 고유값
+     */
+    private val _directions =
+        MutableStateFlow<LatestUiState<Pair<RoutesResponse?, Int>>>(LatestUiState.Loading)
+    val directions: StateFlow<LatestUiState<Pair<RoutesResponse?, Int>>> get() = _directions
+
+    private val _placeDetails =
+        MutableStateFlow<LatestUiState<PlaceDetailsResponse?>>(LatestUiState.Loading)
+
+    private val _placeDetailsResult = MutableStateFlow<PlaceResult?>(null)
+    val placeDetailsResult: StateFlow<PlaceResult?> get() = _placeDetailsResult
+
+    private val _placeDetailsList = MutableStateFlow<List<PlaceResult>>(emptyList())
+    val placeDetailsList: StateFlow<List<PlaceResult>> get() = _placeDetailsList
+
+    private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>>(emptyList())
+    val predictionList: StateFlow<List<AutocompletePredictionItem>> get() = _predictionList
+
+    val query = MutableStateFlow("") // 양방향 데이터바인딩 지원시
+
+    private var _placeId = MutableStateFlow<String?>("")
+    val placeId: StateFlow<String?> get() = _placeId
+
+    private var _startQuery = MutableStateFlow<PlaceResult?>(null)
+    val startQuery: StateFlow<PlaceResult?> get() = _startQuery
+
+    private var _endQuery = MutableStateFlow<PlaceResult?>(null)
+    val endQuery: StateFlow<PlaceResult?> get() = _endQuery
+
+    private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
+    /**
+     * 변수 선언
      */
 
-    // mutableStateFlow:
-    // state flow: 현재 상태 관찰, ※ 내부적으로 값을 conflate하기 때문에 동일한 값은 2번 배출하지 않음
-    // 즉, MutableList에 값만 추가하여 다시 emit 해도 해당 emit은 이전 emit과 동일 인스턴스이기 때문에 방출되지 않는다.
-    // 따라서 List값 변경을 방출해주기 위해선 immutable list에 + 하여 인스턴스 자체를 바꿔서 emit하는 식으로 해야 한다.
-    private val _directions = MutableStateFlow<DirectionsResponse?>(null)
-    val directions: StateFlow<DirectionsResponse?> get() = _directions
+    init {
+        fetchPlaceDetailsList()
+    }
 
-    private val _placeDetails = MutableStateFlow<PlaceDetailsResponse?>(null)
-    val placeDetails: StateFlow<PlaceDetailsResponse?> get() = _placeDetails
+    fun fetchStartQuery(start: PlaceResult) {
+        _startQuery.value = start
+    }
+    fun fetchEndQuery(end: PlaceResult) {
+        _endQuery.value = end
+    }
 
-    private val _currentLatLng = MutableStateFlow<LatLng?>(null)
-    val currentLatLng: StateFlow<LatLng?> get() = _currentLatLng
-
-    private val _query = MutableStateFlow("")
-    val query: StateFlow<String> get() = _query
-
-    private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>?>(null)
-    val predictionList: StateFlow<List<AutocompletePredictionItem>?> get() = _predictionList
-
-    private val _placeId = MutableStateFlow("")
-    val placeId: StateFlow<String> get() = _placeId
-    /**
-     * 변수 세팅 끝
-     */
-
-    fun fetchDirections(request: DirectionsRequest) {
-        viewModelScope.launch {
-            getDirectionsUseCase(request).collectLatest { response: DirectionsResponse ->
-                _directions.value = response
-            }
+    private fun setAdatper() {
+        autoCompleteAdapter = AutoCompleteItemAdapter {
+            Log.d("TAG", "initView: ")
+            fetchPlaceResult(it)
         }
     }
 
-    fun fetchSelectedMarker() {
-
-    }
-
-    // 검색 결과 저장
-    fun fetchPredictions(itemList: List<AutocompletePredictionItem>) {
+    fun fetchDirections(directionsRequest: RoutesRequest, color: Int) {
         viewModelScope.launch {
-            try {
-                _predictionList.value = itemList
-            }catch (e: NullPointerException){
-                e.printStackTrace()
-            }
-
-        }
-    }
-
-    // 현재 위치 저장
-    fun fetchCurrentLatLng(latLng: LatLng) {
-        viewModelScope.launch {
-            try {
-                _currentLatLng.value = latLng
-            }catch (e: NullPointerException){
-                e.printStackTrace()
-            }
-        }
-    }
-
-    // 장소 세부정보 갱신
-    fun fetchPlaceDetails() {
-        viewModelScope.launch {
-            try {
-                _placeId.collectLatest {
-                     getPlaceDetailUseCase(_placeId.value).collectLatest {
-                         Log.d("TAG", "fetchPlaceDetails: _placeId: ${_placeId.value}")
-                         Log.d("TAG", "fetchPlaceDetails: _placeDetails: ${_placeDetails.value}")
-                         _placeDetails.value = it
-                     }
+            getDirectionsUseCase(directionsRequest)
+                .onStart {
+                    _directions.value = LatestUiState.Loading
                 }
-            }catch (e: Throwable){
-                e.printStackTrace()
+                .catch { e ->
+                    e.printStackTrace()
+                    _directions.value = LatestUiState.Error(e)
+                }
+                .collectLatest {
+                    _directions.value = LatestUiState.Success(Pair(it, color))
+                }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            query
+                .debounce(300)
+                .distinctUntilChanged()
+                .collectLatest {
+                    clearPlaceList()
+                    performSearch(it)
             }
         }
     }
 
-    // 위치 정보 가져오기
-    fun fetchLatLngToPlaceId(latLng: LatLng? = null, getPlaceId: String = "") {
+    // 검색 요청을 실행하고 이전 작업을 취소하는 메서드
+    fun performSearch(query: String, currentLatLng: LatLng? = null) {
         viewModelScope.launch {
-            Log.d("TAG", "fetchLatLngToPlaceId: launch")
-            try {
-                if (latLng != null){
-                    Log.d("TAG", "fetchLatLngToPlaceId: ${latLng.latitude},${latLng.longitude}")
-                    val latLng = "${latLng.latitude},${latLng.longitude}"
-                    getPlaceIdUseCase(latLng).collect {
-                        val placeId = it.results.firstOrNull()?.placeId
-                        if (placeId != null) {
-                            _placeId.value = placeId
-                        } else {
-                            Log.d("TAG", "fetchPlaceId: null ")
-                            _placeId.value = "Place ID is null"
-                        }
+            _predictionList.value = emptyList() // 새로운 검색 시작 시 리스트 초기화
+            val token = AutocompleteSessionToken.newInstance()
+            val request = if (currentLatLng != null) {
+                val bounds = RectangularBounds.newInstance(
+                    LatLng(currentLatLng.latitude - 1.7, currentLatLng.longitude - 1.7),
+                    LatLng(currentLatLng.latitude + 1.7, currentLatLng.longitude + 1.7)
+                )
+
+                FindAutocompletePredictionsRequest.builder()
+                    .setLocationBias(bounds)
+                    .setOrigin(currentLatLng)
+                    .setSessionToken(token)
+                    .setQuery(query)
+                    .build()
+            } else {
+                FindAutocompletePredictionsRequest.builder()
+                    .setSessionToken(token)
+                    .setQuery(query)
+                    .build()
+            }
+
+            placeClient.findAutocompletePredictions(request)
+                .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                    val predictions = response.autocompletePredictions.map { prediction ->
+                        AutocompletePredictionItem(
+                            prediction.placeId,
+                            prediction.getPrimaryText(null).toString()
+                        )
+                    }
+                    fetchPredictions(predictions)
+                }
+                .addOnFailureListener { exception: Exception? ->
+                    if (exception is ApiException) {
+                        Log.e("MapsFragment", "Place not found: ${exception.statusCode}")
                     }
                 }
-                else if(getPlaceId.isEmpty()){
-                    Log.d("TAG", "fetchPlaceId: empty ")
-                    _placeId.value = "nothing insert"
-                }else {
-                    Log.d("TAG", "fetchPlaceId: $getPlaceId ")
-                    _placeId.value = getPlaceId
-                }
-            } catch (e: Exception) {
+        }
+    }
 
-                Log.d("TAG", "fetchPlaceId: ${ e.printStackTrace()}")
-                _placeId.value = e.toString()
+    // 검색 결과 저장 메서드
+    private fun fetchPredictions(itemList: List<AutocompletePredictionItem>) {
+        Log.d("TAG", "fetchPredictions: $itemList")
+        viewModelScope.launch {
+            _predictionList.value = emptyList() // 새로운 검색 시작 시 리스트 초기화
+            _predictionList.value = itemList // 새로운 값 할당
+        }
+    }
+
+    // 세부정보 리스트 업데이트
+    private fun fetchPlaceDetailsList() {
+        viewModelScope.launch {
+            _placeDetailsResult.collectLatest { placeResult ->
+                placeResult?.let {
+                    val currentList = _placeDetailsList.value.toMutableList()
+                    // 현재 리스트에 있는 이름과 비교, 없으면 삽입
+                    if (currentList.none { it.name == placeResult.name }) {
+                        currentList.add(placeResult)
+                        _placeDetailsList.value = currentList
+                    }
+                }
             }
         }
     }
 
-    // 장소 검색 후 위치 반환
-    @Suppress("DEPRECATION")
+    fun fetchPlaceResult(res: PlaceResult) {
+        viewModelScope.launch {
+            _placeDetailsResult.value = res
+        }
+    }
+
+    fun fetchPlaceDetails(placeId: String) {
+        Log.d("TAG", "fetchPlaceDetails: ")
+        viewModelScope.launch {
+            getPlaceDetailUseCase(placeId)
+                .onStart {
+                    _placeDetails.value = LatestUiState.Loading
+                }
+                .catch { e ->
+                    e.printStackTrace()
+                    _placeDetails.value = LatestUiState.Error(e)
+                }
+                .collectLatest {
+                    _placeDetails.value = LatestUiState.Success(it)
+                    _placeDetailsResult.value = it.result
+                }
+        }
+    }
+
+    // 리스트 클리어
+    fun clearPlaceList() {
+        _placeDetailsList.value = emptyList()
+        _predictionList.value = emptyList()
+    }
+
+    fun getStartAndEndPlaceId(start: String?, end: String?, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
+        viewModelScope.launch {
+            val startDeferred = CompletableDeferred<LatLng?>()
+            val endDeferred = CompletableDeferred<LatLng?>()
+
+            if(start.isNullOrEmpty() || end.isNullOrEmpty()){
+                Log.d("TAG", "getStartAndEndPlaceId: null or empty")
+            }else {
+                searchLocation(start) { result ->
+                    startDeferred.complete(result)
+                }
+
+                searchLocation(end) { result ->
+                    endDeferred.complete(result)
+                }
+            }
+
+            val startLocation = startDeferred.await()
+            val endLocation = endDeferred.await()
+
+            callback(Pair(startLocation, endLocation))
+        }
+    }
+
+    fun fetchLatLngToPlaceId(latLng: LatLng? = null, getPlaceId: String = "") {
+        viewModelScope.launch {
+            if (latLng != null) {
+                val latLngString = "${latLng.latitude},${latLng.longitude}"
+                getPlaceIdUseCase(latLngString).collect {
+                    val placeId = it.results.firstOrNull()?.placeId
+                    if (placeId != null) {
+                        Log.d("TAG", "fetchLatLngToPlaceId: latLng")
+                        _placeId.value = placeId
+                        fetchPlaceDetails(placeId)
+                    }
+                }
+            } else if (getPlaceId.isNotEmpty()) {
+                Log.d("TAG", "fetchLatLngToPlaceId: placeid")
+                _placeId.value = getPlaceId
+                fetchPlaceDetails(getPlaceId)
+            } else {
+                Log.d("TAG", "fetchLatLngToPlaceId: empty twice ")
+            }
+        }
+    }
+
     fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
         viewModelScope.launch {
             try {

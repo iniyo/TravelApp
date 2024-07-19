@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_main_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tv_start"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:background="@null"
+        android:hint="@string/direction_start"
+        android:paddingStart="10dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <View
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        android:background="@color/dark_gray"
+        app:layout_constraintBottom_toTopOf="@+id/tv_end"
+        app:layout_constraintStart_toStartOf="@+id/tv_start"
+        app:layout_constraintTop_toBottomOf="@+id/tv_start" />
+
+    <TextView
+        android:id="@+id/tv_end"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="30dp"
+        android:background="@null"
+        android:hint="@string/direction_end"
+        android:paddingStart="10dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_start" />
+
+
+    <RadioGroup
+        android:id="@+id/rg_transport_modes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_end">
+
+        <RadioButton
+            android:id="@+id/rb_car"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_car"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/car"
+            android:textColor="@color/black" />
+
+        <RadioButton
+            android:id="@+id/rb_subway"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_subway"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/subway"
+            android:textColor="@color/black" />
+
+        <RadioButton
+            android:id="@+id/rb_walk"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_walk"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/walk"
+            android:textColor="@color/black" />
+
+    </RadioGroup>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_search_direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@color/white_blue"
+        android:text="@string/search_route"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rg_transport_modes" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

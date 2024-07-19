@@ -8,9 +8,7 @@ class PopularPlaceFragment :
 
     override fun initView() {
         super.initView()
-        binding.apply {
-            inclSearchBar.svSearch.queryHint = "관광지/맛집/숙소 검색"
-        }
+
     }
 
 }

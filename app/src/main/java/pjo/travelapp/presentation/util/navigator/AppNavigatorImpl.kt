@@ -17,10 +17,10 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         (activity.supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment).navController
     }
 
-    override fun navigateTo(screen: Fragments) {
+    override fun navigateTo(screen: Fragments, putString: String) {
         when (screen) {
             Fragments.HOME_PAGE -> navController.navigate(R.id.homeFragment)
-            Fragments.SEARCH_PAGE -> navController.navigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+            Fragments.SEARCH_PAGE -> navController.navigate(HomeFragmentDirections.actionHomeFragmentToMainSearchFragment())
             Fragments.TICKET_PAGE -> navController.navigate(R.id.ticketFragment)
             Fragments.ACCOMMODATION_PAGE -> navController.navigate(R.id.accommodationDetailFragment)
             Fragments.MAPS_PAGE -> navController.navigate(R.id.mapsFragment)
@@ -37,10 +37,6 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
 
     override fun navigateUp() {
         navController.navigateUp()
-    }
-
-    override fun navigateTo(screen: Activitys) {
-        // For handling activity navigation if required
     }
 
     override fun destinationChangedListener(onDestinationChanged: (Int) -> Unit) {

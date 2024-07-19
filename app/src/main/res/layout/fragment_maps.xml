@@ -1,85 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cl_maps_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <data>
+        <variable
+            name="place"
+            type="pjo.travelapp.data.entity.PlaceResult" />
+        <variable
+            name="adapter"
+            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+        <variable
+            name="viewmodel"
+            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
+    </data>
+
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/cl_maps_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".presentation.ui.fragment.MapsFragment">
+        android:fitsSystemWindows="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".presentation.ui.fragment.MapsFragment">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fcv_map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:focusableInTouchMode="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.937"
+                tools:layout_editor_absoluteX="0dp" />
+
+            <include
+                android:id="@+id/toolbar_maps_direction"
+                layout="@layout/toolbar_maps_direction"
+                android:visibility="gone" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cl_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_maps_direction">
+
+                <TextView
+                    android:id="@+id/tv_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/bg_search_view"
+                    android:hint="@string/search"
+                    android:padding="10dp"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/iv_voice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_search"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_search"
+                    app:layout_constraintTop_toTopOf="@+id/tv_search"
+                    app:srcCompat="@drawable/ic_voice" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/ibtn_my_location"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/btn_effect_default"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_location_vector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cl_search" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
-            android:id="@+id/toolbar"
-            layout="@layout/top_toolbar"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:id="@+id/info_bottom_sheet"
+            layout="@layout/fragment_maps_bottom_sheet"
+            app:place="@{place}" />
 
-        <TextView
-            android:id="@+id/tv_search_map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:padding="15dp"
-            android:text="@string/search"
-            android:textColor="@color/dark_blue"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/toolbar"
-            app:layout_constraintEnd_toStartOf="@+id/iv_track"
-            app:layout_constraintTop_toTopOf="@+id/toolbar" />
+        <include
+            android:id="@+id/search_bottom_sheet"
+            layout="@layout/fragment_default_search"
+            app:adapter="@{adapter}"
+            app:viewmodel="@{viewmodel}" />
 
-        <ImageView
-            android:id="@+id/iv_track"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:importantForAccessibility="no"
-            android:padding="15dp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_search_map"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_search_map"
-            app:srcCompat="@drawable/distance" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <SearchView
-            android:id="@+id/sv_maps_search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:focusableInTouchMode="true"
-            android:background="@drawable/bg_search_view"
-            android:elevation="3dp"
-            android:iconifiedByDefault="false"
-            android:queryBackground="@null"
-            android:queryHint="@string/search"
-            app:layout_constraintTop_toTopOf="@+id/map"/>
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:focusableInTouchMode="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            app:layout_constraintVertical_bias="0.937"
-            tools:layout_editor_absoluteX="0dp" />
+</layout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_search_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:layout_marginHorizontal="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/sv_maps_search" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <include
-        android:id="@+id/bottom_sheet"
-        layout="@layout/fragment_maps_bottom_sheet" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>

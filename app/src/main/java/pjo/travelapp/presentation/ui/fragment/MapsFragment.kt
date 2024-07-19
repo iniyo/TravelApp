@@ -1,90 +1,98 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.Manifest
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.util.Log
 import android.view.View
-import android.widget.SearchView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.common.api.ApiException
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.PlaceTypes
-import com.google.android.libraries.places.api.model.RectangularBounds
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
-import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.internal.ViewUtils.hideKeyboard
+import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
+import pjo.travelapp.data.entity.DLocation
+import pjo.travelapp.data.entity.LatLngObject
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.RoutesRequest
+import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.databinding.FragmentMapsBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.ui.consts.AdapterStyle
+import pjo.travelapp.presentation.ui.consts.SHOW_DIRECTION
+import pjo.travelapp.presentation.ui.consts.SHOW_SEARCH
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.util.LatestUiState
-
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
-
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
-    private val viewModel: MapsViewModel by viewModels()
-    private lateinit var placesClient: PlacesClient
-    private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
-    private var query = ""
-    private lateinit var currentLatLng: LatLng
+    private val viewModel: MapsViewModel by activityViewModels()
+    private var lat: LatLng = LatLng(35.1179923, 129.0419654)
+    private lateinit var infoBottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var searchBottomSheetBehavior: BottomSheetBehavior<View>
+    private var placeDetailsList = mutableListOf<PlaceResult>()
+    private var searchMarker: Marker? = null
+    private var currentAdapterStyle: AdapterStyle? = null
+    var isToolbarToggler = true
+
+    @Inject
+    lateinit var navigate: AppNavigator
+
 
     @SuppressLint("PotentialBehaviorOverride")
     private val callback = OnMapReadyCallback { map ->
         googleMap = map
-        val sydney = LatLng(35.1179923, 129.0419654)
 
         googleMap.apply {
-            uiSettings.isZoomControlsEnabled = true
-
             mapType = GoogleMap.MAP_TYPE_NORMAL
-            moveCamera(CameraUpdateFactory.newLatLng(sydney))
-            moveCamera(CameraUpdateFactory.zoomTo(15F))
-            setOnMapClickListener { latLng ->
-                moveCamera(CameraUpdateFactory.newLatLng(latLng))
-                moveCamera(CameraUpdateFactory.zoomTo(15F))
-                fetchPlaceIdAndDetails(latLng)
+
+            setOnMapClickListener {
+                infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
+
             setOnPoiClickListener { poi ->
-                moveCamera(CameraUpdateFactory.newLatLng(poi.latLng))
-                moveCamera(CameraUpdateFactory.zoomTo(15F))
-                fetchPlaceIdAndDetails(poi.latLng)
+                startLocationMove(poi.latLng)
+                fetchPlaceIdAndDetails(placeId = poi.placeId)
+                infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             }
+
             setOnMarkerClickListener { marker ->
-                moveCamera(CameraUpdateFactory.newLatLng(marker.position))
-                moveCamera(CameraUpdateFactory.zoomTo(15F))
+                startLocationMove(marker.position)
                 fetchPlaceIdAndDetails(marker.position)
+                infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                 true
             }
         }
-        checkLocatePermissionAndEnableMyLocation()
+        enableMyLocation()
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -98,99 +106,407 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     override fun initCreate() {
         super.initCreate()
         if (!Places.isInitialized()) {
-            Places.initialize(requireContext(),BuildConfig.maps_api_key)
+            Places.initialize(requireContext(), BuildConfig.maps_api_key)
         }
+        Log.d("TAG", "initCreate: ")
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        placesClient = Places.createClient(requireContext())
     }
 
     override fun initView() {
         super.initView()
+        Log.d("TAG", "init: ")
         bind {
-
-            val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+            val mapFragment =
+                childFragmentManager.findFragmentById(R.id.fcv_map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
 
 
             setBottomSheet()
-            setSearch()
-            setAdapter()
-            setFocus()
-
+            setTextStartAndEnd()
+            setClickListener()
+            backPressed()
         }
     }
 
-    private fun setFocus() {
-        binding.apply {
-            // 전역 포커스 변경 리스너 추가
-            view?.viewTreeObserver?.addOnGlobalFocusChangeListener { _, newFocus ->
-                // 새로운 포커스가 SearchView나 RecyclerView가 아닐 때 RecyclerView 숨기기
-                if (newFocus != svMapsSearch && newFocus != rvSearchList) {
-                    rvSearchList.visibility = View.GONE
+    override fun initViewModel() {
+        super.initViewModel()
+        bind {
+            viewmodel = viewModel
+            launchWhenStarted {
+                // 장소 세부정보 리스트
+                launch {
+                    viewModel.placeDetailsList.collectLatest {
+                        Log.d("TAG", "placeDetailsList: ")
+                        placeDetailsList = it.toMutableList()
+                        adapter?.submitList(placeDetailsList)
+                    }
+                }
+
+                // 장소 세부정보
+                launch {
+                    viewModel.placeDetailsResult.collectLatest {
+                        it?.let {
+                            lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
+                            place = it
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.predictionList.collectLatest { predictions ->
+                        predictions.forEach { prediction ->
+                            viewModel.fetchPlaceDetails(prediction.placeId)
+                        }
+                    }
+                }
+
+                // 경로
+                launch {
+                    viewModel.directions.collectLatest {
+                        when (it) {
+                            is LatestUiState.Loading -> {
+                                Log.d("TAG", "maps dialog showLoad: $it")
+                            }
+
+                            is LatestUiState.Error -> {
+                                Log.d("TAG", "maps dialog showError: ${it.exception}")
+                            }
+
+                            is LatestUiState.Success -> {
+                                it.data?.let { response -> updateDirection(response) }
+                            }
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.startQuery.collectLatest {
+                        Log.d("TAG", "startQuery: $it")
+                        if (it != null) {
+                            toolbarMapsDirection.tvStart.text = it.name
+                        } else {
+                            Log.d("TAG", "initViewModel: null startQuery ")
+                        }
+
+                    }
+                }
+                launch {
+                    viewModel.endQuery.collectLatest {
+                        Log.d("TAG", "endQuery: $it")
+                        if (it != null) {
+                            toolbarMapsDirection.tvEnd.text = it.name
+                        } else {
+                            Log.d("TAG", "initViewModel: null endQuery ")
+                        }
+                    }
                 }
             }
+        }
+    }
 
-            // SearchView 레이아웃 변경 리스너 추가
-            svMapsSearch.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                // SearchView가 보이지 않을 때 RecyclerView 숨기기
-                if (svMapsSearch.visibility != View.VISIBLE) {
-                    rvSearchList.visibility = View.GONE
+    private fun backPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (infoBottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
+                    infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                } else if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+                    searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                } else if (!isToolbarToggler) {
+                    toggleToolbars(true)
                 } else {
-                    rvSearchList.visibility = View.VISIBLE
+                    navigate.navigateUp()
+                }
+            }
+        })
+    }
+
+    private fun setTextStartAndEnd() {
+        bind {
+            setFragmentResultListener("start") { requestKey, bundle ->
+                Log.d("TAG", "setTextStartAndEnd: ${bundle.getString("start_address")}")
+                toggleToolbars(SHOW_DIRECTION)
+            }
+            setFragmentResultListener("end") { requestKey, bundle ->
+                Log.d("TAG", "setTextEndAndEnd: ${bundle.getString("end_address")}")
+                toggleToolbars(SHOW_DIRECTION)
+            }
+
+        }
+    }
+
+    private fun updateDirection(data: Pair<RoutesResponse?, Int>) {
+        Log.d("TAG", "maps dialog updateDirection: ${data.first}")
+        data.first?.routes?.forEach { route ->
+            route.polyline?.encodedPolyline?.let {
+                drawPolyline(
+                    it,
+                    route.distanceMeters,
+                    data.second
+                )
+            }
+        }
+    }
+
+    private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
+        val decodedPath = PolyUtil.decode(encodedPolyline)
+        val polyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+
+        // 경로의 중간지점에 거리 마커 추가
+        distanceMeters?.let {
+            val midPoint = decodedPath[decodedPath.size / 2]
+            googleMap.addMarker(
+                MarkerOptions()
+                    .position(midPoint)
+                    .title("Distance: ${distanceMeters / 1000} km")
+                    .visible(true)
+            )
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setAdapter(st: AdapterStyle) {
+        if (currentAdapterStyle == st) {
+            // 동일한 어댑터 스타일인 경우
+            return
+        }
+        currentAdapterStyle = st
+
+        bind {
+            when (st) {
+                AdapterStyle.SEARCH_STYLE_DIRECTION_START -> {
+                    adapter = AutoCompleteItemAdapter {
+                        viewModel.fetchPlaceDetails(it.placeId)
+                        startLocationMove(
+                            LatLng(
+                                it.geometry.location.lat,
+                                it.geometry.location.lng
+                            )
+                        )
+                        toggleBottomSheet(searchBottomSheetBehavior)
+                        viewModel.fetchStartQuery(it)
+                        hideKeyboard(searchBottomSheet.etDefaultSearch)
+                    }
+                }
+
+                AdapterStyle.SEARCH_STYLE_DIRECTION_END -> {
+                    adapter = AutoCompleteItemAdapter {
+                        viewModel.fetchPlaceDetails(it.placeId)
+                        viewModel.fetchEndQuery(it)
+                        toggleBottomSheet(searchBottomSheetBehavior)
+                        hideKeyboard(searchBottomSheet.etDefaultSearch)
+                    }
+                }
+
+                else -> {
+                    adapter = AutoCompleteItemAdapter {
+                        viewModel.fetchPlaceDetails(it.placeId)
+                        startLocationMove(
+                            LatLng(
+                                it.geometry.location.lat,
+                                it.geometry.location.lng
+                            )
+                        )
+                        tvSearch.text = it.name
+                        toggleBottomSheet(searchBottomSheetBehavior)
+                        hideKeyboard(searchBottomSheet.etDefaultSearch)
+                    }
                 }
             }
         }
     }
 
-    private fun setAdapter() {
-        autoCompleteAdapter = AutoCompleteItemAdapter(emptyList()) { prediction ->
-            val query = prediction.name
-            viewModel.searchLocation(query) { latLng ->
-                latLng?.let {
-                    startLocationMove(latLng, query)
-                    fetchPlaceIdAndDetails(latLng)
+    @SuppressLint("RestrictedApi")
+    private fun setClickListener() {
+        bind {
+            toolbarMapsDirection.apply {
+                btnSearchDirection.setOnClickListener {
+                    viewModel.apply {
+                        getStartAndEndPlaceId(
+                            viewModel.startQuery.value?.formattedAddress,
+                            viewModel.endQuery.value?.formattedAddress
+                        ) { locations ->
+                            val startLatLng = locations.first
+                            val endLatLng = locations.second
+
+                            if (startLatLng != null && endLatLng != null) {
+                                startLocationMove(startLatLng)
+
+                                val travelModes =
+                                    arrayOf("DRIVE", "BICYCLE", "WALK", "TRANSIT", "TWO_WHEELER")
+                                travelModes.forEachIndexed { index, mode ->
+                                    val (routingPreference, color) = when (mode) {
+                                        "DRIVE" -> "TRAFFIC_AWARE" to Color.RED
+                                        "BICYCLE" -> null to Color.BLUE
+                                        "WALK" -> null to Color.GREEN
+                                        "TRANSIT" -> null to Color.YELLOW
+                                        "TWO_WHEELER" -> null to Color.MAGENTA
+                                        else -> null to Color.BLACK
+                                    }
+
+                                    val departureTime = if (mode == "DRIVE") {
+                                        Instant.now().plus(10, ChronoUnit.MINUTES).toString()
+                                    } else {
+                                        null
+                                    }
+
+                                    val req = RoutesRequest(
+                                        origin = DLocation(LatLngObject(startLatLng)),
+                                        destination = DLocation(LatLngObject(endLatLng)),
+                                        travelMode = mode,
+                                        routingPreference = routingPreference,
+                                        departureTime = departureTime
+                                    )
+                                    fetchDirections(req, color)
+                                }
+                            } else {
+                                Log.d("TAG", "Exception: Invalid start or end location")
+                            }
+                        }
+                    }
+                }
+
+                tvStart.setOnClickListener {
+                    infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    setAdapter(AdapterStyle.SEARCH_STYLE_DIRECTION_START)
+                    toggleBottomSheet(searchBottomSheetBehavior)
+
+                }
+                tvEnd.setOnClickListener {
+                    infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    setAdapter(AdapterStyle.SEARCH_STYLE_DIRECTION_END)
+                    toggleBottomSheet(searchBottomSheetBehavior)
                 }
             }
-        }
-        binding.rvSearchList.apply {
-            adapter = autoCompleteAdapter
-            layoutManager = LinearLayoutManager(context)
-            setHasFixedSize(true)
+
+            tvSearch.setOnClickListener {
+                setAdapter(AdapterStyle.SEARCH_STYLE_DIRECTION_MAIN)
+                toggleBottomSheet(searchBottomSheetBehavior)
+            }
+
+            infoBottomSheet.clTabContainer1.setOnClickListener {
+                toggleToolbars(SHOW_SEARCH)
+            }
         }
     }
 
-    private fun fetchPlaceIdAndDetails(latLng: LatLng) {
-        viewModel.fetchLatLngToPlaceId(latLng = latLng)
-        viewModel.fetchPlaceDetails()
+    private fun toggleToolbars(bool: Boolean) {
+        if (bool) {
+            isToolbarToggler = true
+            animateView(binding.toolbarMapsDirection.root, false)
+            animateView(binding.clSearch, true)
+        } else {
+            isToolbarToggler = false
+            animateView(binding.toolbarMapsDirection.root, true)
+            animateView(binding.clSearch, false)
+        }
+    }
+
+    private fun animateView(view: View, show: Boolean) {
+        view.apply {
+            if (show) {
+                visibility = View.VISIBLE
+                alpha = 0f
+                translationY = -height.toFloat()
+                animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(300)
+                    .setListener(null)
+            } else {
+                animate()
+                    .alpha(0f)
+                    .translationY(-height.toFloat())
+                    .setDuration(300)
+                    .setListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationEnd(animation: Animator) {
+                            visibility = View.GONE
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+            }
+        }
+    }
+
+    private fun fetchPlaceIdAndDetails(latLng: LatLng? = null, placeId: String = "") {
+        if (placeId.isNotEmpty()) {
+            viewModel.fetchLatLngToPlaceId(getPlaceId = placeId)
+        } else if (latLng != null) {
+            viewModel.fetchLatLngToPlaceId(latLng = latLng)
+        }
     }
 
     private fun setBottomSheet() {
-        val bottomSheet = binding.bottomSheet.root
-        BottomSheetBehavior.from(bottomSheet)
+        val bottomSheet = binding.infoBottomSheet.clBottomSheetContainer
+        infoBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+
+        val searchBottomSheet = binding.searchBottomSheet.clMainContainer
+        searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
+        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        // toolbarMapsDirection 높이 측정
+        /*binding.toolbarMapsDirection.root.viewTreeObserver.addOnGlobalLayoutListener {
+            adjustBottomSheetMaxHeight()
+        }*/
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
-                (resources.displayMetrics.heightPixels * 0.6).toInt() // 최대 높이를 화면의 60%로 설정
+                (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
             if (bottomSheet.height > maxHeight) {
                 val params = bottomSheet.layoutParams
                 params.height = maxHeight
                 bottomSheet.layoutParams = params
             }
         }
+        /* searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                 // 상태 변경 처리
+             }
+
+             override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                 // BottomSheet가 슬라이딩될 때 상단 뷰 애니메이션 처리
+                 val params = binding.toolbarMapsDirection.root.layoutParams as ConstraintLayout.LayoutParams
+                 params.bottomMargin = (binding.toolbarMapsDirection.root.height * slideOffset).toInt()
+                 binding.toolbarMapsDirection.root.layoutParams = params
+             }
+         })*/
+
+        infoBottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    // 상태가 숨김일 때 처리
+                } else {
+                    // 다른 상태일 때 처리
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // 슬라이드 시 추가 작업
+            }
+        })
     }
 
-    private fun checkLocatePermissionAndEnableMyLocation() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            enableMyLocation()
-        } else {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    /*   private fun adjustBottomSheetMaxHeight() {
+           bind {
+               val toolbarHeight = clSearch.height
+               val layoutParams = binding.searchBottomSheet.clMainContainer.layoutParams
+               layoutParams.height = resources.displayMetrics.heightPixels - toolbarHeight
+               binding.searchBottomSheet.clMainContainer.layoutParams = layoutParams
+           }
+
+       }*/
+
+    private fun toggleBottomSheet(bottomSheetBehavior: BottomSheetBehavior<View>) {
+        when (bottomSheetBehavior.state) {
+            BottomSheetBehavior.STATE_EXPANDED -> {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+
+            BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 
@@ -205,64 +521,38 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
+            // 위치 권한이 있는 경우
             googleMap.isMyLocationEnabled = true
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    viewModel.fetchCurrentLatLng(LatLng(location.latitude, location.longitude))
-                    currentLatLng = viewModel.currentLatLng.value!!
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
+                    // 현재 위치 마커를 추가하고 currentLocationMarker에 저장
                     googleMap.addMarker(
-                        MarkerOptions().position(currentLatLng!!).title("Current Location")
+                        MarkerOptions().position(currentLatLng).title("Current Location")
                     )
+                    binding.ibtnMyLocation.setOnClickListener {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                    }
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
+            }.addOnFailureListener { e ->
+                e.printStackTrace()
             }
+        } else {
+            // 위치 권한이 없는 경우 다시 요청
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private fun setSearch() {
-        binding.apply {
-            tvSearchMap.setOnClickListener {
-                if (svMapsSearch.isVisible) {
-                    svMapsSearch.visibility = View.GONE
-                } else {
-                    svMapsSearch.visibility = View.VISIBLE
-                    performSearch(query)
-                }
-            }
-            svMapsSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(queryString: String?): Boolean {
-                    queryString?.let {
-                        query = queryString
-                        viewModel.searchLocation(it) { latLng ->
-                            latLng?.let {
-                                startLocationMove(latLng, queryString)
-                            }
-                        }
-                    }
-                    return false
-                }
+    private fun startLocationMove(latLng: LatLng) {
+        searchMarker?.remove()
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    newText?.let {
-                        if(newText.isEmpty()){
-                            rvSearchList.visibility = View.GONE
-                            getPlaceIdToPlaceDetail(emptyList())
-                        }
-                        performSearch(it)
-                    }
-                    return false
-                }
-            })
-        }
-    }
-
-    private fun startLocationMove(latLng: LatLng, query: String) {
-        googleMap.addMarker(
-            MarkerOptions()
-                .position(latLng)
-                .title(query)
-        )
+        val option = MarkerOptions()
+            .position(latLng)
+            .title("title")
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+        searchMarker = googleMap.addMarker(option)
         googleMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(
                 latLng,
@@ -270,79 +560,4 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             )
         )
     }
-
-    private fun getPlaceIdToPlaceDetail(predictions: List<AutocompletePredictionItem>) {
-        val placeDetailsList = mutableListOf<PlaceResult>()
-
-        lifecycleScope.launch {
-            predictions.forEach { prediction ->
-                viewModel.fetchLatLngToPlaceId(getPlaceId = prediction.placeId)
-                viewModel.fetchPlaceDetails()
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.placeDetails.collect{ res ->
-                        when(res){
-                            is LatestUiState.Error -> { }
-                            LatestUiState.Loading -> TODO()
-                            is LatestUiState.Success -> {
-                                placeDetailsList.add(res.data.result)
-                                if (placeDetailsList.size == predictions.size) {
-                                    autoCompleteAdapter.updateData(placeDetailsList)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun performSearch(query: String) {
-        currentLatLng?.let { currentLocation ->
-            val token = AutocompleteSessionToken.newInstance()
-            val bounds = RectangularBounds.newInstance(
-                LatLng(currentLocation.latitude - 20.7, currentLocation.longitude - 20.7),
-                LatLng(currentLocation.latitude + 20.7, currentLocation.longitude + 20.7)
-            )
-
-            val request = FindAutocompletePredictionsRequest.builder()
-                .setLocationBias(bounds)
-                .setOrigin(currentLocation)
-                .setCountries("KR","JP","AU")
-                /*TypeFilter.GEOCODE – 비즈니스가 아닌 지오코딩 결과만 반환 지정된 위치가 명확하지 않은 경우
-                 TypeFilter.ADDRESS – 정확한 주소가 있는 자동 완성 결과만 반환 사용자가 전체 주소를 찾고 있다는 것을 알고 있다면
-                 TypeFilter.ESTABLISHMENT – 비즈니스인 장소만 반환
-                 TypeFilter.REGIONS – 다음 유형 중 하나와 일치하는 장소만 반환
-                */
-                .setTypesFilter(listOf(PlaceTypes.GEOCODE)) // 특정 장소유형을 찾고 싶다면 README의 google api내용 참고
-                .setSessionToken(token)
-                .setQuery(query)
-                .build()
-
-            placesClient.findAutocompletePredictions(request)
-                .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
-
-                    val predictions = response.autocompletePredictions.map { prediction ->
-                        AutocompletePredictionItem(
-                            prediction.placeId,
-                            prediction.getPrimaryText(null).toString()
-                        )
-                    }
-
-                    Log.d("TAG", "performSearch: $predictions")
-
-                    viewModel.fetchPredictions(predictions)
-
-                }
-                .addOnFailureListener { exception: Exception? ->
-                    if (exception is ApiException) {
-                        Log.e("MapsFragment", "Place not found: ${exception.statusCode}")
-                        binding.rvSearchList.visibility = View.GONE
-                    }
-                }
-        } ?: run {
-            Log.e("MapsFragment", "Current location is null")
-        }
-    }
 }
-
-

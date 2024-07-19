@@ -71,4 +71,10 @@
     <string name="route">경로</string>
     <string name="save">저장</string>
     <string name="around">주변</string>
+    <string name="direction_end">도착 위치를 선택해주세요</string>
+    <string name="direction_start">출발 위치를 선택해주세요</string>
+    <string name="search_route">경로 검색</string>
+    <string name="car">자동차</string>
+    <string name="subway">지하철</string>
+    <string name="walk">도보</string>
 </resources>

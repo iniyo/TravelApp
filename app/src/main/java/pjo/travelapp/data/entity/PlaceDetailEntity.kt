@@ -1,5 +1,6 @@
 package pjo.travelapp.data.entity
 
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
 import retrofit2.http.Query
@@ -80,7 +81,7 @@ data class TimeDetail(
 
 data class Geometry(
     @SerializedName("location") val location: Location,
-    @SerializedName("viewport") val viewport: Viewport
+    @SerializedName("viewport") val viewport: Viewport? = null
 )
 
 data class Location(

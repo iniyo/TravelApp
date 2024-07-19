@@ -14,18 +14,14 @@ enum class Fragments {
     CALENDAR_PAGE
 }
 
-enum class Activitys {
-
-}
-
 /**
  * Interfaces that defines an app navigator.
  */
 interface AppNavigator {
     // Navigate to a given screen.
-    fun navigateTo(screen: Fragments)
-    fun navigateTo(screen: Activitys)
+
     fun navigateUp()
     fun retrieveNavController(): NavController
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
+    fun navigateTo(screen: Fragments, putString: String = "")
 }

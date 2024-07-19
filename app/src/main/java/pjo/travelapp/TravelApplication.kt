@@ -10,10 +10,9 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class TravelApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
-
-
 
     }
 
@@ -22,7 +21,7 @@ class TravelApplication : Application() {
         val naverClientId = getString(R.string.social_login_info_naver_client_id)
         val naverClientSecret = getString(R.string.social_login_info_naver_client_secret)
         val naverClientName = getString(R.string.social_login_info_naver_client_name)
-        NaverIdLoginSDK.initialize(this, naverClientId, naverClientSecret , naverClientName)
+        NaverIdLoginSDK.initialize(this, naverClientId, naverClientSecret, naverClientName)
     }
 
     private fun setKakaoSdk() {

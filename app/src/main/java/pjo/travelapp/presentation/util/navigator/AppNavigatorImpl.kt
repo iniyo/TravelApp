@@ -28,7 +28,6 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             Fragments.PLAN_PAGE -> navController.navigate(R.id.planFragment)
             Fragments.SIGN_PAGE -> navController.navigate(UserDetailFragmentDirections.actionUserDetailFragmentToSignFragment())
             Fragments.CALENDAR_PAGE -> navController.navigate(R.id.checkFragment)
-            Fragments.DEFAULT_SEARCH_PAGE -> navController.navigate(R.id.defaultSearchFragment)
         }
     }
 
@@ -38,10 +37,6 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
 
     override fun navigateUp() {
         navController.navigateUp()
-    }
-
-    override fun navigateTo(screen: Fragments) {
-        // For handling activity navigation if required
     }
 
     override fun destinationChangedListener(onDestinationChanged: (Int) -> Unit) {

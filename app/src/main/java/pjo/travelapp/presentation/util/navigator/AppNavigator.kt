@@ -11,12 +11,7 @@ enum class Fragments {
     USER_PAGE,
     ACCOMMODATION_PAGE,
     PLAN_PAGE,
-    CALENDAR_PAGE,
-    DEFAULT_SEARCH_PAGE
-}
-
-enum class Activitys {
-
+    CALENDAR_PAGE
 }
 
 /**
@@ -28,5 +23,5 @@ interface AppNavigator {
     fun navigateUp()
     fun retrieveNavController(): NavController
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
-    fun navigateTo(screen: Fragments, putString: String)
+    fun navigateTo(screen: Fragments, putString: String = "")
 }

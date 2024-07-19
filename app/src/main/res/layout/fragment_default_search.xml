@@ -1,103 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".presentation.ui.fragment.DefaultSearchFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:id="@+id/iv_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_weight="1"
-        android:importantForAccessibility="no"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/back_white" />
+    <data>
 
-    <EditText
-        android:id="@+id/et_default_search"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/bg_search_view"
-        android:hint="@string/search"
-        android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_back"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/iv_back"
-        app:layout_constraintTop_toTopOf="@+id/iv_back" />
+        <import type="pjo.travelapp.presentation.util.bindadapter.MapsBindAdapter"/>
 
-    <ImageView
-        android:id="@+id/iv_voice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:importantForAccessibility="no"
-        android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="@+id/et_default_search"
-        app:layout_constraintEnd_toEndOf="@+id/et_default_search"
-        app:layout_constraintTop_toTopOf="@+id/et_default_search"
-        app:srcCompat="@drawable/ic_voice" />
+        <variable
+            name="adapter"
+            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
 
-    <TextView
-        android:id="@+id/tv_recent_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:text="최근 검색"
-        android:textColor="@color/dark_blue"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_back" />
+        <variable
+            name="viewmodel"
+            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
+    </data>
 
-    <TextView
-        android:id="@+id/tv_all_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="전체 삭제"
-        android:textColor="@color/blue"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_recent_search"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_recent_search" />
-
-    <View
-        android:id="@+id/v_divider1"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_main_container"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="16dp"
-        android:background="@color/gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_recent_search" />
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:background="@color/white"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="0dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_search_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_more_info"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/v_divider1" />
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:importantForAccessibility="no"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/back_white" />
 
-    <TextView
-        android:id="@+id/tv_more_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/see_more"
-        android:textColor="@color/blue"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_default_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_search_view"
+            android:hint="@string/search"
+            android:padding="10dp"
+            app:query="@={viewmodel.query}"
+            android:imeOptions="actionDone"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_back"
+            app:layout_constraintTop_toTopOf="@+id/iv_back" />
+
+        <ImageView
+            android:id="@+id/iv_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:importantForAccessibility="no"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/et_default_search"
+            app:layout_constraintEnd_toEndOf="@+id/et_default_search"
+            app:layout_constraintTop_toTopOf="@+id/et_default_search"
+            app:srcCompat="@drawable/ic_voice" />
+
+        <TextView
+            android:id="@+id/tv_recent_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:text="최근 검색"
+            android:textColor="@color/dark_blue"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_back" />
+
+        <TextView
+            android:id="@+id/tv_all_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="전체 삭제"
+            android:textColor="@color/blue"
+            android:onClick="@{() -> viewmodel.clearPlaceList()}"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_recent_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_recent_search" />
+
+        <View
+            android:id="@+id/v_divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/gray"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_recent_search" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_search_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="5dp"
+            android:adapter="@{adapter}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@+id/tv_more_info"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/v_divider1"
+            tools:listitem="@layout/rv_maps_search_list" />
+
+        <TextView
+            android:id="@+id/tv_more_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:text="@string/see_more"
+            android:textColor="@color/blue"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

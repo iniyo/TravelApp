@@ -7,7 +7,14 @@
         <variable
             name="place"
             type="pjo.travelapp.data.entity.PlaceResult" />
+        <variable
+            name="adapter"
+            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+        <variable
+            name="viewmodel"
+            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
     </data>
+
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/cl_maps_container"
@@ -36,39 +43,67 @@
                 layout="@layout/toolbar_maps_direction"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/tv_search"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cl_search"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/bg_search_view"
-                android:hint="@string/search"
-                android:textSize="18sp"
-                android:textColor="@color/dark_gray"
-                android:padding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_maps_direction">
 
-            <ImageView
-                android:id="@+id/iv_voice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:importantForAccessibility="no"
-                android:padding="10dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_search"
-                app:layout_constraintEnd_toEndOf="@+id/tv_search"
-                app:layout_constraintTop_toTopOf="@+id/tv_search"
-                app:srcCompat="@drawable/ic_voice" />
+                <TextView
+                    android:id="@+id/tv_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/bg_search_view"
+                    android:hint="@string/search"
+                    android:padding="10dp"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <ImageView
+                    android:id="@+id/iv_voice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_search"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_search"
+                    app:layout_constraintTop_toTopOf="@+id/tv_search"
+                    app:srcCompat="@drawable/ic_voice" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/ibtn_my_location"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/btn_effect_default"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_location_vector"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cl_search" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
-            android:id="@+id/bottom_sheet"
+            android:id="@+id/info_bottom_sheet"
             layout="@layout/fragment_maps_bottom_sheet"
-            app:place="@{place}"/>
+            app:place="@{place}" />
+
+        <include
+            android:id="@+id/search_bottom_sheet"
+            layout="@layout/fragment_default_search"
+            app:adapter="@{adapter}"
+            app:viewmodel="@{viewmodel}" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
 </layout>
 

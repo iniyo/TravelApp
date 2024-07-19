@@ -102,15 +102,6 @@
         android:label="fragment_scehdule"
         tools:layout="@layout/fragment_scehdule" />
     <fragment
-        android:id="@+id/defaultSearchFragment"
-        android:name="pjo.travelapp.presentation.ui.fragment.DefaultSearchFragment"
-        android:label="fragment_default_search"
-        tools:layout="@layout/fragment_default_search">
-        <argument
-            android:name="putString"
-            app:argType="string" />
-    </fragment>
-    <fragment
         android:id="@+id/mainSearchFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.MainSearchFragment"
         android:label="fragment_search"

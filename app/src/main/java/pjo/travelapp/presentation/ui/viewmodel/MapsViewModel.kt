@@ -14,26 +14,25 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.IOException
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.data.entity.DirectionsRequest
-import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.PlaceDetailsResponse
 import pjo.travelapp.data.entity.PlaceResult
-import pjo.travelapp.data.entity.Route
 import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
+import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
@@ -65,34 +64,44 @@ class MapsViewModel @Inject constructor(
     private val _placeDetailsResult = MutableStateFlow<PlaceResult?>(null)
     val placeDetailsResult: StateFlow<PlaceResult?> get() = _placeDetailsResult
 
-    private val _placeDetailsResultDirection = MutableStateFlow<PlaceResult?>(null)
-    val placeDetailsResultDirection: StateFlow<PlaceResult?> get() = _placeDetailsResultDirection
-
     private val _placeDetailsList = MutableStateFlow<List<PlaceResult>>(emptyList())
     val placeDetailsList: StateFlow<List<PlaceResult>> get() = _placeDetailsList
 
     private val _predictionList = MutableStateFlow<List<AutocompletePredictionItem>>(emptyList())
     val predictionList: StateFlow<List<AutocompletePredictionItem>> get() = _predictionList
 
-    private val _query = MutableSharedFlow<String>()
+    val query = MutableStateFlow("") // 양방향 데이터바인딩 지원시
 
     private var _placeId = MutableStateFlow<String?>("")
     val placeId: StateFlow<String?> get() = _placeId
 
-    private var _placeIdDirection = MutableStateFlow<String?>("")
-    val placeIdDirection: StateFlow<String?> get() = _placeIdDirection
+    private var _startQuery = MutableStateFlow<PlaceResult?>(null)
+    val startQuery: StateFlow<PlaceResult?> get() = _startQuery
 
+    private var _endQuery = MutableStateFlow<PlaceResult?>(null)
+    val endQuery: StateFlow<PlaceResult?> get() = _endQuery
+
+    private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
     /**
      * 변수 선언
      */
 
     init {
         fetchPlaceDetailsList()
-        /* fetchQueryToDebounce()*/
     }
 
-    fun resetDirectionsState() {
-        _directions.value = LatestUiState.Loading
+    fun fetchStartQuery(start: PlaceResult) {
+        _startQuery.value = start
+    }
+    fun fetchEndQuery(end: PlaceResult) {
+        _endQuery.value = end
+    }
+
+    private fun setAdatper() {
+        autoCompleteAdapter = AutoCompleteItemAdapter {
+            Log.d("TAG", "initView: ")
+            fetchPlaceResult(it)
+        }
     }
 
     fun fetchDirections(directionsRequest: RoutesRequest, color: Int) {
@@ -111,26 +120,15 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    /*private fun fetchQueryToDebounce() {
+    init {
         viewModelScope.launch {
-            _query
-                .debounce(400)
-                .collectLatest { query ->
-                    Log.d("TAG", "searchText: ")
-                    performSearch(query)
-                }
-        }
-    }
-
-    fun setSearchQuery(query: String) {
-        viewModelScope.launch {
-            _query.emit(query)
-        }
-    }*/
-
-    fun fetchPlaceIdDirection(placeId: String) {
-        viewModelScope.launch {
-            _placeIdDirection.value = placeId
+            query
+                .debounce(300)
+                .distinctUntilChanged()
+                .collectLatest {
+                    clearPlaceList()
+                    performSearch(it)
+            }
         }
     }
 
@@ -201,21 +199,6 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun fetchPlaceDetailsDirections(placeId: String) {
-        Log.d("TAG", "fetchPlaceDetailsDirections: ")
-        viewModelScope.launch {
-            getPlaceDetailUseCase(placeId)
-                .onStart {
-                }
-                .catch { e ->
-                    e.printStackTrace()
-                }
-                .collectLatest {
-                    _placeDetailsResultDirection.value = it.result
-                }
-        }
-    }
-
     fun fetchPlaceResult(res: PlaceResult) {
         viewModelScope.launch {
             _placeDetailsResult.value = res
@@ -241,22 +224,26 @@ class MapsViewModel @Inject constructor(
     }
 
     // 리스트 클리어
-    fun clearPlaceDetails() {
+    fun clearPlaceList() {
         _placeDetailsList.value = emptyList()
         _predictionList.value = emptyList()
     }
 
-    fun getStartAndEndPlaceId(start: String, end: String, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
+    fun getStartAndEndPlaceId(start: String?, end: String?, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
         viewModelScope.launch {
             val startDeferred = CompletableDeferred<LatLng?>()
             val endDeferred = CompletableDeferred<LatLng?>()
 
-            searchLocation(start) { result ->
-                startDeferred.complete(result)
-            }
+            if(start.isNullOrEmpty() || end.isNullOrEmpty()){
+                Log.d("TAG", "getStartAndEndPlaceId: null or empty")
+            }else {
+                searchLocation(start) { result ->
+                    startDeferred.complete(result)
+                }
 
-            searchLocation(end) { result ->
-                endDeferred.complete(result)
+                searchLocation(end) { result ->
+                    endDeferred.complete(result)
+                }
             }
 
             val startLocation = startDeferred.await()

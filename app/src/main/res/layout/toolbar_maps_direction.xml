@@ -2,24 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_main_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:padding="10dp">
 
-    <EditText
+    <TextView
         android:id="@+id/tv_start"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
         android:background="@null"
         android:hint="@string/direction_start"
-        android:importantForAutofill="no"
         android:paddingStart="10dp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="RtlSymmetry" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <View
@@ -30,19 +30,18 @@
         app:layout_constraintStart_toStartOf="@+id/tv_start"
         app:layout_constraintTop_toBottomOf="@+id/tv_start" />
 
-    <EditText
+    <TextView
         android:id="@+id/tv_end"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginTop="30dp"
         android:background="@null"
         android:hint="@string/direction_end"
-        android:importantForAutofill="no"
         android:paddingStart="10dp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_start"
-        tools:ignore="RtlSymmetry,TextFields" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_start" />
 
 
     <RadioGroup
@@ -100,10 +99,10 @@
         android:id="@+id/btn_search_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/search_route"
-        android:background="@color/white_blue"
-        android:textColor="@color/black"
         android:layout_marginTop="10dp"
+        android:background="@color/white_blue"
+        android:text="@string/search_route"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rg_transport_modes" />

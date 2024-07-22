@@ -2,6 +2,11 @@
 <resources>
 
     <!-- ShapeableImageView -->
+    <style name="ShapeAppearanceOverlay.App.circleImageView.5" parent="Base.Theme.TravelApp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">5%</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.App.circleImageView.15" parent="Base.Theme.TravelApp">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">15%</item>

@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.internal.ViewUtils.hideKeyboard
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,6 +89,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
             setOnMarkerClickListener { marker ->
                 startLocationMove(marker.position)
                 fetchPlaceIdAndDetails(marker.position)
+
                 infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                 true
             }
@@ -383,9 +385,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 toggleBottomSheet(searchBottomSheetBehavior)
             }
 
-            infoBottomSheet.clTabContainer1.setOnClickListener {
+            /*infoBottomSheet.clTabContainer1.setOnClickListener {
+                toggleBottomSheet(searchBottomSheetBehavior)
                 toggleToolbars(SHOW_SEARCH)
-            }
+            }*/
         }
     }
 
@@ -439,18 +442,18 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
     }
 
     private fun setBottomSheet() {
-        val bottomSheet = binding.infoBottomSheet.clBottomSheetContainer
-        infoBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+         val bottomSheet = binding.infoBottomSheet.clBottomSheetContainer
+         infoBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
 
-        val searchBottomSheet = binding.searchBottomSheet.clMainContainer
-        searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
-        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+         val searchBottomSheet = binding.searchBottomSheet.clMainContainer
+         searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
+         searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         // toolbarMapsDirection 높이 측정
         /*binding.toolbarMapsDirection.root.viewTreeObserver.addOnGlobalLayoutListener {
             adjustBottomSheetMaxHeight()
         }*/
-        bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
+       /* bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
                 (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
             if (bottomSheet.height > maxHeight) {
@@ -458,7 +461,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 params.height = maxHeight
                 bottomSheet.layoutParams = params
             }
-        }
+        }*/
+
         /* searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
              override fun onStateChanged(bottomSheet: View, newState: Int) {
                  // 상태 변경 처리
@@ -471,22 +475,40 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                  binding.toolbarMapsDirection.root.layoutParams = params
              }
          })*/
-
-        infoBottomSheetBehavior.addBottomSheetCallback(object :
-            BottomSheetBehavior.BottomSheetCallback() {
+        infoBottomSheetBehavior.isFitToContents = false
+        infoBottomSheetBehavior.halfExpandedRatio = 0.4f
+        infoBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    // 상태가 숨김일 때 처리
-                } else {
-                    // 다른 상태일 때 처리
+                when (newState) {
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+
+                    }
+
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+
+                    }
+
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+
+                    }
+
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+
+                    }
+
+                    BottomSheetBehavior.STATE_SETTLING -> {
+
+                    }
                 }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                // 슬라이드 시 추가 작업
+
             }
         })
     }
+
+
 
     /*   private fun adjustBottomSheetMaxHeight() {
            bind {
@@ -545,6 +567,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         }
     }
 
+    // 위치로 이동 및 마커 셋
     private fun startLocationMove(latLng: LatLng) {
         searchMarker?.remove()
 

@@ -123,8 +123,8 @@ class MapsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             query
-                .debounce(300)
-                .distinctUntilChanged()
+            /*    .debounce(300)
+                .distinctUntilChanged()*/
                 .collectLatest {
                     clearPlaceList()
                     performSearch(it)
@@ -133,7 +133,7 @@ class MapsViewModel @Inject constructor(
     }
 
     // 검색 요청을 실행하고 이전 작업을 취소하는 메서드
-    fun performSearch(query: String, currentLatLng: LatLng? = null) {
+    private fun performSearch(query: String, currentLatLng: LatLng? = null) {
         viewModelScope.launch {
             _predictionList.value = emptyList() // 새로운 검색 시작 시 리스트 초기화
             val token = AutocompleteSessionToken.newInstance()
@@ -199,7 +199,7 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun fetchPlaceResult(res: PlaceResult) {
+    private fun fetchPlaceResult(res: PlaceResult) {
         viewModelScope.launch {
             _placeDetailsResult.value = res
         }
@@ -275,7 +275,8 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
+    @Suppress("DEPRECATION")
+    private fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
         viewModelScope.launch {
             try {
                 val addressList = geocoder.getFromLocationName(location, 1)

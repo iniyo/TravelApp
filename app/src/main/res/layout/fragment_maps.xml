@@ -34,9 +34,7 @@
                 android:layout_height="0dp"
                 android:focusableInTouchMode="true"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.937"
-                tools:layout_editor_absoluteX="0dp" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <include
                 android:id="@+id/toolbar_maps_direction"

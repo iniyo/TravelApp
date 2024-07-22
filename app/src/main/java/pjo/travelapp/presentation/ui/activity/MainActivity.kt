@@ -35,7 +35,6 @@ open class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         init()
     }
 
@@ -43,14 +42,16 @@ open class MainActivity : AppCompatActivity() {
         // splash 및 화면 초기화
         startSplash()
         initContentView()
-        setClickListener()
         setNavigationOnClick()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
+        setViewModel()
     }
+
     private fun startSplash() {
         splashScreen = installSplashScreen()
     }
+
     private fun initContentView() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -66,15 +67,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun hideKeyboard() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-    }
-
-    private fun setClickListener() {
-
-    }
-
     // chip nav bar 이동
     private fun setNavigationOnClick() {
         binding.apply {
@@ -87,6 +79,10 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setViewModel() {
+        viewModel.fetchData()
     }
 
     // 현재 프래그먼트 계산

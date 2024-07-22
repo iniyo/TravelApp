@@ -35,9 +35,10 @@ android {
         /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
 
         buildConfigField("String", "maps_api_url", properties.getProperty("maps_api_url"))
+        buildConfigField("String", "place_base_url", properties.getProperty("place_base_url"))
+        buildConfigField("String", "route_base_url", properties.getProperty("route_base_url"))
 
-
-        javaCompileOptions {
+        /*javaCompileOptions {
             annotationProcessorOptions {
                 arguments.putAll(mapOf(
                     "room.schemaLocation" to "$projectDir/schemas",
@@ -45,7 +46,7 @@ android {
                     "room.expandProjection" to "true"
                 ))
             }
-        }
+        }*/
     }
 
     buildTypes {
@@ -121,6 +122,9 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
+    // paging
+    implementation(libs.androidx.paging.runtime.ktx)
 
     // coroutine
     implementation(libs.kotlinx.coroutines.core)

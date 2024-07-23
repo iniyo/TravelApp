@@ -10,6 +10,7 @@ import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -52,7 +53,7 @@ import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
+class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
@@ -206,6 +207,35 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
         }
     }
 
+    private fun updateDirection(data: Pair<RoutesResponse?, Int>) {
+        Log.d("TAG", "maps dialog updateDirection: ${data.first}")
+        data.first?.routes?.forEach { route ->
+            route.polyline?.encodedPolyline?.let {
+                drawPolyline(
+                    it,
+                    route.distanceMeters,
+                    data.second
+                )
+            }
+        }
+    }
+
+    private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
+        val decodedPath = PolyUtil.decode(encodedPolyline)
+        val polyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+
+        // 경로의 중간지점에 거리 마커 추가
+        distanceMeters?.let {
+            val midPoint = decodedPath[decodedPath.size / 2]
+            googleMap.addMarker(
+                MarkerOptions()
+                    .position(midPoint)
+                    .title("Distance: ${distanceMeters / 1000} km")
+                    .visible(true)
+            )
+        }
+
+    }
     private fun backPressed() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -235,36 +265,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
         }
     }
-
-    private fun updateDirection(data: Pair<RoutesResponse?, Int>) {
-        Log.d("TAG", "maps dialog updateDirection: ${data.first}")
-        data.first?.routes?.forEach { route ->
-            route.polyline?.encodedPolyline?.let {
-                drawPolyline(
-                    it,
-                    route.distanceMeters,
-                    data.second
-                )
-            }
-        }
-    }
-
-    private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
-        val decodedPath = PolyUtil.decode(encodedPolyline)
-        val polyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
-
-        // 경로의 중간지점에 거리 마커 추가
-        distanceMeters?.let {
-            val midPoint = decodedPath[decodedPath.size / 2]
-            googleMap.addMarker(
-                MarkerOptions()
-                    .position(midPoint)
-                    .title("Distance: ${distanceMeters / 1000} km")
-                    .visible(true)
-            )
-        }
-    }
-
     @SuppressLint("RestrictedApi")
     private fun setAdapter(st: AdapterStyle) {
         if (currentAdapterStyle == st) {
@@ -385,10 +385,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
                 toggleBottomSheet(searchBottomSheetBehavior)
             }
 
-            /*infoBottomSheet.clTabContainer1.setOnClickListener {
-                toggleBottomSheet(searchBottomSheetBehavior)
-                toggleToolbars(SHOW_SEARCH)
-            }*/
+            infoBottomSheet.clTabContainer1.setOnClickListener {
+                toggleBottomSheet(infoBottomSheetBehavior)
+                toggleToolbars(SHOW_DIRECTION)
+            }
         }
     }
 
@@ -476,9 +476,21 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
              }
          })*/
         infoBottomSheetBehavior.isFitToContents = false
-        infoBottomSheetBehavior.halfExpandedRatio = 0.4f
+        infoBottomSheetBehavior.halfExpandedRatio = 0.5f
+       /* val nestedScrollView = bottomSheet.findViewById<NestedScrollView>(R.id.nsv_cotainer)
+        nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            if (scrollY == 0) {
+                // 스크롤이 상단에 있을 때 추가 처리
+            }
+        }*/
+
         infoBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
+                } else {
+                    binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_up)
+                }
                 when (newState) {
                     BottomSheetBehavior.STATE_DRAGGING -> {
 
@@ -498,6 +510,9 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>(R.layout.fragment_maps) {
 
                     BottomSheetBehavior.STATE_SETTLING -> {
 
+                    }
+                    BottomSheetBehavior.STATE_EXPANDED -> {
+                        binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
                     }
                 }
             }

@@ -53,6 +53,7 @@ class MorePlaceRecyclerAdapter :
 
     fun addPlace(placeWithPhoto: Pair<Place, Bitmap?>) {
         placesWithPhotos.add(placeWithPhoto)
+
         notifyItemInserted(placesWithPhotos.size - 1)
     }
 }

@@ -1,5 +1,6 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.calendar
 
+import android.util.Log
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
@@ -33,8 +34,15 @@ private val rangeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
 private val headerDateFormatter = DateTimeFormatter.ofPattern("yy년 M월 d일 (E)").withLocale(Locale.KOREAN)
 
 // Local date 형식 format, Local date - 달력 시간 이므로 불변임.
-fun dateRangeDisplayText(startDate: LocalDate, endDate: LocalDate): String {
-    return "Selected: ${rangeFormatter.format(startDate)} - ${rangeFormatter.format(endDate)}"
+fun dateRangeDisplayText(start: LocalDate?, end: LocalDate?): CharSequence {
+
+    val rt = if(start != null && end != null) {
+        "${headerDateFormatter.format(start)} - ${headerDateFormatter.format(end)}"
+    } else {
+        Log.d("TAG", "dateRangeDisplayText: null")
+        "null"
+    }
+    return rt
 }
 
 fun formatDaysBetween(daysBetween: Long?): String {

@@ -82,6 +82,7 @@ class MapsViewModel @Inject constructor(
     val endQuery: StateFlow<PlaceResult?> get() = _endQuery
 
     private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
+
     /**
      * 변수 선언
      */
@@ -93,6 +94,7 @@ class MapsViewModel @Inject constructor(
     fun fetchStartQuery(start: PlaceResult) {
         _startQuery.value = start
     }
+
     fun fetchEndQuery(end: PlaceResult) {
         _endQuery.value = end
     }
@@ -123,12 +125,12 @@ class MapsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             query
-            /*    .debounce(300)
-                .distinctUntilChanged()*/
+                .debounce(300)
+                .distinctUntilChanged()
                 .collectLatest {
                     clearPlaceList()
                     performSearch(it)
-            }
+                }
         }
     }
 
@@ -229,14 +231,18 @@ class MapsViewModel @Inject constructor(
         _predictionList.value = emptyList()
     }
 
-    fun getStartAndEndPlaceId(start: String?, end: String?, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
+    fun getStartAndEndPlaceId(
+        start: String?,
+        end: String?,
+        callback: (Pair<LatLng?, LatLng?>) -> Unit
+    ) {
         viewModelScope.launch {
             val startDeferred = CompletableDeferred<LatLng?>()
             val endDeferred = CompletableDeferred<LatLng?>()
 
-            if(start.isNullOrEmpty() || end.isNullOrEmpty()){
+            if (start.isNullOrEmpty() || end.isNullOrEmpty()) {
                 Log.d("TAG", "getStartAndEndPlaceId: null or empty")
-            }else {
+            } else {
                 searchLocation(start) { result ->
                     startDeferred.complete(result)
                 }

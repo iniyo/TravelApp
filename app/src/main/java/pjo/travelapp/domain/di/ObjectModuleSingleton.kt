@@ -59,7 +59,7 @@ object ObjectModuleSingleton {
         val maxAge = Integer.MAX_VALUE
         return OkHttpClient.Builder()
             .cache(cache)
-            .addInterceptor(loggingInterceptor)
+           /* .addInterceptor(loggingInterceptor)*/
             .addInterceptor { chain ->
                 var request = chain.request()
                 request = request.newBuilder()

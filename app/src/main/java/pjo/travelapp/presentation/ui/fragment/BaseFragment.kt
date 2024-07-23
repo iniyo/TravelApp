@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -17,8 +16,9 @@ import kotlinx.coroutines.launch
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: Int) : Fragment() {
+abstract class BaseFragment<T : ViewBinding> : Fragment() {
 
+    // ViewBinding 객체를 저장하는 변수
     private var _binding: T? = null
     val binding get() = _binding!!
 
@@ -27,26 +27,29 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // ViewBinding 객체를 생성하여 _binding 변수에 할당
         _binding = createBinding(inflater, container)
         initCreate()
         return binding.root
     }
 
-    @Suppress("UNCHECKED_CAST") // 안전하지 않은 캐스트 타입 캐스트 시 경고 무시
+    @Suppress("UNCHECKED_CAST")
     private fun createBinding(inflater: LayoutInflater, container: ViewGroup?): T {
-        val superclass: Type? = javaClass.genericSuperclass // 현재 클래스의 수퍼 클래스에 대한 타입 정보 가져옴. -> 제네릭 타입 포함 수퍼 클래스 반환
+        // 현재 클래스의 수퍼 클래스에 대한 타입 정보 가져옴
+        val superclass: Type? = javaClass.genericSuperclass
         if (superclass !is ParameterizedType) {
             throw IllegalStateException("Superclass must be parameterized")
         }
-        val aClass = superclass.actualTypeArguments[0] as Class<T> // ParameterizedType -> 제네릭 타입정보 포함하는 타입, actualTypeArguments[0] 수퍼 클래스의 제네릭 타입 인수 중 첫 번째, 이후 T타입으로 캐스트
-        // view data binding 혹은 서브 클래스인지 확인
+        // 수퍼 클래스의 제네릭 타입 인수 중 첫 번째 인수를 가져와 ViewBinding으로 캐스트
+        val aClass = (superclass.actualTypeArguments[0] as Class<T>)
         return if (ViewDataBinding::class.java.isAssignableFrom(aClass)) {
-            // 맞으면 data binding으로 binding
-            DataBindingUtil.inflate(inflater, layoutId, container, false)
+            // ViewDataBinding의 서브 클래스인 경우 DataBindingUtil을 사용하여 바인딩 초기화
+            val method = aClass.getMethod("inflate", LayoutInflater::class.java)
+            method.invoke(null, inflater) as T
         } else {
-            // 틀리면 view binding으로 binding
-            val method = aClass.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java) // invoke로 받을 메서드 형식 지정
-            method.invoke(null, inflater, container, false) as T // method.invoke로 inflate 메서드 호출 -> 타입에 맞는걸로 조정됨.
+            // ViewBinding의 서브 클래스인 경우 직접 바인딩 초기화
+            val method = aClass.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java)
+            method.invoke(null, inflater, container, false) as T
         }
     }
 
@@ -63,14 +66,19 @@ abstract class BaseFragment<T : ViewBinding>(@LayoutRes private val layoutId: In
         _binding = null
     }
 
+    // 하위 클래스에서 구현할 수 있는 초기화 메서드들
     protected open fun initCreate() {}
     protected open fun initView() {}
     protected open fun initViewModel() {}
     protected open fun initListener() {}
     protected open fun afterViewCreated() {}
+
+    // ViewBinding 객체에 대해 블록 코드를 실행하는 메서드
     protected inline fun bind(block: T.() -> Unit) {
         binding.apply(block)
     }
+
+    // Lifecycle 상태가 STARTED일 때 코루틴 블록을 실행하는 메서드
     protected fun launchWhenStarted(block: suspend CoroutineScope.() -> Unit) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

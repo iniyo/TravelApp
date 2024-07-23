@@ -1,10 +1,5 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
@@ -16,44 +11,19 @@ import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserDetailFragment : Fragment() {
-
-    private var _binding: FragmentUserDetailBinding? = null
-    private val binding get() = _binding!!
+class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
 
     @Inject
     lateinit var navigator: AppNavigator
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-
-        _binding = FragmentUserDetailBinding.inflate(layoutInflater, container, false)
-        return binding.root
-    }
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun initView() {
+        super.initView()
         setClickListner()
         setAdapter()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun setClickListner() {
-        binding.apply {
+        bind {
             btnLoginAndSignup.setOnClickListener {
                 navigator.navigateTo(Fragments.SIGN_PAGE, "")
             }
@@ -68,12 +38,12 @@ class UserDetailFragment : Fragment() {
 
         val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
-        binding.apply {
+        bind {
             vpUserSchedule.apply {
                 addItemDecoration(decoration)
 
                 setPageTransformer { page, position ->
-                    page.translationX = position * - pageTransX
+                    page.translationX = position * -pageTransX
                 }
                 clipToPadding = false
                 clipChildren = false

@@ -2,9 +2,7 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -16,14 +14,13 @@ import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
 import pjo.travelapp.presentation.adapter.PopularRecyclerAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
 import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
-import pjo.travelapp.presentation.ui.viewmodel.BaseViewModel
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
+class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     @Inject
     lateinit var navigator: AppNavigator
@@ -148,8 +145,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
                 setHasFixedSize(true)
             }
 
-            val pagerAdapter = MorePlacesViewPagerAdapter(requireActivity())
-            pagerAdapter.fragments = getForkFragment()
+            val pagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), getForkFragment())
             vpTabItemsShow.apply {
                 adapter = pagerAdapter
             }
@@ -162,7 +158,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
     private fun startRollingTextAnimation() {
         val rollingText = resources.getStringArray(R.array.arr_rolling)
-        var textIndex = 0
 
         binding.rtvSearch.apply {
             /* animationDuration = 1500L
@@ -190,7 +185,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
 
             setOnClickListener {
-                navigator.navigateTo(Fragments.SEARCH_PAGE, "")
+                navigator.navigateTo(Fragments.SEARCH_PAGE)
             }
         }
     }

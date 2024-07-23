@@ -1,4 +1,4 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.calendar
 
 import android.annotation.SuppressLint
 import android.app.Activity

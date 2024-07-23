@@ -28,6 +28,7 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             Fragments.PLAN_PAGE -> navController.navigate(R.id.planFragment)
             Fragments.SIGN_PAGE -> navController.navigate(UserDetailFragmentDirections.actionUserDetailFragmentToSignFragment())
             Fragments.CALENDAR_PAGE -> navController.navigate(R.id.checkFragment)
+            Fragments.VOICE_PAGE -> navController.navigate(R.id.voiceRecognitionFragment)
         }
     }
 

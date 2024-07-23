@@ -1,9 +1,10 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import pjo.travelapp.R
+import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.databinding.FragmentScehduleBinding
 
-class ScehduleFragment : BaseFragment<FragmentScehduleBinding>(R.layout.fragment_scehdule) {
+@AndroidEntryPoint
+class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
     override fun initView() {
         super.initView()

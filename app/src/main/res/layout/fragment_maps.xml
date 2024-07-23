@@ -4,12 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="place"
             type="pjo.travelapp.data.entity.PlaceResult" />
+
         <variable
             name="adapter"
             type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+
         <variable
             name="viewmodel"
             type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
@@ -19,8 +22,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/cl_maps_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

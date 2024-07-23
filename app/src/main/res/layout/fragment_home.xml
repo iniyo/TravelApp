@@ -107,7 +107,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_light_gray">
 
-                    <pjo.travelapp.presentation.util.RollingTextView
+                    <pjo.travelapp.presentation.util.customview.RollingTextView
                         android:id="@+id/rtv_search"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -336,7 +336,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
                     android:paddingHorizontal="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

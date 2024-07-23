@@ -1,13 +1,17 @@
 package pjo.travelapp.presentation.ui.activity
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
@@ -15,7 +19,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
-import pjo.travelapp.presentation.ui.viewmodel.BaseViewModel
+import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -24,12 +28,11 @@ import javax.inject.Inject
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var splashScreen: SplashScreen
-    private val viewModel: BaseViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-
     @Inject
     lateinit var navigator: AppNavigator
-
+    private var isPermissionRequestInProgress = false
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
 
@@ -43,9 +46,11 @@ open class MainActivity : AppCompatActivity() {
         startSplash()
         initContentView()
         setNavigationOnClick()
+        setCheckPermission()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
         setViewModel()
+
     }
 
     private fun startSplash() {
@@ -124,7 +129,9 @@ open class MainActivity : AppCompatActivity() {
                         finish()
                     } else {
                         backPressedOnce = true
-                        Snackbar.make(binding.root, "한번 더 누르면 앱이 종료됩니다.", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root,
+                            getString(R.string.end_application), Snackbar.LENGTH_SHORT)
+                            .show()
                         handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
                     }
                 } else {
@@ -132,5 +139,41 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun setCheckPermission() {
+        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (!isPermissionRequestInProgress) {
+                isPermissionRequestInProgress = true
+                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.RECORD_AUDIO), 0)
+            }
+        }
+    }
+    // 권한 요청 취소
+    private fun cancelPermissionRequest() {
+        if (isPermissionRequestInProgress) {
+            // 권한 요청을 취소하는 로직을 여기에 추가
+            isPermissionRequestInProgress = false
+        }
+    }
+
+    // 앱이 백그라운드로 갈 때 호출
+    override fun onPause() {
+        super.onPause()
+        cancelPermissionRequest()
+    }
+
+    // 앱이 완전히 종료될 때 호출
+    override fun onStop() {
+        super.onStop()
+        cancelPermissionRequest()
+    }
+
+    // 포그라운드로 돌아올 때 호출
+    override fun onResume() {
+        super.onResume()
+        if (!isPermissionRequestInProgress) {
+            setCheckPermission()
+        }
     }
 }

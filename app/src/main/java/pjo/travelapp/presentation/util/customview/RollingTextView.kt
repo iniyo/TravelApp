@@ -1,4 +1,4 @@
-package pjo.travelapp.presentation.util
+package pjo.travelapp.presentation.util.customview
 
 import android.content.Context
 import android.os.Handler

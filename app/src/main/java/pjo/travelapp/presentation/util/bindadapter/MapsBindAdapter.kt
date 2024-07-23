@@ -15,18 +15,12 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.Photo
-import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
-
-fun <T> StateFlow<T>.asLiveData(): LiveData<T> {
-    return this.asLiveData()
-}
 
 object MapsBindAdapter {
     /**
@@ -84,7 +78,7 @@ object MapsBindAdapter {
     @JvmStatic
     @BindingAdapter("imageUrl")
     fun loadImage(view: ImageView, photo: Photo?) {
-        var ph: String? = null
+        val ph: String?
         var img: Int = R.drawable.img_bg_title
         if (photo != null) {
             ph = photo.getPhotoUrl()
@@ -94,7 +88,6 @@ object MapsBindAdapter {
                 .placeholder(img)
                 .into(view)
         } else {
-            ph = null
             img = R.drawable.img_bg_title
             Glide.with(view.context)
                 .load(img)
@@ -102,7 +95,6 @@ object MapsBindAdapter {
                 .placeholder(img)
                 .into(view)
         }
-
     }
 
     @JvmStatic

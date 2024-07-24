@@ -36,7 +36,7 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
             R.drawable.banner2
         )
 
-        val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
+        val (pageTransX, decoration) = MyGraphicMapper.getDecoration(10, 20)
 
         bind {
             vpUserSchedule.apply {

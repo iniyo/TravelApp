@@ -1,6 +1,8 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Bitmap
+import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
@@ -11,25 +13,78 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.databinding.FragmentRecycleItemBinding
 import pjo.travelapp.presentation.adapter.MorePlaceRecyclerAdapter
+import pjo.travelapp.presentation.adapter.MorePlaceRecyclerPagingAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.GridSpacingItemDecoration
 import pjo.travelapp.presentation.util.LatestUiState
 
 @AndroidEntryPoint
-class RecycleItemFragment(
-    private val pop: String
-) : BaseFragment<FragmentRecycleItemBinding>() {
+class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
     private val viewModel: MainViewModel by activityViewModels()
-
+    private lateinit var pop: String
 
     override fun initView() {
         super.initView()
         bind {
-            rvMorePlaces.layoutManager =
-                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            rvMorePlaces.addItemDecoration(GridSpacingItemDecoration(2, 16, true)) // 16dp의 마진 적용
-            adapter = MorePlaceRecyclerAdapter()
+            if (rvMorePlaces.adapter == null) {
+                rvMorePlaces.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                rvMorePlaces.addItemDecoration(GridSpacingItemDecoration(2, 16, true)) // 16dp의 마진 적용
+                adapter = MorePlaceRecyclerAdapter()
+            }
+        }
+    }
+
+    override fun initViewModel() {
+        super.initViewModel()
+        bind {
+            launchWhenStarted {
+                when (pop) {
+                    "도쿄" -> {
+                        title = pop
+                        launch {
+                            viewModel.tokyoHotPlaceList.collectLatest {
+                                handleUiState(it)
+                            }
+                        }
+                    }
+
+                    "후쿠오카" -> {
+                        title = pop
+                        launch {
+                            viewModel.fukuokaHotPlaceList.collectLatest {
+                                handleUiState(it)
+                            }
+                        }
+                    }
+
+                    "파리" -> {
+                        title = pop
+                        launch {
+                            viewModel.parisHotPlaceList.collectLatest {
+                                handleUiState(it)
+                            }
+                        }
+                    }
+
+                    "근처" -> {
+                        title = pop
+                        launch {
+
+                            viewModel.nearbySearch.collectLatest {
+                                handleUiState(it)
+                            }
+
+                        }
+                    }
+
+                    else -> {
+                        launch {
+                            title = pop
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -55,47 +110,24 @@ class RecycleItemFragment(
                 }
             }
         }
-
     }
 
-    override fun initViewModel() {
-        super.initViewModel()
-        bind {
+    companion object {
+        private const val ARG_POP = "pop"
 
-            launchWhenStarted {
-                when (pop) {
-                    "Tokyo" -> {
-                        launch {
-                            viewModel.tokyoHotPlaceList.collectLatest { state ->
-                                handleUiState(state)
-                                tvCountryTitle.text = pop
-                            }
-                        }
-                    }
+        fun newInstance(pop: String): RecycleItemFragment {
+            val fragment = RecycleItemFragment()
+            val args = Bundle()
+            args.putString(ARG_POP, pop)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
-                    "Fukuoka" -> {
-                        launch {
-                            viewModel.fukuokaHotPlaceList.collectLatest { state ->
-                                handleUiState(state)
-                                tvCountryTitle.text = pop
-                            }
-                        }
-                    }
-
-                    "Paris" -> {
-                        launch {
-                            viewModel.parisHotPlaceList.collectLatest { state ->
-                                handleUiState(state)
-                                tvCountryTitle.text = pop
-                            }
-                        }
-                    }
-
-                    else -> {
-
-                    }
-                }
-            }
+    override fun initCreate() {
+        super.initCreate()
+        arguments?.let {
+            pop = it.getString(ARG_POP) ?: ""
         }
     }
 }

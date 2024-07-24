@@ -1,13 +1,15 @@
 package pjo.travelapp.presentation.ui.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -15,6 +17,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
@@ -35,6 +40,7 @@ open class MainActivity : AppCompatActivity() {
     private var isPermissionRequestInProgress = false
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,11 +52,11 @@ open class MainActivity : AppCompatActivity() {
         startSplash()
         initContentView()
         setNavigationOnClick()
-        setCheckPermission()
+        setCheckVoicePermission()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
         setViewModel()
-
+        setFusedLocation()
     }
 
     private fun startSplash() {
@@ -77,17 +83,17 @@ open class MainActivity : AppCompatActivity() {
         binding.apply {
             cnbItem.setOnItemSelectedListener { id ->
                 when (id) {
-                    R.id.nav_home -> navigator.navigateTo(Fragments.HOME_PAGE, "")
-                    R.id.nav_map -> navigator.navigateTo(Fragments.MAPS_PAGE, "")
-                    R.id.nav_planner -> navigator.navigateTo(Fragments.CALENDAR_PAGE, "")
-                    R.id.nav_profile -> navigator.navigateTo(Fragments.USER_PAGE, "")
+                    R.id.nav_home -> navigator.navigateTo(Fragments.HOME_PAGE)
+                    R.id.nav_map -> navigator.navigateTo(Fragments.MAPS_PAGE)
+                    R.id.nav_planner -> navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+                    R.id.nav_profile -> navigator.navigateTo(Fragments.USER_PAGE)
                 }
             }
         }
     }
 
     private fun setViewModel() {
-        viewModel.fetchData()
+        /*viewModel.fetchData()*/
     }
 
     // 현재 프래그먼트 계산
@@ -129,9 +135,7 @@ open class MainActivity : AppCompatActivity() {
                         finish()
                     } else {
                         backPressedOnce = true
-                        Snackbar.make(binding.root,
-                            getString(R.string.end_application), Snackbar.LENGTH_SHORT)
-                            .show()
+                        Snackbar.make(binding.root, getString(R.string.end_application), Snackbar.LENGTH_SHORT).show()
                         handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
                     }
                 } else {
@@ -141,7 +145,19 @@ open class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun setCheckPermission() {
+    private fun setFusedLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            setCheckLocationPermission()
+        }
+    }
+
+    private fun setCheckVoicePermission() {
         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             if (!isPermissionRequestInProgress) {
                 isPermissionRequestInProgress = true
@@ -149,10 +165,37 @@ open class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    @SuppressLint("MissingPermission")
+    private fun setCheckLocationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                baseContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                baseContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (!isPermissionRequestInProgress) {
+                isPermissionRequestInProgress = true
+            }
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    Log.d("TAG", "enableMyLocation: $currentLatLng")
+                    viewModel.fetchCurrentLocation(currentLatLng)
+                }
+            }
+        } else {
+            // 위치 권한이 없는 경우 다시 요청
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
     // 권한 요청 취소
     private fun cancelPermissionRequest() {
         if (isPermissionRequestInProgress) {
-            // 권한 요청을 취소하는 로직을 여기에 추가
             isPermissionRequestInProgress = false
         }
     }
@@ -160,20 +203,25 @@ open class MainActivity : AppCompatActivity() {
     // 앱이 백그라운드로 갈 때 호출
     override fun onPause() {
         super.onPause()
-        cancelPermissionRequest()
+        if (!isPermissionRequestInProgress) {
+            cancelPermissionRequest()
+        }
     }
 
     // 앱이 완전히 종료될 때 호출
     override fun onStop() {
         super.onStop()
-        cancelPermissionRequest()
+        if (!isPermissionRequestInProgress) {
+            cancelPermissionRequest()
+        }
     }
 
     // 포그라운드로 돌아올 때 호출
     override fun onResume() {
         super.onResume()
         if (!isPermissionRequestInProgress) {
-            setCheckPermission()
+            setCheckVoicePermission()
+            setCheckLocationPermission()
         }
     }
 }

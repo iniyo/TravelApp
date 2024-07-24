@@ -12,6 +12,10 @@
         <import type="android.view.View" />
 
         <variable
+            name="adapter"
+            type="pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter" />
+
+        <variable
             name="view"
             type="pjo.travelapp.presentation.ui.fragment.HomeFragment" />
     </data>
@@ -336,6 +340,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
+                    android:adapter="@{adapter}"
                     android:paddingHorizontal="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

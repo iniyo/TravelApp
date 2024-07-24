@@ -6,14 +6,12 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_main_content"
-        android:layout_width="160dp"
-        android:layout_height="0dp"
+        android:layout_width="240dp"
+        android:layout_height="180dp"
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
         android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_max="400dp"
-        app:layout_constraintHeight_min="150dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.5"

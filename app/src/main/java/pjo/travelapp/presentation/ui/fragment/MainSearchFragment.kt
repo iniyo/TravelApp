@@ -7,7 +7,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.databinding.FragmentMainSearchBinding
-import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.adapter.MainSearchItemAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
@@ -21,6 +21,7 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val mapsViewModel: MapsViewModel by activityViewModels()
     private val placeViewModel: PlanViewModel by activityViewModels()
+
     @Inject
     lateinit var navigator: AppNavigator
 
@@ -28,10 +29,8 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
         super.initView()
 
         bind {
-            adapter = AutoCompleteItemAdapter {
-                navigator.navigateTo(Fragments.MAPS_PAGE)
-                mapsViewModel.fetchPlaceDetails(it.placeId)
-            }
+            adapter = MainSearchItemAdapter {}
+
             ivVoice.setOnClickListener {
                 navigator.navigateTo(Fragments.VOICE_PAGE)
             }
@@ -62,11 +61,11 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
 
         bind {
             launchWhenStarted {
-               launch{
-                   mainViewModel.voiceString.collectLatest {
-                       svDefaultSearch.setQuery(it, false)
-                   }
-               }
+                launch {
+                    mainViewModel.voiceString.collectLatest {
+                        svDefaultSearch.setQuery(it, false)
+                    }
+                }
                 launch {
                     mainViewModel.placeDetailsList.collectLatest {
                         adapter?.submitList(it)

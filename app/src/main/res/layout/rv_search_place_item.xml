@@ -24,9 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:text="시부야 역"
-        android:textColor="@color/black"
+        android:textColor="@color/dark_blue"
         android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/iv_little_place_pic"
         app:layout_constraintTop_toTopOf="@+id/iv_little_place_pic" />
 

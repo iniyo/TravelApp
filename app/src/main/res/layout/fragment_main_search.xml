@@ -11,7 +11,7 @@
 
         <variable
             name="adapter"
-            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+            type="pjo.travelapp.presentation.adapter.MainSearchItemAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

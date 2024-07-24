@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_homeFragment_to_recycleItemFragment"
             app:destination="@id/recycleItemFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_scehduleFragment"
+            app:destination="@id/scehduleFragment" />
     </fragment>
     <fragment
         android:id="@+id/accommodationDetailFragment"

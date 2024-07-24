@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -45,6 +46,7 @@ import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.ui.consts.AdapterStyle
 import pjo.travelapp.presentation.ui.consts.SHOW_DIRECTION
 import pjo.travelapp.presentation.ui.consts.SHOW_SEARCH
+import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.navigator.AppNavigator
@@ -58,6 +60,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private val viewModel: MapsViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
     private lateinit var infoBottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var searchBottomSheetBehavior: BottomSheetBehavior<View>
@@ -70,13 +73,30 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     lateinit var navigate: AppNavigator
 
 
-    @SuppressLint("PotentialBehaviorOverride")
+    @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
     private val callback = OnMapReadyCallback { map ->
         googleMap = map
 
         googleMap.apply {
             mapType = GoogleMap.MAP_TYPE_NORMAL
-
+            googleMap.isMyLocationEnabled = true
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                val location = mainViewModel.currentLocation.value
+                if (location != null) {
+                    val currentLatLng = location
+                    Log.d("TAG", "enableMyLocation: $currentLatLng")
+                    // 현재 위치 마커를 추가하고 currentLocationMarker에 저장
+                    googleMap.addMarker(
+                        MarkerOptions().position(currentLatLng).title("Current Location")
+                    )
+                    binding.ibtnMyLocation.setOnClickListener {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                    }
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                }
+            }.addOnFailureListener { e ->
+                e.printStackTrace()
+            }
             setOnMapClickListener {
                 infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
@@ -95,22 +115,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 true
             }
         }
-        enableMyLocation()
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            enableMyLocation()
-        }
     }
 
     override fun initCreate() {
         super.initCreate()
-        if (!Places.isInitialized()) {
-            Places.initialize(requireContext(), BuildConfig.maps_api_key)
-        }
         Log.d("TAG", "initCreate: ")
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
     }
@@ -122,7 +130,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             val mapFragment =
                 childFragmentManager.findFragmentById(R.id.fcv_map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
-
 
             setBottomSheet()
             setTextStartAndEnd()
@@ -405,33 +412,38 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     }
 
     private fun animateView(view: View, show: Boolean) {
-        view.apply {
-            if (show) {
-                visibility = View.VISIBLE
-                alpha = 0f
-                translationY = -height.toFloat()
-                animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(300)
-                    .setListener(null)
-            } else {
-                animate()
-                    .alpha(0f)
-                    .translationY(-height.toFloat())
-                    .setDuration(300)
-                    .setListener(object : Animator.AnimatorListener {
-                        override fun onAnimationStart(animation: Animator) {}
-                        override fun onAnimationEnd(animation: Animator) {
-                            visibility = View.GONE
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {}
-                        override fun onAnimationRepeat(animation: Animator) {}
-                    })
+        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                view.apply {
+                    if (show) {
+                        visibility = View.VISIBLE
+                        alpha = 0f
+                        translationY = height.toFloat() // 아래에서 위로 애니메이션을 적용하기 위해 height을 사용
+                        animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setDuration(300)
+                            .setListener(null)
+                    } else {
+                        animate()
+                            .alpha(0f)
+                            .translationY(height.toFloat()) // 위에서 아래로 애니메이션을 적용하기 위해 height을 사용
+                            .setDuration(300)
+                            .setListener(object : Animator.AnimatorListener {
+                                override fun onAnimationStart(animation: Animator) {}
+                                override fun onAnimationEnd(animation: Animator) {
+                                    visibility = View.GONE
+                                }
+                                override fun onAnimationCancel(animation: Animator) {}
+                                override fun onAnimationRepeat(animation: Animator) {}
+                            })
+                    }
+                }
             }
-        }
+        })
     }
+
 
     private fun fetchPlaceIdAndDetails(latLng: LatLng? = null, placeId: String = "") {
         if (placeId.isNotEmpty()) {
@@ -547,40 +559,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // 위치 권한이 있는 경우
-            googleMap.isMyLocationEnabled = true
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
-                    Log.d("TAG", "enableMyLocation: $currentLatLng")
-                    // 현재 위치 마커를 추가하고 currentLocationMarker에 저장
-                    googleMap.addMarker(
-                        MarkerOptions().position(currentLatLng).title("Current Location")
-                    )
-                    binding.ibtnMyLocation.setOnClickListener {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    }
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                }
-            }.addOnFailureListener { e ->
-                e.printStackTrace()
-            }
-        } else {
-            // 위치 권한이 없는 경우 다시 요청
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
 
     // 위치로 이동 및 마커 셋
     private fun startLocationMove(latLng: LatLng) {

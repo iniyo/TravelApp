@@ -1,8 +1,9 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -11,9 +12,9 @@ import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentHomeBinding
 import pjo.travelapp.presentation.adapter.CategoryRecyclerAdapter
 import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
-import pjo.travelapp.presentation.adapter.PopularRecyclerAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
 import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
+import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -24,6 +25,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     @Inject
     lateinit var navigator: AppNavigator
+    private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var a: List<Int>
     private lateinit var b: List<Int>
     private lateinit var c: List<Int>
@@ -42,19 +44,33 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         setTabLayout()
     }
 
-    private fun getForkFragment(): List<Fragment> {
-        val fragmentList: List<Fragment> = listOf(
-            RecycleItemFragment("Tokyo"),
-            RecycleItemFragment("Fukuoka"),
-            RecycleItemFragment("Paris")
-        )
-        return fragmentList
-    }
-
-
     private fun setTabLayout() {
         val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
-        setTabItemMargin(binding.tlTop, marginSize, marginSize)
+        bind {
+            setTabItemMargin(tlTop, marginSize, marginSize)
+            tlTop.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let {
+                        Log.d("TAG", "onTabSelected: ${tab.position}")
+                        val fragments = mainViewModel.getForkFragments(it.position)
+                        adapter = MorePlacesViewPagerAdapter(requireActivity(), fragments)
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            })
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.adapter = null
     }
 
     // TabLayout Tab 사이 간격 부여
@@ -134,7 +150,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 setHasFixedSize(true)
             }
 
-            rvPopular.apply {
+            /*rvPopular.apply {
                 adapter = PopularRecyclerAdapter(c)
                 layoutManager = LinearLayoutManager(
                     context,
@@ -143,12 +159,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 )
                 setItemViewCacheSize(c.size)
                 setHasFixedSize(true)
-            }
-
-            val pagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), getForkFragment())
-            vpTabItemsShow.apply {
-                adapter = pagerAdapter
-            }
+            }*/
+            /*   val fragments = mainViewModel.getForkFragments(0)
+               adapter = MorePlacesViewPagerAdapter(requireActivity(), fragments)*/
         }
     }
 

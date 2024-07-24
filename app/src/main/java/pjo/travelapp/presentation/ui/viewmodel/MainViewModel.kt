@@ -2,29 +2,38 @@ package pjo.travelapp.presentation.ui.viewmodel
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.CircularBounds
+import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.data.entity.NearbySearchResponse
-import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
+import pjo.travelapp.presentation.ui.fragment.RecycleItemFragment
 import pjo.travelapp.presentation.util.LatestUiState
+import java.util.Random
 import javax.inject.Inject
+
+private fun <T> List<T>.shuffled(): List<T> {
+    return this.shuffled(Random(System.currentTimeMillis()))
+}
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -32,6 +41,9 @@ class MainViewModel @Inject constructor(
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase
 ) : ViewModel() {
 
+    /**
+     * 변수 선언
+     */
     private val types = listOf("tourist_attraction", "restaurant", "park", "cafe")
 
     private val _tokyoHotPlaceList =
@@ -46,40 +58,82 @@ class MainViewModel @Inject constructor(
         MutableStateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>(LatestUiState.Loading)
     val parisHotPlaceList: StateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>> get() = _parisHotPlaceList
 
-    private val _voiceString = MutableStateFlow<String>("")
+    private val _voiceString = MutableStateFlow("")
     val voiceString: StateFlow<String> get() = _voiceString
 
-    private val _inputText = MutableStateFlow<String>("")
+    private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> get() = _inputText
 
-    private val _placeDetailResult = MutableStateFlow<PlaceResult?>(null)
-    val placeDetailResult: StateFlow<PlaceResult?> get() = _placeDetailResult
-
-    private val _placeDetailsList = MutableStateFlow<List<PlaceResult>>(emptyList())
-    val placeDetailsList: StateFlow<List<PlaceResult>> get() = _placeDetailsList
+    private val _placeDetailsList = MutableStateFlow<List<Pair<Place, Bitmap?>>>(emptyList())
+    val placeDetailsList: StateFlow<List<Pair<Place, Bitmap?>>> get() = _placeDetailsList
 
     private val _nearbySearch =
-        MutableStateFlow<LatestUiState<List<NearbySearchResponse>>>(LatestUiState.Loading)
-    val nearbySearch: StateFlow<LatestUiState<List<NearbySearchResponse>>> get() = _nearbySearch
+        MutableStateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>(LatestUiState.Loading)
+    val nearbySearch: StateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>> get() = _nearbySearch
+
+    private val _currentLocation = MutableStateFlow<LatLng?>(null)
+    val currentLocation: StateFlow<LatLng?> get() = _currentLocation
 
     // 캐시용 변수 추가
-    private val placeDetailCache = mutableMapOf<String, PlaceResult>()
+    private val placeDetailCache = mutableMapOf<String, Place>()
 
-    init {
-        fetchQueryTextSearch()
-    }
+    private val fragmentLists = mutableMapOf<Int, List<Fragment>>()
+
+    private val _shuffledHotPlaceList =
+        MutableStateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>(LatestUiState.Loading)
+    val shuffledHotPlaceList: StateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>> get() = _shuffledHotPlaceList
+
+    // 공통 placeFields
     private val placeFields = listOf(
         Place.Field.ID,
         Place.Field.NAME,
-        Place.Field.ADDRESS,
         Place.Field.RATING,
-        Place.Field.PHOTO_METADATAS
+        Place.Field.PHOTO_METADATAS,
+        Place.Field.REVIEWS
     )
 
+    /**
+     * 변수 선언 끝
+     */
+
+    init {
+        fetchQueryTextSearch()
+        shuffleAndDistribute()
+    }
+    private fun shuffleAndDistribute() {
+        viewModelScope.launch {
+            val tokyoList = (_tokyoHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+            val fukuokaList = (_fukuokaHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+            val parisList = (_parisHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+
+            // 결합한 리스트를 랜덤으로 섞기
+            val combinedList = (tokyoList + fukuokaList + parisList)
+                .filterNot { it.first.name.isNullOrEmpty() || it.first.address.isNullOrEmpty() }
+                .shuffled()
+
+            // 새로운 리스트에 저장
+            _shuffledHotPlaceList.value = LatestUiState.Success(combinedList)
+        }
+    }
+    private fun getFragmentSetLists(choose: Int): List<String> {
+        return when (choose) {
+            0 -> listOf("도쿄", "후쿠오카", "파리")
+            1 -> listOf("숙소")
+            else -> listOf("근처")
+        }
+    }
+
+    fun getForkFragments(choose: Int): List<Fragment> {
+        return fragmentLists.getOrPut(choose) {
+            val list = getFragmentSetLists(choose)
+            list.map { RecycleItemFragment.newInstance(it) }
+        }
+    }
+
     fun fetchData() {
-        fetchTopRatedTouristAttractions("Tokyo")
-        fetchTopRatedTouristAttractions("Fukuoka")
-        fetchTopRatedTouristAttractions("Paris")
+        fetchTopRatedTouristAttractions("도쿄")
+        fetchTopRatedTouristAttractions("후쿠오카")
+        fetchTopRatedTouristAttractions("파리")
     }
 
     fun updateInputText(newText: String) {
@@ -94,9 +148,16 @@ class MainViewModel @Inject constructor(
         _placeDetailsList.value = emptyList()
     }
 
-
     private fun fetchQueryTextSearch() {
         val token = AutocompleteSessionToken.newInstance()
+        val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+        val placeFields = listOf(
+            Place.Field.ID,
+            Place.Field.NAME,
+            Place.Field.ADDRESS,
+            Place.Field.PHOTO_METADATAS
+        )
+
         viewModelScope.launch {
             inputText.collectLatest {
                 clearList()
@@ -109,28 +170,17 @@ class MainViewModel @Inject constructor(
                 try {
                     val res = placesClient.findAutocompletePredictions(request).await()
                     val preds = res.autocompletePredictions.map { pred ->
-                        AutocompletePredictionItem(pred.placeId, pred.getPrimaryText(null).toString())
+                        AutocompletePredictionItem(
+                            pred.placeId,
+                            pred.getPrimaryText(null).toString()
+                        )
                     }
 
                     preds.forEach { pred ->
-                        if (placeDetailCache.containsKey(pred.placeId)) {
-                            val cachedResult = placeDetailCache[pred.placeId]
-                            cachedResult?.let {
-                                val currentList = _placeDetailsList.value.toMutableList()
-                                if (currentList.none { cl -> cl.name == it.name }) {
-                                    currentList.add(it)
-                                    _placeDetailsList.value = currentList
-                                }
-                            }
-                        } else {
-                            getPlaceDetailUseCase(pred.placeId).collectLatest { res ->
-                                placeDetailCache[pred.placeId] = res.result
-                                val currentList = _placeDetailsList.value.toMutableList()
-                                if (currentList.none { cl -> cl.name == res.result.name }) {
-                                    currentList.add(res.result)
-                                    _placeDetailsList.value = currentList
-                                }
-                            }
+                        placeDetailCache[pred.placeId]?.let { cachedResult ->
+                            addPlaceToResults(cachedResult, placesWithPhotos)
+                        } ?: run {
+                            fetchAndCachePlaceDetails(pred.placeId, placeFields, placesWithPhotos)
                         }
                     }
                 } catch (e: Exception) {
@@ -140,24 +190,92 @@ class MainViewModel @Inject constructor(
         }
     }
 
- /*   private fun fetchNearbyTouristAttractions() {
-        val query = "popular tourist attractions japan, europe"
+    private suspend fun fetchAndCachePlaceDetails(
+        placeId: String,
+        placeFields: List<Place.Field>,
+        placesWithPhotos: MutableList<Pair<Place, Bitmap?>>
+    ) {
+        val req = FetchPlaceRequest.builder(placeId, placeFields).build()
+        val placeDetails = placesClient.fetchPlace(req).await().place
+
+        placeDetailCache[placeId] = placeDetails
+        addPlaceToResults(placeDetails, placesWithPhotos)
+    }
+
+    private fun addPlaceToResults(
+        place: Place,
+        placesWithPhotos: MutableList<Pair<Place, Bitmap?>>
+    ) {
         viewModelScope.launch {
-            val searchByTextRequest = SearchNearbyRequest.builder()
-                .setMaxResultCount(1)
-                .setRankPreference(SearchNearbyRequest.RankPreference.DISTANCE)
-                .setPlaceFields(placeFields)
-                .build()
-
-            val response = placesClient.searchNearby(searchByTextRequest).await()
-            val places = response.places
-
-            placesClient.searchNearby()
+            if (placesWithPhotos.none { it.first.name == place.name }) {
+                val photoMetadatas = place.photoMetadatas
+                val photoBitmap =
+                    if (!photoMetadatas.isNullOrEmpty()) fetchPhoto(photoMetadatas) else null
+                placesWithPhotos.add(Pair(place, photoBitmap))
+                _placeDetailsList.value = placesWithPhotos
+            }
         }
-    }*/
+    }
+
+    fun fetchCurrentLocation(lt: LatLng) {
+        _currentLocation.value = lt
+        /*fetchNearbyTouristAttractions()*/
+    }
+
+    /* fun fetchNearbyPlacesFlow(): Flow<PagingData<Pair<Place, Bitmap?>>> {
+         val currentLoc = _currentLocation.value ?: throw IllegalStateException("Location not set")
+         return Pager(PagingConfig(pageSize = 4, initialLoadSize = 4)) {
+             NearbyPlacePagingSource(placesClient, currentLoc, placeFields)
+         }.flow.cachedIn(viewModelScope)
+     }*/
+
+    private fun fetchNearbyTouristAttractions() {
+        Log.d("TAG", "fetchNearbyTouristAttractions: ")
+        try {
+            val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+
+            val currentLoc =
+                LatLng(currentLocation.value!!.latitude, currentLocation.value!!.longitude)
+            val bounds = CircularBounds.newInstance(currentLoc,  /* radius = */10000.0)
+            val includedTypes = listOf("tourist_attraction", "restaurant", "cafe") // 포함
+            val excludedTypes =
+                listOf("meal_delivery", "indian_restaurant", "greek_restaurant") // 제외
+
+            viewModelScope.launch {
+                val searchByTextRequest = SearchNearbyRequest.builder(bounds, placeFields)
+                    .setMaxResultCount(7)
+                    .setIncludedTypes(includedTypes)
+                    .setExcludedTypes(excludedTypes)
+                    .setRankPreference(SearchNearbyRequest.RankPreference.DISTANCE)
+                    .build()
+
+                val res = placesClient.searchNearby(searchByTextRequest).await() //tasks api사용시 동기작업
+                val newPlaces = res.places
+                    .filter { it.photoMetadatas != null && it.photoMetadatas!!.isNotEmpty() && it.rating != null }
+                    .sortedByDescending { it.rating } // 평점 순으로 정렬
+
+                Log.d("TAG", "fetchNearbyTouristAttractions: ${res.places}")
+                newPlaces.forEach {
+                    val photoMetadatas = it.photoMetadatas
+                    if (!photoMetadatas.isNullOrEmpty()) {
+                        val photoBitmap = fetchPhoto(photoMetadatas)
+                        placesWithPhotos.add(Pair(it, photoBitmap))
+                    } else {
+                        placesWithPhotos.add(Pair(it, null))
+                    }
+                }
+                updatePlaceList("근처", placesWithPhotos)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            updateUiState("근처", LatestUiState.Error(e))
+        }
+    }
 
     private fun fetchPopularTouristAttractions() {
-        val query = "popular tourist attractions japan, europe"
+        Log.d("TAG", "fetchPopularTouristAttractions: ")
+
+        val query = "popular tourist attraction the world in best"
         val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
         viewModelScope.launch {
             val searchByTextRequest = SearchByTextRequest.builder(query, placeFields)
@@ -167,24 +285,20 @@ class MainViewModel @Inject constructor(
                 .setRankPreference(SearchByTextRequest.RankPreference.DISTANCE)
                 .build()
 
-           try {
-               placesClient.searchByText(searchByTextRequest).result.places.forEach {
-                   val photoMetadatas = it.photoMetadatas
-                   if (!photoMetadatas.isNullOrEmpty()) {
-                       val photoRequest = FetchPhotoRequest.builder(photoMetadatas.first())
-                           .setMaxWidth(800)
-                           .setMaxHeight(1200)
-                           .build()
-                       val fetchPhotoResponse = placesClient.fetchPhoto(photoRequest).await()
-                       val photoBitmap = fetchPhotoResponse.bitmap
-                       placesWithPhotos.add(Pair(it, photoBitmap))
-                   } else {
-                       placesWithPhotos.add(Pair(it, null))
-                   }
-               }
-           }catch (e: Throwable) {
-               e.printStackTrace()
-           }
+            try {
+                placesClient.searchByText(searchByTextRequest)
+                    .result.places.forEach {
+                        val photoMetadatas = it.photoMetadatas
+                        if (!photoMetadatas.isNullOrEmpty()) {
+                            placesWithPhotos.add(Pair(it, fetchPhoto(photoMetadatas)))
+                        } else {
+                            placesWithPhotos.add(Pair(it, null))
+                        }
+                    }
+
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -205,59 +319,67 @@ class MainViewModel @Inject constructor(
                 try {
                     val response = placesClient.searchByText(searchByTextRequest).await()
                     response.places.forEach { place ->
-                        if (place.id !in placeIds) { // 중복 여부 확인
+                        if (place.id!! !in placeIds) { // 중복 여부 확인
                             val photoMetadatas = place.photoMetadatas
                             if (!photoMetadatas.isNullOrEmpty()) {
-                                val photoRequest = FetchPhotoRequest.builder(photoMetadatas.first())
-                                    .setMaxWidth(800)
-                                    .setMaxHeight(1200)
-                                    .build()
-                                val fetchPhotoResponse = placesClient.fetchPhoto(photoRequest).await()
-                                val photoBitmap = fetchPhotoResponse.bitmap
-                                placesWithPhotos.add(Pair(place, photoBitmap))
+                                placesWithPhotos.add(Pair(place, fetchPhoto(photoMetadatas)))
                             } else {
                                 placesWithPhotos.add(Pair(place, null))
                             }
                             place.id?.let { placeIds.add(it) } // Set에 Place ID 추가
                         }
                     }
+                    updatePlaceList(city, placesWithPhotos)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     updateUiState(city, LatestUiState.Error(e))
                 }
             }
-            updatePlaceList(city, placesWithPhotos)
         }
     }
 
-    private fun updatePlaceList(city: String, newPlaces: List<Pair<Place, Bitmap?>>) {
-        when (city) {
-            "Tokyo" -> {
-                _tokyoHotPlaceList.value = LatestUiState.Success(newPlaces)
-            }
+    private fun updatePlaceList(loc: String, newPlaces: List<Pair<Place, Bitmap?>>) {
+        when (loc) {
+            "도쿄" -> _tokyoHotPlaceList.value = LatestUiState.Success(newPlaces)
+            "후쿠오카" -> _fukuokaHotPlaceList.value = LatestUiState.Success(newPlaces)
+            "파리" -> _parisHotPlaceList.value = LatestUiState.Success(newPlaces)
+            "근처" -> _nearbySearch.value = LatestUiState.Success(newPlaces)
+            else -> {
 
-            "Fukuoka" -> {
-                _fukuokaHotPlaceList.value = LatestUiState.Success(newPlaces)
-            }
-
-            "Paris" -> {
-                _parisHotPlaceList.value = LatestUiState.Success(newPlaces)
             }
         }
     }
 
     private fun updateUiState(city: String, state: LatestUiState<List<Pair<Place, Bitmap?>>>) {
         when (city) {
-            "Tokyo" -> {
-                _tokyoHotPlaceList.value = state
+            "도쿄" -> _tokyoHotPlaceList.value = state
+            "후쿠오카" -> _fukuokaHotPlaceList.value = state
+            "파리" -> _parisHotPlaceList.value = state
+            "근처" -> _nearbySearch.value = state
+
+            else -> {
+
+            }
+        }
+    }
+
+    private suspend fun fetchPhoto(photoMetadatas: MutableList<PhotoMetadata>?): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            if (photoMetadatas.isNullOrEmpty()) {
+                Log.e("TAG", "Photo metadatas are null or empty")
+                return@withContext null
             }
 
-            "Fukuoka" -> {
-                _fukuokaHotPlaceList.value = state
-            }
-
-            "Paris" -> {
-                _parisHotPlaceList.value = state
+            try {
+                val photoRequest = FetchPhotoRequest.builder(photoMetadatas.first())
+                    .setMaxWidth(800)
+                    .setMaxHeight(1200)
+                    .build()
+                val fetchPhotoResponse = placesClient.fetchPhoto(photoRequest).await()
+                fetchPhotoResponse.bitmap
+            } catch (e: Exception) {
+                Log.e("TAG", "fetchPhoto: $e")
+                null
             }
         }
     }

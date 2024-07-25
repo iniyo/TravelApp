@@ -5,9 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.databinding.RvRecommendedItemBinding
 
-class RecommendedRecyclerAdapter(
-    private val imgList: List<Int>
-) : RecyclerView.Adapter<RecommendedRecyclerAdapter.ViewHolder>() {
+class RecommendedRecyclerAdapter: RecyclerView.Adapter<RecommendedRecyclerAdapter.ViewHolder>() {
+    private var imgList = mutableListOf<Int>()
 
     class ViewHolder(private val binding: RvRecommendedItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -46,10 +45,11 @@ class RecommendedRecyclerAdapter(
         holder.bind(imgList[position % imgList.size])
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-    }
-
     override fun getItemCount(): Int = imgList.size
 
+    fun addAd(item: Int) {
+        imgList.add(item)
+
+        notifyItemInserted(imgList.size - 1)
+    }
 }

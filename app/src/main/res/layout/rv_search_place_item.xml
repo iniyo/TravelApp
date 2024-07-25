@@ -6,14 +6,15 @@
     android:layout_height="wrap_content"
     android:layout_margin="5dp">
 
-    <ImageView
-        android:id="@+id/iv_little_place_pic"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/siv_little_place_pic"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="5dp"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:src="@drawable/intro_pic"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.50"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,43 +24,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:text="시부야 역"
+        android:text="@string/title"
         android:textColor="@color/dark_blue"
         android:textSize="18sp"
-        app:layout_constraintStart_toEndOf="@+id/iv_little_place_pic"
-        app:layout_constraintTop_toTopOf="@+id/iv_little_place_pic" />
+        app:layout_constraintStart_toEndOf="@+id/siv_little_place_pic"
+        app:layout_constraintTop_toTopOf="@+id/siv_little_place_pic" />
 
     <TextView
         android:id="@+id/tv_place_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="관광명소"
+        android:text="@string/type"
         android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_little_place_pic"
-        app:layout_constraintStart_toStartOf="@+id/tv_place_name"
-        app:layout_constraintTop_toBottomOf="@+id/tv_place_name" />
-
+        app:layout_constraintBottom_toBottomOf="@+id/siv_little_place_pic"
+        app:layout_constraintStart_toStartOf="@+id/tv_place_name" />
 
     <TextView
         android:id="@+id/tv_spot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:text="/ 시부야"
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_place_type"
         app:layout_constraintStart_toEndOf="@+id/tv_place_type"
         app:layout_constraintTop_toTopOf="@+id/tv_place_type" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_choose"
-        android:layout_width="70dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="5dp"
-        android:background="@drawable/bg_gray_solid_corner"
-        android:text="선택"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_little_place_pic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/iv_little_place_pic" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

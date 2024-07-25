@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import pjo.travelapp.data.entity.TravelDestinationAbroad
+import pjo.travelapp.data.entity.TravelDestinationDomestic
 import javax.inject.Inject
 
 
@@ -24,12 +26,23 @@ class PlanViewModel @Inject constructor(
     private var _selectedPlaceName = MutableStateFlow<String>("")
     val selectedPlaceName: StateFlow<String> get() = _selectedPlaceName
 
+    private var _selectedPlaceNameList = MutableStateFlow(ArrayList<String>())
+    val selectedPlaceNameList: StateFlow<List<String>> get() = _selectedPlaceNameList
+
     private var _selectedCalendarDatePeriod = MutableStateFlow<String>("")
     val selectedCalendarDatePeriod: StateFlow<String> get() = _selectedCalendarDatePeriod
 
+    private val _domesticPlace = MutableStateFlow<TravelDestinationDomestic?>(null)
+    val domesticPlace: StateFlow<TravelDestinationDomestic?> get() = _domesticPlace
+
+    private val _abroadPlace = MutableStateFlow<TravelDestinationAbroad?>(null)
+    val abroadPlace: StateFlow<TravelDestinationAbroad?> get() = _abroadPlace
 
     init {
         fetchPlaceAndDate()
+        fetchPlaceList()
+        fetchDomesticPlace()
+        fetchAbroadPlace()
     }
 
     private fun fetchSelectedCalendarDate(date: String) {
@@ -48,17 +61,36 @@ class PlanViewModel @Inject constructor(
         _selectedCalendarDatePeriod.value = date.toString()
     }
 
+    private fun fetchPlaceList() {
+        viewModelScope.launch {
+            selectedPlaceName.collectLatest {
+                _selectedPlaceNameList.value.add(it)
+            }
+        }
+    }
+
+    fun fetchUserSchedule() {
+
+    }
+
+
+    fun fetchDomesticPlace() {
+        _domesticPlace.value = TravelDestinationDomestic()
+    }
+
+    fun fetchAbroadPlace() {
+        _abroadPlace.value = TravelDestinationAbroad()
+    }
+
     private fun fetchPlaceAndDate() {
         var place = ""
         var trip = ""
         var placeAndDate = ""
         viewModelScope.launch {
             tripPeriod.collectLatest {
-                trip = ""
                 trip = it
             }
             selectedPlaceName.collectLatest {
-                place = ""
                 place = it
             }
 

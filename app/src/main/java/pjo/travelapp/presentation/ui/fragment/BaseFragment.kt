@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -19,8 +18,8 @@ import java.lang.reflect.Type
 abstract class BaseFragment<T : ViewBinding> : Fragment() {
 
     // ViewBinding 객체를 저장하는 변수
-    private var _binding: T? = null
-    val binding get() = _binding!!
+    protected var _binding: T? = null
+    val binding get() = _binding ?: throw IllegalStateException("Binding is only valid between onCreateView and onDestroyView")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +29,7 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
         // ViewBinding 객체를 생성하여 _binding 변수에 할당
         _binding = createBinding(inflater, container)
         initCreate()
-        return binding.root
+        return _binding?.root
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -48,17 +47,25 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
             method.invoke(null, inflater) as T
         } else {
             // ViewBinding의 서브 클래스인 경우 직접 바인딩 초기화
-            val method = aClass.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java)
+            val method = aClass.getMethod(
+                "inflate",
+                LayoutInflater::class.java,
+                ViewGroup::class.java,
+                Boolean::class.java
+            )
             method.invoke(null, inflater, container, false) as T
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
-        initViewModel()
-        initListener()
-        afterViewCreated()
+        bind {
+            initView()
+            initAdapter()
+            initViewModel()
+            initListener()
+            afterViewCreated()
+        }
     }
 
     override fun onDestroyView() {
@@ -72,10 +79,12 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
     protected open fun initViewModel() {}
     protected open fun initListener() {}
     protected open fun afterViewCreated() {}
+    protected open fun initAdapter() {}
+
 
     // ViewBinding 객체에 대해 블록 코드를 실행하는 메서드
-    protected inline fun bind(block: T.() -> Unit) {
-        binding.apply(block)
+    protected inline fun bind(crossinline block: T.() -> Unit) {
+        _binding?.apply(block)
     }
 
     // Lifecycle 상태가 STARTED일 때 코루틴 블록을 실행하는 메서드
@@ -87,3 +96,4 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
         }
     }
 }
+

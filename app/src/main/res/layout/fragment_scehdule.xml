@@ -13,7 +13,7 @@
             type="pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter" />
         <variable
             name="schedule_adapter"
-            type="pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter" />
+            type="pjo.travelapp.presentation.adapter.PromotionSlideAdapter" />
     </data>
 
 
@@ -24,7 +24,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/bottom_navigation_height">
 
             <ImageView
                 android:id="@+id/iv_my_trip_back"
@@ -72,13 +73,13 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_trips"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vp_trips"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
                     android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
                     android:adapter="@{schedule_adapter}"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
                     app:layout_constraintTop_toBottomOf="@+id/tv_my_trip" />
@@ -93,7 +94,7 @@
                     android:textSize="17sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
-                    app:layout_constraintTop_toBottomOf="@+id/rv_trips" />
+                    app:layout_constraintTop_toBottomOf="@+id/vp_trips" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_next_trips"
@@ -101,6 +102,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:adapter="@{default_adapter_2}"
+                    android:orientation="horizontal"
+                    tools:listitem="@layout/rv_schedule_item"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/tv_next_trip"
@@ -124,6 +127,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:adapter="@{default_adapter_1}"
+                    android:orientation="horizontal"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/tv_next_trip"

@@ -1,19 +1,16 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.Manifest
 import android.animation.Animator
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
+import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -22,20 +19,17 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.android.libraries.places.api.Places
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.internal.ViewUtils.hideKeyboard
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import pjo.travelapp.BuildConfig
 import pjo.travelapp.R
-import pjo.travelapp.data.entity.AutocompletePredictionItem
 import pjo.travelapp.data.entity.DLocation
 import pjo.travelapp.data.entity.LatLngObject
 import pjo.travelapp.data.entity.PlaceResult
@@ -45,7 +39,6 @@ import pjo.travelapp.databinding.FragmentMapsBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.ui.consts.AdapterStyle
 import pjo.travelapp.presentation.ui.consts.SHOW_DIRECTION
-import pjo.travelapp.presentation.ui.consts.SHOW_SEARCH
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.util.LatestUiState
@@ -60,8 +53,9 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private val viewModel: MapsViewModel by activityViewModels()
-    private val mainViewModel: MainViewModel by activityViewModels()
+    private lateinit var mainViewModel: MainViewModel
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
+    private var currentLatLng: LatLng = LatLng(35.1179923, 129.0419654)
     private lateinit var infoBottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var searchBottomSheetBehavior: BottomSheetBehavior<View>
     private var placeDetailsList = mutableListOf<PlaceResult>()
@@ -80,47 +74,50 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         googleMap.apply {
             mapType = GoogleMap.MAP_TYPE_NORMAL
             googleMap.isMyLocationEnabled = true
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            fusedLocationClient.lastLocation.addOnSuccessListener {
                 val location = mainViewModel.currentLocation.value
                 if (location != null) {
-                    val currentLatLng = location
+                    currentLatLng = location
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
                     // 현재 위치 마커를 추가하고 currentLocationMarker에 저장
                     googleMap.addMarker(
                         MarkerOptions().position(currentLatLng).title("Current Location")
                     )
-                    binding.ibtnMyLocation.setOnClickListener {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-                    }
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
             }.addOnFailureListener { e ->
                 e.printStackTrace()
             }
+
             setOnMapClickListener {
                 infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                toggleToolbars(true)
             }
 
             setOnPoiClickListener { poi ->
                 startLocationMove(poi.latLng)
                 fetchPlaceIdAndDetails(placeId = poi.placeId)
-                infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                if(binding.place != null) {
+                    viewModel.fetchEndQuery(binding.place!!)
+                }
+                toggleBottomSheet(infoBottomSheetBehavior, true)
             }
 
             setOnMarkerClickListener { marker ->
                 startLocationMove(marker.position)
                 fetchPlaceIdAndDetails(marker.position)
-
                 infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                 true
             }
         }
     }
 
-    override fun initCreate() {
-        super.initCreate()
-        Log.d("TAG", "initCreate: ")
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        // 액티비티에 연결될 때 ViewModel을 초기화합니다.
+        activity?.let {
+            mainViewModel = ViewModelProvider(it).get(MainViewModel::class.java)
+        }
     }
 
     override fun initView() {
@@ -130,6 +127,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             val mapFragment =
                 childFragmentManager.findFragmentById(R.id.fcv_map) as SupportMapFragment?
             mapFragment?.getMapAsync(callback)
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             setBottomSheet()
             setTextStartAndEnd()
@@ -140,73 +138,75 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     override fun initViewModel() {
         super.initViewModel()
-        bind {
-            viewmodel = viewModel
-            launchWhenStarted {
-                // 장소 세부정보 리스트
-                launch {
-                    viewModel.placeDetailsList.collectLatest {
-                        Log.d("TAG", "placeDetailsList: ")
-                        placeDetailsList = it.toMutableList()
-                        adapter?.submitList(placeDetailsList)
-                    }
-                }
-
-                // 장소 세부정보
-                launch {
-                    viewModel.placeDetailsResult.collectLatest {
-                        it?.let {
-                            lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
-                            place = it
+        if (::mainViewModel.isInitialized) {
+            bind {
+                viewmodel = viewModel
+                launchWhenStarted {
+                    // 장소 세부정보 리스트
+                    launch {
+                        viewModel.placeDetailsList.collectLatest {
+                            Log.d("TAG", "placeDetailsList: ")
+                            placeDetailsList = it.toMutableList()
+                            adapter?.submitList(placeDetailsList)
                         }
                     }
-                }
 
-                launch {
-                    viewModel.predictionList.collectLatest { predictions ->
-                        predictions.forEach { prediction ->
-                            viewModel.fetchPlaceDetails(prediction.placeId)
-                        }
-                    }
-                }
-
-                // 경로
-                launch {
-                    viewModel.directions.collectLatest {
-                        when (it) {
-                            is LatestUiState.Loading -> {
-                                Log.d("TAG", "maps dialog showLoad: $it")
-                            }
-
-                            is LatestUiState.Error -> {
-                                Log.d("TAG", "maps dialog showError: ${it.exception}")
-                            }
-
-                            is LatestUiState.Success -> {
-                                it.data?.let { response -> updateDirection(response) }
+                    // 장소 세부정보
+                    launch {
+                        viewModel.placeDetailsResult.collectLatest {
+                            it?.let {
+                                lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
+                                place = it
                             }
                         }
                     }
-                }
 
-                launch {
-                    viewModel.startQuery.collectLatest {
-                        Log.d("TAG", "startQuery: $it")
-                        if (it != null) {
-                            toolbarMapsDirection.tvStart.text = it.name
-                        } else {
-                            Log.d("TAG", "initViewModel: null startQuery ")
+                    launch {
+                        viewModel.predictionList.collectLatest { predictions ->
+                            predictions.forEach { prediction ->
+                                viewModel.fetchPlaceDetails(prediction.placeId)
+                            }
                         }
-
                     }
-                }
-                launch {
-                    viewModel.endQuery.collectLatest {
-                        Log.d("TAG", "endQuery: $it")
-                        if (it != null) {
-                            toolbarMapsDirection.tvEnd.text = it.name
-                        } else {
-                            Log.d("TAG", "initViewModel: null endQuery ")
+
+                    // 경로
+                    launch {
+                        viewModel.directions.collectLatest {
+                            when (it) {
+                                is LatestUiState.Loading -> {
+                                    Log.d("TAG", "maps dialog showLoad: $it")
+                                }
+
+                                is LatestUiState.Error -> {
+                                    Log.d("TAG", "maps dialog showError: ${it.exception}")
+                                }
+
+                                is LatestUiState.Success -> {
+                                    it.data?.let { response -> updateDirection(response) }
+                                }
+                            }
+                        }
+                    }
+
+                    launch {
+                        viewModel.startQuery.collectLatest {
+                            Log.d("TAG", "startQuery: $it")
+                            if (it != null) {
+                                toolbarMapsDirection.tvStart.text = it.name
+                            } else {
+                                Log.d("TAG", "initViewModel: null startQuery ")
+                            }
+
+                        }
+                    }
+                    launch {
+                        viewModel.endQuery.collectLatest {
+                            Log.d("TAG", "endQuery: $it")
+                            if (it != null) {
+                                toolbarMapsDirection.tvEnd.text = it.name
+                            } else {
+                                Log.d("TAG", "initViewModel: null endQuery ")
+                            }
                         }
                     }
                 }
@@ -242,21 +242,33 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             )
         }
 
+        // LatLngBounds 객체를 사용하여 경로의 경계 설정
+        val boundsBuilder = LatLngBounds.Builder()
+        decodedPath.forEach { boundsBuilder.include(it) }
+        val bounds = boundsBuilder.build()
+
+        // 경로가 모두 보이도록 카메라 이동
+        val padding = 200 // 경계와 지도 사이의 여백 (픽셀 단위)
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+
     }
+
     private fun backPressed() {
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (infoBottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
-                    infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                } else if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
-                    searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                } else if (!isToolbarToggler) {
-                    toggleToolbars(true)
-                } else {
-                    navigate.navigateUp()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (infoBottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
+                        infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    } else if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+                        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    } else if (!isToolbarToggler) {
+                        toggleToolbars(true)
+                    } else {
+                        navigate.navigateUp()
+                    }
                 }
-            }
-        })
+            })
     }
 
     private fun setTextStartAndEnd() {
@@ -272,6 +284,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
         }
     }
+
     @SuppressLint("RestrictedApi")
     private fun setAdapter(st: AdapterStyle) {
         if (currentAdapterStyle == st) {
@@ -329,6 +342,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         bind {
             toolbarMapsDirection.apply {
                 btnSearchDirection.setOnClickListener {
+                    toggleToolbars(true)
                     viewModel.apply {
                         getStartAndEndPlaceId(
                             viewModel.startQuery.value?.formattedAddress,
@@ -395,6 +409,16 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             infoBottomSheet.clTabContainer1.setOnClickListener {
                 toggleBottomSheet(infoBottomSheetBehavior)
                 toggleToolbars(SHOW_DIRECTION)
+                if (place != null) {
+                    viewModel.fetchEndQuery(place!!)
+                }
+            }
+
+            ibtnMyLocation.setOnClickListener {
+                if (place != null) {
+                    viewModel.fetchStartQuery(place!!)
+                }
+                startLocationMove(currentLatLng)
             }
         }
     }
@@ -412,7 +436,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     }
 
     private fun animateView(view: View, show: Boolean) {
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        view.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 view.apply {
@@ -435,6 +460,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                                 override fun onAnimationEnd(animation: Animator) {
                                     visibility = View.GONE
                                 }
+
                                 override fun onAnimationCancel(animation: Animator) {}
                                 override fun onAnimationRepeat(animation: Animator) {}
                             })
@@ -454,26 +480,26 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     }
 
     private fun setBottomSheet() {
-         val bottomSheet = binding.infoBottomSheet.clBottomSheetContainer
-         infoBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        val bottomSheet = binding.infoBottomSheet.clBottomSheetContainer
+        infoBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
 
-         val searchBottomSheet = binding.searchBottomSheet.clMainContainer
-         searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
-         searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        val searchBottomSheet = binding.searchBottomSheet.clMainContainer
+        searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
+        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         // toolbarMapsDirection 높이 측정
         /*binding.toolbarMapsDirection.root.viewTreeObserver.addOnGlobalLayoutListener {
             adjustBottomSheetMaxHeight()
         }*/
-       /* bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
-            val maxHeight =
-                (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
-            if (bottomSheet.height > maxHeight) {
-                val params = bottomSheet.layoutParams
-                params.height = maxHeight
-                bottomSheet.layoutParams = params
-            }
-        }*/
+        /* bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
+             val maxHeight =
+                 (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
+             if (bottomSheet.height > maxHeight) {
+                 val params = bottomSheet.layoutParams
+                 params.height = maxHeight
+                 bottomSheet.layoutParams = params
+             }
+         }*/
 
         /* searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
              override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -489,14 +515,15 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
          })*/
         infoBottomSheetBehavior.isFitToContents = false
         infoBottomSheetBehavior.halfExpandedRatio = 0.5f
-       /* val nestedScrollView = bottomSheet.findViewById<NestedScrollView>(R.id.nsv_cotainer)
-        nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            if (scrollY == 0) {
-                // 스크롤이 상단에 있을 때 추가 처리
-            }
-        }*/
+        /* val nestedScrollView = bottomSheet.findViewById<NestedScrollView>(R.id.nsv_cotainer)
+         nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+             if (scrollY == 0) {
+                 // 스크롤이 상단에 있을 때 추가 처리
+             }
+         }*/
 
-        infoBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        infoBottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
@@ -504,25 +531,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                     binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_up)
                 }
                 when (newState) {
-                    BottomSheetBehavior.STATE_DRAGGING -> {
-
-                    }
-
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-
-                    }
-
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-
-                    }
-
-                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-
-                    }
-
-                    BottomSheetBehavior.STATE_SETTLING -> {
-
-                    }
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
                     }
@@ -536,7 +544,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     }
 
 
-
     /*   private fun adjustBottomSheetMaxHeight() {
            bind {
                val toolbarHeight = clSearch.height
@@ -547,21 +554,25 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
        }*/
 
-    private fun toggleBottomSheet(bottomSheetBehavior: BottomSheetBehavior<View>) {
+    private fun toggleBottomSheet(bottomSheetBehavior: BottomSheetBehavior<View>, choose: Boolean = false) {
         when (bottomSheetBehavior.state) {
             BottomSheetBehavior.STATE_EXPANDED -> {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
 
             BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                if(choose){
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                }else {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                }
             }
         }
     }
 
 
     // 위치로 이동 및 마커 셋
-    private fun startLocationMove(latLng: LatLng) {
+    private fun startLocationMove(latLng: LatLng, zoomsize: Float = 15f) {
         searchMarker?.remove()
 
         val option = MarkerOptions()
@@ -572,7 +583,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         googleMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(
                 latLng,
-                16F
+                zoomsize
             )
         )
     }

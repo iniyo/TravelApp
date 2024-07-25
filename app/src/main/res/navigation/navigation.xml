@@ -40,7 +40,7 @@
         android:label="fragment_accommodation_detail"
         tools:layout="@layout/fragment_accommodation_detail" />
     <fragment
-        android:id="@+id/checkFragment"
+        android:id="@+id/calendarFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.CalendarFragment"
         android:label="fragment_check"
         tools:layout="@layout/fragment_calendar" >
@@ -106,7 +106,7 @@
         tools:layout="@layout/fragment_main_search" >
         <action
             android:id="@+id/action_mainSearchFragment_to_checkFragment"
-            app:destination="@id/checkFragment" />
+            app:destination="@id/calendarFragment" />
         <action
             android:id="@+id/action_mainSearchFragment_to_voiceRecognitionFragment"
             app:destination="@id/voiceRecognitionFragment" />
@@ -121,4 +121,12 @@
         android:name="pjo.travelapp.presentation.ui.fragment.VoiceRecognitionFragment"
         android:label="fragment_voice_recognition"
         tools:layout="@layout/fragment_voice_recognition" />
+    <fragment
+        android:id="@+id/placeDetailFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.PlaceDetailFragment"
+        android:label="PlaceDetailFragment" />
+    <fragment
+        android:id="@+id/placeSelectFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.PlaceSelectFragment"
+        android:label="PlaceSelectFragment" />
 </navigation>

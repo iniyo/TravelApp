@@ -109,6 +109,8 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     // okhttp loggin interceptor
     implementation(libs.logging.interceptor)
+    // viewpager circle indicator
+    implementation(libs.dotsindicator)
     /**
      * open source end
      */

@@ -27,9 +27,11 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
             Fragments.USER_PAGE -> navController.navigate(R.id.userDetailFragment)
             Fragments.PLAN_PAGE -> navController.navigate(R.id.planFragment)
             Fragments.SIGN_PAGE -> navController.navigate(UserDetailFragmentDirections.actionUserDetailFragmentToSignFragment())
-            Fragments.CALENDAR_PAGE -> navController.navigate(R.id.checkFragment)
+            Fragments.CALENDAR_PAGE -> navController.navigate(R.id.calendarFragment)
             Fragments.VOICE_PAGE -> navController.navigate(R.id.voiceRecognitionFragment)
             Fragments.SCHEDULE_PAGE -> navController.navigate(R.id.scehduleFragment)
+            Fragments.PLACE_SELECT_PAGE -> navController.navigate(R.id.placeSelectFragment)
+            Fragments.PLACE_DETAIL_PAGE -> navController.navigate(R.id.placeDetailFragment)
         }
     }
 

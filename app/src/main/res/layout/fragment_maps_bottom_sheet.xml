@@ -17,8 +17,8 @@
         android:layout_height="match_parent"
         app:behavior_hideable="false"
         app:behavior_peekHeight="32dp"
-        tools:context=".presentation.ui.fragment.MapsBottomSheetFragment"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        tools:context=".presentation.ui.fragment.MapsBottomSheetFragment">
 
         <ImageView
             android:id="@+id/iv_up_arrow"
@@ -402,6 +402,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
+                                android:ellipsize="end"
+                                android:maxLines="2"
                                 android:text="@{place.vicinity}" />
                         </LinearLayout>
 
@@ -423,6 +425,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="20dp"
+                                android:ellipsize="end"
+                                android:maxLines="2"
                                 android:text="@{place.website}" />
                         </LinearLayout>
 

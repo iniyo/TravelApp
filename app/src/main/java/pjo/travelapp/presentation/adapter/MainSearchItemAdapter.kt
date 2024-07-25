@@ -18,15 +18,15 @@ class MainSearchItemAdapter(
     inner class ViewHolder(private val binding: RvSearchPlaceItemBinding) :
         androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Pair<Place, Bitmap?>) {
+        fun bind(item: Pair<Place, Bitmap?>?) {
             try {
                 binding.apply {
                     if (item != null) {
                         Log.d("TAG", "AutoCompleteItemAdapter bind: $item")
                         item.second?.let {
-                            ivLittlePlacePic.setImageBitmap(it)
+                            sivLittlePlacePic.setImageBitmap(it)
                         } ?: run {
-                            ivLittlePlacePic.setImageResource(R.drawable.ic_launcher_foreground)
+                            sivLittlePlacePic.setImageResource(R.drawable.ic_launcher_foreground)
                         }
 
                         tvPlaceName.text = item.first.name

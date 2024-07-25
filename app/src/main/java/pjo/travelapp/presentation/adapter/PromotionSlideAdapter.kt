@@ -7,10 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import pjo.travelapp.databinding.VpMainTopSlideItemBinding
 
-class TopSlideViewPagerAdapter(
-    private val imgList: List<Int>
-) : RecyclerView.Adapter<TopSlideViewPagerAdapter.ViewHolder>() {
+class PromotionSlideAdapter: RecyclerView.Adapter<PromotionSlideAdapter.ViewHolder>() {
 
+    private var imgList = mutableListOf<Int>()
 
     init {
         setHasStableIds(true)
@@ -28,17 +27,12 @@ class TopSlideViewPagerAdapter(
         holder.bind(imgList[position % imgList.size])
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-    }
-
     class ViewHolder(private val binding: VpMainTopSlideItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(imgUrl: Int) {
 
             binding.apply {
 
-                Log.d("TAG", "bind: $imgUrl")
                 ivTopSlide.setImageResource(imgUrl)
                /* Glide.with(root.context)
                     .load(imgUrl)
@@ -56,4 +50,10 @@ class TopSlideViewPagerAdapter(
     }
 
     override fun getItemCount(): Int = imgList.size
+
+    fun addAd(item: Int) {
+        imgList.add(item)
+        Log.d("TAG", "addAd")
+        notifyItemInserted(imgList.size - 1)
+    }
 }

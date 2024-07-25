@@ -18,7 +18,11 @@ import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +39,7 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var splashScreen: SplashScreen
     private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+
     @Inject
     lateinit var navigator: AppNavigator
     private var isPermissionRequestInProgress = false
@@ -116,7 +121,7 @@ open class MainActivity : AppCompatActivity() {
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
                 }
-                if (destinationId == R.id.checkFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment) {
+                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
                     cnbItem.visibility = View.VISIBLE
@@ -135,7 +140,11 @@ open class MainActivity : AppCompatActivity() {
                         finish()
                     } else {
                         backPressedOnce = true
-                        Snackbar.make(binding.root, getString(R.string.end_application), Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.end_application),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
                         handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
                     }
                 } else {
@@ -158,10 +167,18 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setCheckVoicePermission() {
-        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this@MainActivity,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             if (!isPermissionRequestInProgress) {
                 isPermissionRequestInProgress = true
-                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.RECORD_AUDIO), 0)
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(Manifest.permission.RECORD_AUDIO),
+                    0
+                )
             }
         }
     }
@@ -187,6 +204,32 @@ open class MainActivity : AppCompatActivity() {
                     viewModel.fetchCurrentLocation(currentLatLng)
                 }
             }
+            // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
+            val locationRequest =
+                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
+                    setMinUpdateIntervalMillis(5000)
+                    setMaxUpdateDelayMillis(20000)
+                }.build()
+
+            // 위치 콜백 설정
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    locationResult.lastLocation?.let { location ->
+                        val currentLatLng = LatLng(location.latitude, location.longitude)
+                        Log.d("TAG", "Location updated: $currentLatLng")
+                        viewModel.fetchCurrentLocation(currentLatLng)
+                    }
+                }
+            }
+
+            // 위치 업데이트 요청
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(baseContext)
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+
         } else {
             // 위치 권한이 없는 경우 다시 요청
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)

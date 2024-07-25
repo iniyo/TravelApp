@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ll_category_main_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:layout_marginEnd="8dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/siv_pic"
+
+    <LinearLayout
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.50" />
+        android:background="@drawable/bg_white_solid_corner">
+
+        <ImageView
+            android:id="@+id/iv_pic"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:src="@drawable/svg_air_ticket"
+            android:scaleType="centerCrop" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_title"

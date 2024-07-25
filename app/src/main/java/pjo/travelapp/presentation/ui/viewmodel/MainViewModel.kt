@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.presentation.ui.fragment.RecycleItemFragment
@@ -37,8 +38,7 @@ private fun <T> List<T>.shuffled(): List<T> {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private var placesClient: PlacesClient,
-    private val getPlaceDetailUseCase: GetPlaceDetailUseCase
+    private var placesClient: PlacesClient
 ) : ViewModel() {
 
     /**
@@ -74,10 +74,11 @@ class MainViewModel @Inject constructor(
     private val _currentLocation = MutableStateFlow<LatLng?>(null)
     val currentLocation: StateFlow<LatLng?> get() = _currentLocation
 
+    private val _promotionData = MutableStateFlow<LatestUiState<List<Int>>>(LatestUiState.Loading)
+    val promotionData: StateFlow<LatestUiState<List<Int>>> get() = _promotionData
+
     // 캐시용 변수 추가
     private val placeDetailCache = mutableMapOf<String, Place>()
-
-    private val fragmentLists = mutableMapOf<Int, List<Fragment>>()
 
     private val _shuffledHotPlaceList =
         MutableStateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>(LatestUiState.Loading)
@@ -91,44 +92,73 @@ class MainViewModel @Inject constructor(
         Place.Field.PHOTO_METADATAS,
         Place.Field.REVIEWS
     )
-
+    private var isTokyoListInitialized = false
+    private var isFukuokaListInitialized = false
+    private var isParisListInitialized = false
     /**
      * 변수 선언 끝
      */
 
     init {
         fetchQueryTextSearch()
-        shuffleAndDistribute()
+        observeHotPlaceLists()
+        fetchPromotion()
     }
+
+    private fun fetchPromotion() {
+        _promotionData.value = LatestUiState.Success(listOf(
+                R.drawable.banner1,
+                R.drawable.banner2
+            )
+        )
+    }
+
+    private fun observeHotPlaceLists() {
+        viewModelScope.launch {
+            observeHotPlaceList(tokyoHotPlaceList) { isTokyoListInitialized = true }
+            observeHotPlaceList(fukuokaHotPlaceList) { isFukuokaListInitialized = true }
+            observeHotPlaceList(parisHotPlaceList) { isParisListInitialized = true }
+        }
+    }
+
+    private fun observeHotPlaceList(
+        hotPlaceList: StateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            hotPlaceList.collectLatest { state ->
+                if (state is LatestUiState.Success) {
+                    onSuccess()
+                    if (isAllListsInitialized()) {
+                        shuffleAndDistribute()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isAllListsInitialized(): Boolean {
+        return isTokyoListInitialized && isFukuokaListInitialized && isParisListInitialized
+    }
+
     private fun shuffleAndDistribute() {
         viewModelScope.launch {
             val tokyoList = (_tokyoHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
             val fukuokaList = (_fukuokaHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
             val parisList = (_parisHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
 
-            // 결합한 리스트를 랜덤으로 섞기
             val combinedList = (tokyoList + fukuokaList + parisList)
-                .filterNot { it.first.name.isNullOrEmpty() || it.first.address.isNullOrEmpty() }
                 .shuffled()
+                .sortedByDescending { it.first.rating } // 평점 높은 순으로 정렬
 
-            // 새로운 리스트에 저장
+            combinedList.forEach {
+                Log.d("TAG", "viewmodel shuffleAndDistribute: ${it.first.name}")
+            }
+
             _shuffledHotPlaceList.value = LatestUiState.Success(combinedList)
         }
     }
-    private fun getFragmentSetLists(choose: Int): List<String> {
-        return when (choose) {
-            0 -> listOf("도쿄", "후쿠오카", "파리")
-            1 -> listOf("숙소")
-            else -> listOf("근처")
-        }
-    }
 
-    fun getForkFragments(choose: Int): List<Fragment> {
-        return fragmentLists.getOrPut(choose) {
-            val list = getFragmentSetLists(choose)
-            list.map { RecycleItemFragment.newInstance(it) }
-        }
-    }
 
     fun fetchData() {
         fetchTopRatedTouristAttractions("도쿄")

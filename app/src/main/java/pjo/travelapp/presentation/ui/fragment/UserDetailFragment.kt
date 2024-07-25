@@ -1,10 +1,9 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentUserDetailBinding
-import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
+import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -36,19 +35,21 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
             R.drawable.banner2
         )
 
-        val (pageTransX, decoration) = MyGraphicMapper.getDecoration(10, 20)
+        val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
         bind {
+            adapter = PromotionSlideAdapter()
+            a.forEach {
+                adapter?.addAd(it)
+            }
+
             vpUserSchedule.apply {
                 addItemDecoration(decoration)
 
                 setPageTransformer { page, position ->
                     page.translationX = position * -pageTransX
                 }
-                clipToPadding = false
-                clipChildren = false
-                adapter = TopSlideViewPagerAdapter(a)
-                orientation = ViewPager2.ORIENTATION_HORIZONTAL
+
                 offscreenPageLimit = 2
             }
         }

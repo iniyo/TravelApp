@@ -1,31 +1,32 @@
 package pjo.travelapp.presentation.adapter
 
-import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.google.android.libraries.places.api.model.Place
 import pjo.travelapp.presentation.ui.fragment.RecycleItemFragment
 
 class MorePlacesViewPagerAdapter(
-    private val fragmentActivity: FragmentActivity,
-    private val fragments: List<Fragment>
+    fragmentActivity: FragmentActivity,
+    private val choose: Int // 선택된 카테고리를 전달 받음
 ) : FragmentStateAdapter(fragmentActivity) {
 
-    override fun getItemCount(): Int = fragments.size
-    private val fragmentManager = fragmentActivity.supportFragmentManager
-    private val fragmentTransaction = fragmentManager.beginTransaction()
-
+    override fun getItemCount(): Int = getFragmentSetLists(choose).size
 
     override fun createFragment(position: Int): Fragment {
-        val fragmentTag = "f$position"
-        val existingFragment = fragmentManager.findFragmentByTag(fragmentTag)
-        if (existingFragment != null) {
-            return existingFragment
-        }
+        // Create a new fragment
+        val fragmentName = getFragmentSetLists(choose)[position]
+        return RecycleItemFragment.newInstance(fragmentName)
+    }
 
-        val fragment = fragments[position]
-        fragmentTransaction.add(fragment, fragmentTag).commitNowAllowingStateLoss()
-        return fragment
+    override fun containsItem(itemId: Long): Boolean {
+        return super.containsItem(itemId)
+    }
+
+    private fun getFragmentSetLists(choose: Int): List<String> {
+        return when (choose) {
+            0 -> listOf("도쿄", "후쿠오카", "파리")
+            1 -> listOf("숙소")
+            else -> listOf("근처")
+        }
     }
 }

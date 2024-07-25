@@ -13,7 +13,9 @@ enum class Fragments {
     PLAN_PAGE,
     CALENDAR_PAGE,
     VOICE_PAGE,
-    SCHEDULE_PAGE
+    SCHEDULE_PAGE,
+    PLACE_SELECT_PAGE,
+    PLACE_DETAIL_PAGE
 }
 
 /**

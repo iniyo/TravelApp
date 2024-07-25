@@ -46,6 +46,11 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="default_tab_text" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 
     <!-- bottomSheetFragment border 20dp 전용 테마 -->
     <style name="AppBottomSheetDialogBorder20WhiteTheme"

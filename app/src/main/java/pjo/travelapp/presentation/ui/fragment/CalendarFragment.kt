@@ -2,6 +2,8 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -15,6 +17,7 @@ import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import pjo.travelapp.R
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
@@ -30,6 +33,7 @@ import pjo.travelapp.presentation.util.extension.displayText
 import pjo.travelapp.presentation.util.calendar.formatDaysBetween
 import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.calendar.headerDateFormatDisplayText
+import pjo.travelapp.presentation.util.calendar.selectedMonthsAndDays
 import pjo.travelapp.presentation.util.extension.makeInVisible
 import pjo.travelapp.presentation.util.extension.makeVisible
 import pjo.travelapp.presentation.util.extension.setTextColorRes
@@ -45,7 +49,8 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     @Inject
     lateinit var navigator: AppNavigator
     private val viewModel: PlanViewModel by activityViewModels()
-
+    private val today = LocalDate.now()
+    private var selection = DateSelection() // data class
 
     override fun initView() {
         super.initView()
@@ -77,13 +82,21 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
         }
     }
 
-    private val today = LocalDate.now()
-    private var selection = DateSelection() // data class
+    override fun initViewModel() {
+        bind {
+            launchWhenStarted {
+               viewModel.planAdapterList.collectLatest {
+
+               }
+            }
+        }
+    }
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {
         binding.tvStartDate.apply {
             if (selection.startDate != null) {
+                Log.d("TAG", "bindSummaryViews: ${selection.startDate}")
                 text = headerDateFormatDisplayText(selection, true)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
@@ -94,6 +107,7 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
 
         binding.tvEndDate.apply {
             if (selection.endDate != null) {
+                Log.d("TAG", "bindSummaryViews: ${selection.endDate}")
                 text = headerDateFormatDisplayText(selection, false)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
@@ -105,8 +119,10 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
         if(selection.daysBetween != null){
             val period = formatDaysBetween(selection.daysBetween)
             binding.tvTourDate.text = period
-            viewModel.fetchTripPeriod(period)
+            viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
             viewModel.fetchSelectedCalendarDatePeriod(dateRangeDisplayText(selection.startDate, selection.endDate))
+
+            viewModel.fetchUserAdapter( selectedMonthsAndDays(selection.startDate, selection.endDate))
         }else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }

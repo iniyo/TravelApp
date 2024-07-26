@@ -9,16 +9,16 @@
     app:cnb_iconColor="@color/white"
     />
     <item
-        android:id="@+id/nav_map"
+        android:id="@+id/nav_maps"
         android:icon="@drawable/bottom_btn2"
-        android:title="@string/explorer"
+        android:title="@string/maps"
         app:cnb_backgroundColor="@color/blue"
         app:cnb_iconColor="@color/white"
         />
     <item
-        android:id="@+id/nav_planner"
+        android:id="@+id/nav_schedule"
         android:icon="@drawable/bottom_btn3"
-        android:title="@string/planner"
+        android:title="@string/schedule"
         app:cnb_backgroundColor="@color/blue"
         app:cnb_iconColor="@color/white"
         />

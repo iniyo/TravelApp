@@ -5,6 +5,7 @@ import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.nextMonth
 import com.kizitonwose.calendar.core.previousMonth
 import com.kizitonwose.calendar.core.yearMonth
+import com.squareup.okhttp.internal.Internal.logger
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -43,6 +44,19 @@ fun dateRangeDisplayText(start: LocalDate?, end: LocalDate?): CharSequence {
         "null"
     }
     return rt
+}
+
+fun selectedMonthsAndDays(start: LocalDate?, end: LocalDate?): List<Pair<Int, Int>>? {
+    return if (start != null && end != null) {
+        generateSequence(start) { it.plusDays(1) }
+            .takeWhile { it <= end }
+            .map { it.monthValue to it.dayOfMonth }
+            .toList()
+
+    } else {
+        logger.info("selectedMonthsAndDays: null")
+        null
+    }
 }
 
 fun formatDaysBetween(daysBetween: Long?): String {

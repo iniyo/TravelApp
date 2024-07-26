@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -29,6 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
+import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -39,6 +41,7 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var splashScreen: SplashScreen
     private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+    private val planViewModel: PlanViewModel by viewModels()
 
     @Inject
     lateinit var navigator: AppNavigator
@@ -73,9 +76,11 @@ open class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
+    // backstack control
     private fun handleBackStack() {
         val fragmentManager = supportFragmentManager
-        if (fragmentManager.backStackEntryCount > 3) {
+        // back stack 2개 초과시 pop
+        if (fragmentManager.backStackEntryCount > 2) {
             fragmentManager.popBackStack(
                 fragmentManager.getBackStackEntryAt(0).id,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE
@@ -89,8 +94,8 @@ open class MainActivity : AppCompatActivity() {
             cnbItem.setOnItemSelectedListener { id ->
                 when (id) {
                     R.id.nav_home -> navigator.navigateTo(Fragments.HOME_PAGE)
-                    R.id.nav_map -> navigator.navigateTo(Fragments.MAPS_PAGE)
-                    R.id.nav_planner -> navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+                    R.id.nav_maps -> navigator.navigateTo(Fragments.MAPS_PAGE)
+                    R.id.nav_schedule -> navigator.navigateTo(Fragments.SCHEDULE_PAGE)
                     R.id.nav_profile -> navigator.navigateTo(Fragments.USER_PAGE)
                 }
             }
@@ -99,6 +104,7 @@ open class MainActivity : AppCompatActivity() {
 
     private fun setViewModel() {
         /*viewModel.fetchData()*/
+        planViewModel.fetchUserSchedules()
     }
 
     // 현재 프래그먼트 계산
@@ -108,8 +114,8 @@ open class MainActivity : AppCompatActivity() {
             binding.apply {
                 when (destinationId) {
                     R.id.homeFragment -> cnbItem.setItemSelected(R.id.nav_home)
-                    R.id.mapsFragment -> cnbItem.setItemSelected(R.id.nav_map)
-                    R.id.planFragment -> cnbItem.setItemSelected(R.id.nav_planner)
+                    R.id.mapsFragment -> cnbItem.setItemSelected(R.id.nav_maps)
+                    R.id.scehduleFragment -> cnbItem.setItemSelected(R.id.nav_schedule)
                     R.id.userDetailFragment -> cnbItem.setItemSelected(R.id.nav_profile)
                 }
                 if (destinationId == R.id.mainSearchFragment) {
@@ -121,7 +127,7 @@ open class MainActivity : AppCompatActivity() {
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
                 }
-                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment) {
+                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
                     cnbItem.visibility = View.VISIBLE

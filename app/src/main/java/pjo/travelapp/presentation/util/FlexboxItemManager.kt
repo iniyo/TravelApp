@@ -2,6 +2,7 @@ package pjo.travelapp.presentation.util
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -43,7 +44,7 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
             }
             orientation = LinearLayout.HORIZONTAL
             setPadding(6.dpToPx(), 6.dpToPx(), 6.dpToPx(), 6.dpToPx())
-            background = ContextCompat.getDrawable(context, R.drawable.bg_white_solid_corner)
+            background = ContextCompat.getDrawable(context, R.drawable.btn_effect_user_detail_white_corner)
             gravity = Gravity.CENTER_VERTICAL
             clickListener?.let { setOnClickListener(it) } // 클릭 리스너 설정
         }
@@ -84,8 +85,13 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
         deleteButtonId: String? = null,
         imageResource: Int,
         textResId: String,
-        clickListener: ((View) -> Unit)? = null
+        clickListener: ((String) -> Unit)? = null
     ) {
+
+/*
+        // 아이템 추가
+        addedItems.add(textResId)*/
+
         val generatedLayoutId = layoutId?.let { idMap[it] } ?: View.generateViewId().also { idMap[layoutId ?: "layout"] = it }
         val generatedImageViewId = imageViewId?.let { idMap[it] } ?: View.generateViewId().also { idMap[imageViewId ?: "imageView"] = it }
         val generatedTextViewId = textViewId?.let { idMap[it] } ?: View.generateViewId().also { idMap[textViewId ?: "textView"] = it }
@@ -100,7 +106,6 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
                 setMargins(0, 5.dpToPx(), 0, 5.dpToPx())
             }
             setBackgroundColor(Color.TRANSPARENT)
-            clickListener?.let { setOnClickListener(it) } // 클릭 리스너 설정
         }
 
         val imageView = ShapeableImageView(context).apply {
@@ -115,6 +120,8 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
             shapeAppearanceModel = ShapeAppearanceModel.builder()
                 .setAllCornerSizes(ShapeAppearanceModel.PILL)
                 .build()
+            // 클릭 이벤트 무시
+            isClickable = false
         }
 
         val deleteButton = ImageView(context).apply {
@@ -127,6 +134,7 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
             setOnClickListener {
                 // 삭제 버튼을 클릭하면 부모 레이아웃에서 해당 아이템을 제거
                 flexboxLayout.removeView(newItem)
+                clickListener?.invoke(textResId) // 전달된 클릭 리스너 호출
             }
         }
 
@@ -143,6 +151,8 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
             textSize = 16f
             setTextColor(ContextCompat.getColor(context, R.color.dark_blue))
             setTypeface(typeface, android.graphics.Typeface.NORMAL)
+            // 클릭 이벤트 무시
+            isClickable = false
         }
 
         newItem.addView(imageView)
@@ -169,11 +179,6 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
 
         flexboxLayout.addView(newItem)
     }
-
-
-
-
-
 
     private fun Int.dpToPx(): Int {
         return (this * context.resources.displayMetrics.density).toInt()

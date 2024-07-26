@@ -1,29 +1,30 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import pjo.travelapp.data.entity.TravelDestinationAbroad
+import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.databinding.FragmentPlaceSelectBinding
 import pjo.travelapp.presentation.adapter.PlaceSelectAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
-import pjo.travelapp.data.entity.TravelDestinationAbroad
-import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
-import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
 
     private val planViewModel: PlanViewModel by activityViewModels()
-    @Inject lateinit var navigator: AppNavigator
+
+    @Inject
+    lateinit var navigator: AppNavigator
+    private var title: String? = null
+    private var imgResId: Int? = null
 
     override fun initView() {
         bind {
@@ -31,14 +32,40 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
             val abroadData = TravelDestinationAbroad()
             val domesticData = TravelDestinationDomestic()
             planViewModel.fetchAbroadPlace()
+            val itemManager = FlexboxItemManager(requireContext(), fblPlaceContainer)
+            val addedItems = mutableSetOf<String>()
 
-            btnSelectPlace.isEnabled = fblPlaceContainer.childCount > 0
-            if( fblPlaceContainer.childCount > 0){
-                Log.d("TAG", "btnSelectPlace: ${fblPlaceContainer.childCount} ")
-            }else {
-                Log.d("TAG", "btnSelectPlace: ${fblPlaceContainer.childCount} ")
+            adapter = PlaceSelectAdapter { (place, imageResId) ->
+                title = place
+                imgResId = imageResId
+                // 중복 아이템 체크
+                if (addedItems.contains(title)) {
+                    Log.d("ItemManager", "Item $title already added")
+                } else {
+                    itemManager.addDeletableItem(
+                        imageResource = imageResId,
+                        textResId = title!!
+                    ) {
+                        Log.d("TAG", "Deleting: $it")
+                        planViewModel.deletePlace(Pair(it, imageResId))
+                        addedItems.remove(it)
+                    }
+                    addedItems.add(title!!)
+                }
             }
 
+            fblPlaceContainer.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                btnSelectPlace.isEnabled = fblPlaceContainer.childCount > 0
+                if (title != null && imgResId != null) {
+                    planViewModel.updateSelectedPlace(title!!, imgResId!!)
+                }
+            }
+
+            if (fblPlaceContainer.childCount > 0) {
+                Log.d("TAG", "btnSelectPlace: ${fblPlaceContainer.childCount} ")
+            } else {
+                Log.d("TAG", "btnSelectPlace: ${fblPlaceContainer.childCount} ")
+            }
 
             tlChooseDomesticOrAbroad.addOnTabSelectedListener(object :
                 TabLayout.OnTabSelectedListener {
@@ -53,6 +80,7 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                                     abroadData.getSubTitleList()
                                 )
                             }
+
                             1 -> {
                                 // 국내
                                 adapter?.setData(
@@ -61,6 +89,7 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                                     domesticData.getSubTitleList()
                                 )
                             }
+
                             else -> {}
                         }
                     }
@@ -74,16 +103,6 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                     // 필요시 구현
                 }
             })
-
-            val itemManager = FlexboxItemManager(requireContext(), fblPlaceContainer)
-            adapter = PlaceSelectAdapter { (title, imgResId) ->
-                itemManager.addDeletableItem(
-                    imageResource = imgResId,
-                    textResId = title // 필요한 텍스트 리소스 ID를 여기에 설정
-                )
-                planViewModel.fetchPlace(title)
-            }
-            rvPlaceList.adapter = adapter
         }
     }
 
@@ -101,6 +120,11 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                         }
                     }
                 }
+                launch {
+                    planViewModel.planAdapterList.collectLatest {
+
+                    }
+                }
             }
         }
     }
@@ -111,10 +135,9 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                 Log.d("TAG", "btnSelectPlace: ")
                 navigator.navigateTo(Fragments.CALENDAR_PAGE)
             }
+            ivBack.setOnClickListener {
+                navigator.navigateUp()
+            }
         }
-    }
-
-    private fun generateRandomId(prefix: String): String {
-        return prefix + UUID.randomUUID().toString()
     }
 }

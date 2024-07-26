@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
@@ -7,10 +8,13 @@ import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import pjo.travelapp.data.entity.UserSchduleEntity
 import pjo.travelapp.databinding.FragmentScehduleBinding
 import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
+import pjo.travelapp.presentation.adapter.UserScehduleAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
+import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 
@@ -18,29 +22,32 @@ import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val planViewModel: PlanViewModel by activityViewModels()
 
     override fun initViewModel() {
-        super.initViewModel()
-        launchWhenStarted {
-             launch{
-                 mainViewModel.nearbySearch.collectLatest {
-                     handleUiState(it, choose = 1)
-                 }
-             }
-            launch {
-                mainViewModel.shuffledHotPlaceList.collectLatest {
-                    handleUiState(it, choose = 2)
+
+        bind {
+            launchWhenStarted {
+                launch{
+                    mainViewModel.nearbySearch.collectLatest {
+                        handleUiState(it, choose = true)
+                    }
                 }
-            }
-            launch {
-                mainViewModel.promotionData.collectLatest {
-                    handleUiState(list = it, choose = 0)
+                launch {
+                    mainViewModel.shuffledHotPlaceList.collectLatest {
+                        handleUiState(it, choose = false)
+                    }
+                }
+                launch {
+                    planViewModel.userScheduleList.collectLatest {
+                        scheduleAdapter?.submitList(it)
+                    }
                 }
             }
         }
     }
 
-    private fun handleUiState(state: LatestUiState<List<Pair<Place, Bitmap?>>>? = null, list: LatestUiState<List<Int>>? = null, choose: Int) {
+    private fun handleUiState(state: LatestUiState<List<Pair<Place, Bitmap?>>>? = null, choose: Boolean) {
         bind {
             when (state) {
                 is LatestUiState.Loading -> {
@@ -48,12 +55,12 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 }
                 is LatestUiState.Success -> {
                     when (choose) {
-                        1 -> {
+                        true -> {
                             state.data.forEach {
                                 defaultAdapter1?.addPlace(it)
                             }
                         }
-                        2 -> {
+                        else -> {
                             state.data.forEach {
                                 defaultAdapter2?.addPlace(it)
                             }
@@ -67,25 +74,15 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 }
                 null -> {}
             }
-            when (list) {
-                is LatestUiState.Loading -> {
-                }
-                is LatestUiState.Success -> {
-                    list.data.forEach {
-                        scheduleAdapter?.addAd(it)
-                    }
-                }
-                is LatestUiState.Error -> {
-                }
-                null -> {}
-            }
         }
     }
 
     override fun initAdapter() {
         super.initAdapter()
         bind {
-            scheduleAdapter = PromotionSlideAdapter()
+            scheduleAdapter = UserScehduleAdapter {
+                showDeleteConfirmationDialog(it)
+            }
             defaultAdapter1 = ScheduleDefaultAdapter()
             defaultAdapter2 = ScheduleDefaultAdapter()
 
@@ -100,5 +97,14 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
             }
         }
     }
-
+    private fun showDeleteConfirmationDialog(userSchedule: UserSchduleEntity) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("삭제 확인")
+            .setMessage("정말로 이 항목을 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                planViewModel.deleteUserSchedule(userSchedule)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
 }

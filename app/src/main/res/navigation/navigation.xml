@@ -16,9 +16,6 @@
             app:exitAnim="@anim/anim_slide_on_bottom"
             app:popExitAnim="@anim/anim_slide_on_bottom" />
         <action
-            android:id="@+id/action_homeFragment_to_planFragment"
-            app:destination="@id/planFragment" />
-        <action
             android:id="@+id/action_homeFragment_to_userDetailFragment"
             app:destination="@id/userDetailFragment" />
         <action
@@ -33,6 +30,9 @@
         <action
             android:id="@+id/action_homeFragment_to_scehduleFragment"
             app:destination="@id/scehduleFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_placeSelectFragment"
+            app:destination="@id/placeSelectFragment" />
     </fragment>
     <fragment
         android:id="@+id/accommodationDetailFragment"
@@ -45,7 +45,7 @@
         android:label="fragment_check"
         tools:layout="@layout/fragment_calendar" >
         <action
-            android:id="@+id/action_checkFragment_to_planFragment"
+            android:id="@+id/action_calendarFragment_to_planFragment"
             app:destination="@id/planFragment" />
     </fragment>
     <fragment
@@ -58,18 +58,6 @@
             app:destination="@id/voiceRecognitionFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/planFragment"
-        android:name="pjo.travelapp.presentation.ui.fragment.PlanFragment"
-        android:label="fragment_plan"
-        tools:layout="@layout/fragment_plan" >
-        <action
-            android:id="@+id/action_planFragment_to_ticketFragment"
-            app:destination="@id/ticketFragment" />
-        <action
-            android:id="@+id/action_planFragment_to_scehduleFragment"
-            app:destination="@id/scehduleFragment" />
-    </fragment>
     <fragment
         android:id="@+id/signFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.SignFragment"
@@ -105,9 +93,6 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_main_search" >
         <action
-            android:id="@+id/action_mainSearchFragment_to_checkFragment"
-            app:destination="@id/calendarFragment" />
-        <action
             android:id="@+id/action_mainSearchFragment_to_voiceRecognitionFragment"
             app:destination="@id/voiceRecognitionFragment" />
     </fragment>
@@ -128,5 +113,25 @@
     <fragment
         android:id="@+id/placeSelectFragment"
         android:name="pjo.travelapp.presentation.ui.fragment.PlaceSelectFragment"
-        android:label="PlaceSelectFragment" />
+        android:label="PlaceSelectFragment" >
+        <action
+            android:id="@+id/action_placeSelectFragment_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
+        <action
+            android:id="@+id/action_placeSelectFragment_to_voiceRecognitionFragment"
+            app:destination="@id/voiceRecognitionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/planFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.PlanFragment"
+        android:label="fragment_plan"
+        tools:layout="@layout/fragment_plan" >
+        <action
+            android:id="@+id/action_planFragment_to_ticketFragment"
+            app:destination="@id/ticketFragment" />
+        <action
+            android:id="@+id/action_planFragment_to_scehduleFragment"
+            app:destination="@id/scehduleFragment" />
+    </fragment>
+
 </navigation>

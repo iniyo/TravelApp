@@ -125,7 +125,7 @@
                 android:layout_marginHorizontal="10dp"
                 android:text="여행 하러 가볼까요?"
                 android:textSize="20sp"
-                android:theme="@style/CheckFragmentButtonTheme"
+                android:theme="@style/calendar_fragment_button_theme"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />

@@ -146,7 +146,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             topPromotionViewpagerAdapter = PromotionSlideAdapter()
             recommendedRecycleAdapter = RecommendedRecyclerAdapter()
             categoryRecycleAdapter = CategoryRecyclerAdapter {
-                navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)
+                when(it) {
+                    "항공" -> {}
+                    "호텔" -> {}
+                    "관광지" -> {}
+                    "내 여행 계획" -> { navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)}
+                    "근처 맛집" -> {}
+                }
             }
             popularRecycleAdapter = ScheduleDefaultAdapter()
             morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)

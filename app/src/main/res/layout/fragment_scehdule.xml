@@ -13,7 +13,7 @@
             type="pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter" />
         <variable
             name="schedule_adapter"
-            type="pjo.travelapp.presentation.adapter.PromotionSlideAdapter" />
+            type="pjo.travelapp.presentation.adapter.UserScehduleAdapter" />
     </data>
 
 
@@ -76,6 +76,7 @@
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/vp_trips"
                     android:layout_width="match_parent"
+                    android:paddingVertical="20dp"
                     android:layout_height="160dp"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"

@@ -15,7 +15,7 @@ import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvCategoryItemBinding
 
 class CategoryRecyclerAdapter(
-    private val itemClickListener: (LinearLayout) -> Unit
+    private val itemClickListener: (String) -> Unit
 ) : RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder>() {
 
     private val category = Category()
@@ -29,7 +29,7 @@ class CategoryRecyclerAdapter(
             binding.apply {
                 ivPic.setImageResource(imgUrl)
                 tvTitle.text = title
-                itemView.setOnClickListener { itemClickListener(llCategoryMainContainer) }
+                itemView.setOnClickListener { itemClickListener(title) }
             }
         }
     }

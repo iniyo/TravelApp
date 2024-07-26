@@ -2,7 +2,6 @@ package pjo.travelapp.presentation.ui.viewmodel
 
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
@@ -26,8 +25,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
-import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
-import pjo.travelapp.presentation.ui.fragment.RecycleItemFragment
 import pjo.travelapp.presentation.util.LatestUiState
 import java.util.Random
 import javax.inject.Inject
@@ -95,6 +92,7 @@ class MainViewModel @Inject constructor(
     private var isTokyoListInitialized = false
     private var isFukuokaListInitialized = false
     private var isParisListInitialized = false
+
     /**
      * 변수 선언 끝
      */
@@ -106,7 +104,8 @@ class MainViewModel @Inject constructor(
     }
 
     private fun fetchPromotion() {
-        _promotionData.value = LatestUiState.Success(listOf(
+        _promotionData.value = LatestUiState.Success(
+            listOf(
                 R.drawable.banner1,
                 R.drawable.banner2
             )
@@ -143,9 +142,12 @@ class MainViewModel @Inject constructor(
 
     private fun shuffleAndDistribute() {
         viewModelScope.launch {
-            val tokyoList = (_tokyoHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
-            val fukuokaList = (_fukuokaHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
-            val parisList = (_parisHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+            val tokyoList =
+                (_tokyoHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+            val fukuokaList =
+                (_fukuokaHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
+            val parisList =
+                (_parisHotPlaceList.value as? LatestUiState.Success)?.data ?: emptyList()
 
             val combinedList = (tokyoList + fukuokaList + parisList)
                 .shuffled()
@@ -180,7 +182,6 @@ class MainViewModel @Inject constructor(
 
     private fun fetchQueryTextSearch() {
         val token = AutocompleteSessionToken.newInstance()
-        val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
         val placeFields = listOf(
             Place.Field.ID,
             Place.Field.NAME,
@@ -189,36 +190,37 @@ class MainViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            inputText.collectLatest {
-                clearList()
-                val request = FindAutocompletePredictionsRequest.builder()
-                    .setSessionToken(token)
-                    .setTypesFilter(listOf("restaurant", "tourist_attraction", "cafe"))
-                    .setQuery(it)
-                    .build()
+            inputText.collectLatest { query ->
+                if (query.isNotEmpty()) {
+                    val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+                    val request = FindAutocompletePredictionsRequest.builder()
+                        .setSessionToken(token)
+                        .setTypesFilter(listOf("restaurant", "tourist_attraction", "cafe"))
+                        .setQuery(query)
+                        .build()
 
-                try {
-                    val res = placesClient.findAutocompletePredictions(request).await()
-                    val preds = res.autocompletePredictions.map { pred ->
-                        AutocompletePredictionItem(
-                            pred.placeId,
-                            pred.getPrimaryText(null).toString()
-                        )
-                    }
+                    try {
+                        val res = placesClient.findAutocompletePredictions(request).await()
+                        val preds = res.autocompletePredictions.map { pred ->
+                            AutocompletePredictionItem(
+                                pred.placeId,
+                                pred.getPrimaryText(null).toString()
+                            )
+                        }
 
-                    preds.forEach { pred ->
-                        placeDetailCache[pred.placeId]?.let { cachedResult ->
-                            addPlaceToResults(cachedResult, placesWithPhotos)
-                        } ?: run {
+                        preds.forEach { pred ->
                             fetchAndCachePlaceDetails(pred.placeId, placeFields, placesWithPhotos)
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                } else {
+                    _placeDetailsList.value = emptyList()
                 }
             }
         }
     }
+
 
     private suspend fun fetchAndCachePlaceDetails(
         placeId: String,
@@ -237,13 +239,11 @@ class MainViewModel @Inject constructor(
         placesWithPhotos: MutableList<Pair<Place, Bitmap?>>
     ) {
         viewModelScope.launch {
-            if (placesWithPhotos.none { it.first.name == place.name }) {
-                val photoMetadatas = place.photoMetadatas
-                val photoBitmap =
-                    if (!photoMetadatas.isNullOrEmpty()) fetchPhoto(photoMetadatas) else null
-                placesWithPhotos.add(Pair(place, photoBitmap))
-                _placeDetailsList.value = placesWithPhotos
-            }
+            val photoMetadatas = place.photoMetadatas
+            val photoBitmap =
+                if (!photoMetadatas.isNullOrEmpty()) fetchPhoto(photoMetadatas) else null
+            placesWithPhotos.add(Pair(place, photoBitmap))
+            _placeDetailsList.value = placesWithPhotos.toList() // Immutable List로 업데이트
         }
     }
 

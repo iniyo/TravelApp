@@ -25,6 +25,14 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
     @Inject
     lateinit var navigator: AppNavigator
 
+    override fun initListener() {
+        bind {
+            ivBack.setOnClickListener {
+                navigator.navigateUp()
+            }
+        }
+    }
+
     override fun initView() {
         super.initView()
 
@@ -74,4 +82,6 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
             }
         }
     }
+
+
 }

@@ -4,6 +4,7 @@ import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
 import android.util.Log
+import androidx.room.Room
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -16,6 +17,8 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
+import pjo.travelapp.data.datasource.AppDatabase
+import pjo.travelapp.data.datasource.UserScheduleDao
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
 import pjo.travelapp.data.repo.MapsRepository
@@ -156,4 +159,27 @@ object ObjectModuleSingleton {
         return PlaceRepositoryImpl(placesClient, types)
     }
 
+    /**
+     * room database
+     */
+
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+    }
+
+    @Provides
+    fun provideUserScheduleDao(database: AppDatabase): UserScheduleDao {
+        return database.userScheduleDao()
+    }
+
+    /**
+     *
+     */
 }

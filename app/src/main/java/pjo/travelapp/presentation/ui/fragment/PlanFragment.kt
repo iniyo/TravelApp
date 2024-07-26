@@ -1,14 +1,18 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.util.Log
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
+import pjo.travelapp.data.entity.UserSchduleEntity
 import pjo.travelapp.databinding.FragmentPlanBinding
+import pjo.travelapp.presentation.adapter.PlanAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
 import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -16,32 +20,80 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     @Inject
     lateinit var navigator: AppNavigator
-    private val viewMdoel: PlanViewModel by activityViewModels()
+    private val planViewModel: PlanViewModel by activityViewModels()
+    private var period: Int = 0
+    private lateinit var placeList: List<Pair<String, Int>>
+    private lateinit var userName: String
+    private lateinit var userId: String
+    private lateinit var planListDate: List<Pair<Int, Int>>
+    private lateinit var datePeriod: String
 
     override fun initView() {
-        super.initView()
-        flexboxItemAdd()
+        setupFlexboxItems()
+        setupAdapter()
+        userName = "test"
+        userId = "testId"
+    }
+
+    override fun initListener() {
+        binding.btnAddedSchedule.setOnClickListener {
+            val newSchedule = UserSchduleEntity(
+                userId = userId,
+                userName = userName,
+                place = placeList,
+                period = period,
+                planListDate = planListDate,
+                datePeriod = datePeriod
+            )
+            planViewModel.fetchUserSchedule(newSchedule)
+            navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+        }
     }
 
     override fun initViewModel() {
-        super.initViewModel()
         bind {
             launchWhenStarted {
-                launch{
-                    viewMdoel.selectedCalendarDatePeriod.collectLatest {
-                        tvTripDate.text = it
+                launch {
+                    planViewModel.selectedCalendarDatePeriod.collectLatest {
+                        datePeriod = it
+                        binding.tvTripDate.text = it
                     }
                 }
-                launch{
-                    viewMdoel.selectedCalendarDate.collectLatest {
-                        tvTripTitle.text = it
+                launch {
+                    planViewModel.selectedCalendarDate.collectLatest {
+                        binding.tvTripTitle.text = it
+                    }
+                }
+                launch {
+                    planViewModel.title.collectLatest {
+                        binding.tvTripTitle.text = it
+                    }
+                }
+                launch {
+                    planViewModel.selectedPlace.collectLatest {
+                        placeList = it
+                    }
+                }
+                launch {
+                    planViewModel.planAdapterList.collectLatest {
+                        planListDate = it
+                        Log.d("TAG", "dd: ")
+                        adapter?.submitList(it)
                     }
                 }
             }
         }
     }
 
-    private fun flexboxItemAdd() {
+    private fun setupAdapter() {
+        bind {
+            adapter = PlanAdapter {
+                // 아이템 클릭 이벤트
+            }
+        }
+    }
+
+    private fun setupFlexboxItems() {
         val itemManager = FlexboxItemManager(requireContext(), binding.fblButtonContainer)
         itemManager.addItem(
             "ll_fbl_item_1",
@@ -49,62 +101,59 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             "tv_map",
             R.drawable.ic_map,
             R.string.map
-        ) { view ->
+        ) { navigator.navigateTo(Fragments.MAPS_PAGE) }
 
-        }
         itemManager.addItem(
             "ll_fbl_item_2",
             "iv_share",
             "tv_share",
             R.drawable.ic_share,
             R.string.share
-        ) { view ->
-            // Handle click event for ll_fbl_item_2
-        }
+        ) { /* Handle click event for ll_fbl_item_2 */ }
+
         itemManager.addItem(
             "ll_fbl_item_3",
             "iv_edit",
             "tv_edit",
             R.drawable.ic_edit,
             R.string.edit
-        ) { view ->
-            // Handle click event for ll_fbl_item_3
-        }
+        ) { /* Handle click event for ll_fbl_item_3 */ }
+
         itemManager.addItem(
             "ll_fbl_item_4",
             "iv_budget_plan",
             "tv_budget_plan",
             R.drawable.ic_cache,
             R.string.budget_plan
-        ) { view ->
-            // Handle click event for ll_fbl_item_4
-        }
+        ) { /* Handle click event for ll_fbl_item_4 */ }
+
         itemManager.addItem(
             "ll_fbl_item_5",
             "iv_check_list",
             "tv_check_list",
             R.drawable.ic_checklist,
             R.string.check_list
-        ) { view ->
-            // Handle click event for ll_fbl_item_5
-        }
+        ) { /* Handle click event for ll_fbl_item_5 */ }
+
         itemManager.addItem(
             "ll_fbl_item_6",
             "iv_airline_ticket",
             "tv_airline_ticket",
             R.drawable.ic_airplane,
             R.string.airline_ticket
-        ) { view ->
-            // Handle click event for ll_fbl_item_6
-        }
+        ) { /* Handle click event for ll_fbl_item_6 */ }
+
         itemManager.addItem(
             "ll_fbl_item_7",
             "iv_accommodation",
             "tv_accommodation",
             R.drawable.ic_accommodation,
             R.string.accommodation
-        ) { view ->
-            // Handle click event for ll_fbl_item_7
-        }
+        ) { /* Handle click event for ll_fbl_item_7 */ }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        planViewModel.deletePlaceList()
     }
 }

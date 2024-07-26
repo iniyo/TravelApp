@@ -62,10 +62,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private var searchMarker: Marker? = null
     private var currentAdapterStyle: AdapterStyle? = null
     var isToolbarToggler = true
-
     @Inject
     lateinit var navigate: AppNavigator
-
 
     @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
     private val callback = OnMapReadyCallback { map ->

@@ -21,6 +21,9 @@ import pjo.travelapp.data.datasource.AppDatabase
 import pjo.travelapp.data.datasource.UserScheduleDao
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
+import pjo.travelapp.data.remote.SkyScannerApiService
+import pjo.travelapp.data.repo.HotelRepository
+import pjo.travelapp.data.repo.HotelRepositoryImpl
 import pjo.travelapp.data.repo.MapsRepository
 import pjo.travelapp.data.repo.PlaceRepository
 import pjo.travelapp.data.repo.PlaceRepositoryImpl
@@ -62,7 +65,7 @@ object ObjectModuleSingleton {
         val maxAge = Integer.MAX_VALUE
         return OkHttpClient.Builder()
             .cache(cache)
-           /* .addInterceptor(loggingInterceptor)*/
+            .addInterceptor(loggingInterceptor)
             .addInterceptor { chain ->
                 var request = chain.request()
                 request = request.newBuilder()
@@ -111,6 +114,17 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
+    fun provideHotelsDetail(okHttpClient: OkHttpClient) : SkyScannerApiService {
+        val retro = Retrofit.Builder()
+            .baseUrl("https://sky-scanner3.p.rapidapi.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retro.create(SkyScannerApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
         if (!Places.isInitialized()) {
             Places.initialize(context, BuildConfig.maps_api_key)
@@ -124,6 +138,14 @@ object ObjectModuleSingleton {
         service: MapsApiService
     ): MapsRepository {
         return MapsRepositoryImpl(service)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHotelRepository(
+        service: SkyScannerApiService
+    ): HotelRepository {
+        return HotelRepositoryImpl(service)
     }
 
     @Provides
@@ -182,4 +204,6 @@ object ObjectModuleSingleton {
     /**
      *
      */
+
+
 }

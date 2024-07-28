@@ -11,12 +11,15 @@ import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import pjo.travelapp.data.entity.HotelCard
 import pjo.travelapp.databinding.FragmentRecycleItemBinding
 import pjo.travelapp.presentation.adapter.MorePlaceRecyclerAdapter
-import pjo.travelapp.presentation.adapter.MorePlaceRecyclerPagingAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.GridSpacingItemDecoration
 import pjo.travelapp.presentation.util.LatestUiState
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @AndroidEntryPoint
 class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
@@ -28,8 +31,15 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
         super.initView()
         bind {
             if (rvMorePlaces.adapter == null) {
-                rvMorePlaces.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-                rvMorePlaces.addItemDecoration(GridSpacingItemDecoration(2, 16, true)) // 16dp의 마진 적용
+                rvMorePlaces.layoutManager =
+                    StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                rvMorePlaces.addItemDecoration(
+                    GridSpacingItemDecoration(
+                        2,
+                        16,
+                        true
+                    )
+                ) // 16dp의 마진 적용
                 adapter = MorePlaceRecyclerAdapter()
             }
         }
@@ -70,11 +80,20 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "근처" -> {
                         title = pop
                         launch {
-
                             viewModel.nearbySearch.collectLatest {
                                 handleUiState(it)
                             }
+                        }
+                    }
 
+                    "숙소" -> {
+                        title = pop
+                        launch {
+                            launch {
+                                viewModel.hotelState.collectLatest { state ->
+                                    handleUiState(hotelState = state)
+                                }
+                            }
                         }
                     }
 
@@ -88,26 +107,59 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
         }
     }
 
-    private fun handleUiState(state: LatestUiState<List<Pair<Place, Bitmap?>>>) {
+    private fun handleUiState(
+        placeState: LatestUiState<List<Pair<Place, Bitmap?>>>? = null,
+        hotelState: LatestUiState<List<HotelCard>>? = null
+    ) {
         bind {
-            when (state) {
+            when (placeState) {
                 is LatestUiState.Loading -> {
                     pbPopularMore.visibility = View.VISIBLE
                 }
 
                 is LatestUiState.Success -> {
                     pbPopularMore.visibility = View.GONE
-                    state.data.forEach {
+                    placeState.data.forEach {
                         adapter?.addPlace(it)
                     }
                 }
 
                 is LatestUiState.Error -> {
                     pbPopularMore.visibility = View.GONE
-                    // 에러 처리 로직 추가
-                    Toast.makeText(context, "Error: ${state.exception.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(
+                        context,
+                        "Error: ${placeState.exception.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+
+                else -> {}
+            }
+
+            when (hotelState) {
+                is LatestUiState.Loading -> {
+                    pbPopularMore.visibility = View.VISIBLE
+                }
+
+                is LatestUiState.Success -> {
+                    pbPopularMore.visibility = View.GONE
+                    hotelState.data.forEach {
+                        Log.d("TAG", "hotel handle: $it")
+                        adapter?.addHotel(it)
+                    }
+                }
+
+                is LatestUiState.Error -> {
+                    pbPopularMore.visibility = View.GONE
+                    Log.d("TAG", "handleUiState: ${hotelState.exception.message}")
+                    Toast.makeText(
+                        context,
+                        "Error: ${hotelState.exception.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                else -> {}
             }
         }
     }

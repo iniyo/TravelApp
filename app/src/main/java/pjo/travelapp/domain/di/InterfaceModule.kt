@@ -29,5 +29,6 @@ abstract class AppInterfaceModule {
 
     @Binds
     abstract fun bindKakaoSignManager(impl: KakaoSignManagerImpl): KakaoSignManager
+
 }
 

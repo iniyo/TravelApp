@@ -8,7 +8,7 @@
 
         <import type="android.view.View" />
 
-        <variable
+          <variable
             name="adapter"
             type="pjo.travelapp.presentation.adapter.MorePlaceRecyclerAdapter" />
 

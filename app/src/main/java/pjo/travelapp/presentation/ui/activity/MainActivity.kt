@@ -2,6 +2,7 @@ package pjo.travelapp.presentation.ui.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -39,10 +40,9 @@ import javax.inject.Inject
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var splashScreen: SplashScreen
-    private val viewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
     private val planViewModel: PlanViewModel by viewModels()
-
     @Inject
     lateinit var navigator: AppNavigator
     private var isPermissionRequestInProgress = false
@@ -65,6 +65,7 @@ open class MainActivity : AppCompatActivity() {
         setupOnBackPressedDispatcher()
         setViewModel()
         setFusedLocation()
+        setCLickListener()
     }
 
     private fun startSplash() {
@@ -74,6 +75,14 @@ open class MainActivity : AppCompatActivity() {
     private fun initContentView() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+    }
+
+    private fun setCLickListener() {
+        binding.clAnimator.setOnClickListener {
+            Log.d("TAG", "setCLickListener: ")
+            val intent = Intent(this@MainActivity, TransparentActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // backstack control
@@ -103,7 +112,9 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        /*viewModel.fetchData()*/
+        /*mainViewModel.fetchData()*/
+        mainViewModel.setDates()
+        mainViewModel.searchHotels("Tokyo")
         planViewModel.fetchUserSchedules()
     }
 
@@ -207,7 +218,7 @@ open class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
-                    viewModel.fetchCurrentLocation(currentLatLng)
+                    mainViewModel.fetchCurrentLocation(currentLatLng)
                 }
             }
             // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
@@ -223,7 +234,7 @@ open class MainActivity : AppCompatActivity() {
                     locationResult.lastLocation?.let { location ->
                         val currentLatLng = LatLng(location.latitude, location.longitude)
                         Log.d("TAG", "Location updated: $currentLatLng")
-                        viewModel.fetchCurrentLocation(currentLatLng)
+                        mainViewModel.fetchCurrentLocation(currentLatLng)
                     }
                 }
             }

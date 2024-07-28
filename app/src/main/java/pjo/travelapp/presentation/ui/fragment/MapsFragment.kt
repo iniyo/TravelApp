@@ -41,8 +41,10 @@ import pjo.travelapp.presentation.ui.consts.AdapterStyle
 import pjo.travelapp.presentation.ui.consts.SHOW_DIRECTION
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
+import pjo.travelapp.presentation.ui.viewmodel.SpeechRecognitionViewModel
 import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -53,6 +55,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
     private val viewModel: MapsViewModel by activityViewModels()
+    private val speechViewModel: SpeechRecognitionViewModel by activityViewModels()
     private lateinit var mainViewModel: MainViewModel
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
     private var currentLatLng: LatLng = LatLng(35.1179923, 129.0419654)
@@ -159,6 +162,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                         }
                     }
 
+                    // 검색 결과
                     launch {
                         viewModel.predictionList.collectLatest { predictions ->
                             predictions.forEach { prediction ->
@@ -167,7 +171,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                         }
                     }
 
-                    // 경로
+                    // 경로 정보
                     launch {
                         viewModel.directions.collectLatest {
                             when (it) {
@@ -186,6 +190,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                         }
                     }
 
+                    // 경로 출발위치
                     launch {
                         viewModel.startQuery.collectLatest {
                             Log.d("TAG", "startQuery: $it")
@@ -197,6 +202,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                         }
                     }
+
+                    // 경로 도착위치
                     launch {
                         viewModel.endQuery.collectLatest {
                             Log.d("TAG", "endQuery: $it")
@@ -205,6 +212,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                             } else {
                                 Log.d("TAG", "initViewModel: null endQuery ")
                             }
+                        }
+                    }
+
+                    // 음성인식
+                    launch {
+                        speechViewModel.voiceString.collectLatest {
+                            searchBottomSheet.etDefaultSearch.setText(it)
                         }
                     }
                 }
@@ -418,6 +432,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 }
                 startLocationMove(currentLatLng)
             }
+
+            ivVoice.setOnClickListener {
+                navigate.navigateTo(Fragments.VOICE_PAGE)
+                toggleBottomSheet(searchBottomSheetBehavior)
+            }
+
+
         }
     }
 

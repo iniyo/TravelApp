@@ -25,7 +25,12 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
+import pjo.travelapp.data.entity.HotelCard
+import pjo.travelapp.data.repo.HotelRepository
 import pjo.travelapp.presentation.util.LatestUiState
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.Random
 import javax.inject.Inject
 
@@ -35,7 +40,8 @@ private fun <T> List<T>.shuffled(): List<T> {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private var placesClient: PlacesClient
+    private var placesClient: PlacesClient,
+    private val hotelRepo: HotelRepository
 ) : ViewModel() {
 
     /**
@@ -55,9 +61,6 @@ class MainViewModel @Inject constructor(
         MutableStateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>>(LatestUiState.Loading)
     val parisHotPlaceList: StateFlow<LatestUiState<List<Pair<Place, Bitmap?>>>> get() = _parisHotPlaceList
 
-    private val _voiceString = MutableStateFlow("")
-    val voiceString: StateFlow<String> get() = _voiceString
-
     private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> get() = _inputText
 
@@ -73,6 +76,10 @@ class MainViewModel @Inject constructor(
 
     private val _promotionData = MutableStateFlow<LatestUiState<List<Int>>>(LatestUiState.Loading)
     val promotionData: StateFlow<LatestUiState<List<Int>>> get() = _promotionData
+
+    private val _hotelState =
+        MutableStateFlow<LatestUiState<List<HotelCard>>>(LatestUiState.Loading)
+    val hotelState: StateFlow<LatestUiState<List<HotelCard>>> = _hotelState
 
     // 캐시용 변수 추가
     private val placeDetailCache = mutableMapOf<String, Place>()
@@ -92,7 +99,8 @@ class MainViewModel @Inject constructor(
     private var isTokyoListInitialized = false
     private var isFukuokaListInitialized = false
     private var isParisListInitialized = false
-
+    private var checkin: String = ""
+    private var checkout: String = ""
     /**
      * 변수 선언 끝
      */
@@ -101,6 +109,50 @@ class MainViewModel @Inject constructor(
         fetchQueryTextSearch()
         observeHotPlaceLists()
         fetchPromotion()
+    }
+
+    fun setDates() {
+        val dates = getCheckinCheckoutDates()
+        checkin = dates.first
+        checkout = dates.second
+    }
+
+    fun searchHotels(cityName: String) {
+        viewModelScope.launch {
+            try {
+                val autoCompleteResponse = hotelRepo.autoComplete(cityName)
+                if (autoCompleteResponse.status && autoCompleteResponse.data.isNotEmpty()) {
+                    val cityEntity = autoCompleteResponse.data.firstOrNull { it.entityType == "도시" }
+                    val entityId = cityEntity?.entityId
+                    if (entityId != null) {
+                        val response = hotelRepo.searchHotels(entityId, checkin, checkout)
+                        _hotelState.value = LatestUiState.Success(response.data.results.hotelCards)
+                    } else {
+                        _hotelState.value = LatestUiState.Error(Exception("City entity not found"))
+                    }
+                } else {
+                    _hotelState.value = LatestUiState.Error(Exception("City not found"))
+                }
+            } catch (e: Exception) {
+                _hotelState.value = LatestUiState.Error(e)
+            }
+        }
+    }
+
+    private fun getCheckinCheckoutDates(): Pair<String, String> {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+
+        // 현재 시간이 오후 5시 이후인지 확인
+        if (calendar.get(Calendar.HOUR_OF_DAY) >= 15) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        val checkin = dateFormat.format(calendar.time)
+        calendar.add(Calendar.DAY_OF_YEAR, 3)
+        val checkout = dateFormat.format(calendar.time)
+
+        return Pair(checkin, checkout)
     }
 
     private fun fetchPromotion() {
@@ -170,10 +222,6 @@ class MainViewModel @Inject constructor(
 
     fun updateInputText(newText: String) {
         _inputText.value = newText
-    }
-
-    fun fetchVoiceString(voice: String) {
-        _voiceString.value = voice
     }
 
     private fun clearList() {

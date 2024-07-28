@@ -9,6 +9,8 @@ import android.speech.SpeechRecognizer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class SpeechRecognitionViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -19,8 +21,15 @@ class SpeechRecognitionViewModel(application: Application) : AndroidViewModel(ap
     val recognitionResults: LiveData<List<String>?> get() = _recognitionResults
     val recognitionStatus: LiveData<RecognitionStatus> get() = _recognitionStatus
 
+    private val _voiceString = MutableStateFlow("")
+    val voiceString: StateFlow<String> get() = _voiceString
+
     init {
         initializeSpeechRecognizer()
+    }
+
+    fun fetchVoiceString(voice: String) {
+        _voiceString.value = voice
     }
 
     private fun initializeSpeechRecognizer() {

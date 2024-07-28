@@ -11,6 +11,7 @@ import pjo.travelapp.presentation.adapter.MainSearchItemAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.ui.viewmodel.SpeechRecognitionViewModel
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -19,8 +20,7 @@ import javax.inject.Inject
 class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val mapsViewModel: MapsViewModel by activityViewModels()
-    private val placeViewModel: PlanViewModel by activityViewModels()
+    private val speechViewModel: SpeechRecognitionViewModel by activityViewModels()
 
     @Inject
     lateinit var navigator: AppNavigator
@@ -70,7 +70,7 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
         bind {
             launchWhenStarted {
                 launch {
-                    mainViewModel.voiceString.collectLatest {
+                    speechViewModel.voiceString.collectLatest {
                         svDefaultSearch.setQuery(it, false)
                     }
                 }

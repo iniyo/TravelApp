@@ -37,7 +37,7 @@ class VoiceRecognitionFragment : BaseFragment<FragmentVoiceRecognitionBinding>()
                 launch {
                     speechViewModel.recognitionResults.observe(viewLifecycleOwner) { results ->
                         results?.let {
-                            mainViewModel.fetchVoiceString(it.joinToString(" "))
+                            speechViewModel.fetchVoiceString(it.joinToString(" "))
                         }
                     }
                 }

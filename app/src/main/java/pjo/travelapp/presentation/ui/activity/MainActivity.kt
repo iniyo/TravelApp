@@ -85,6 +85,7 @@ open class MainActivity : AppCompatActivity() {
         setView()
         setViewModel()
         setCLickListener()
+        //
     }
 
     private fun startSplash() {

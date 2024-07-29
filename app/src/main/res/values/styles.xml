@@ -2,6 +2,11 @@
 <resources>
 
     <!-- ShapeableImageView -->
+    <style name="ShapeAppearanceOverlay.App.circleImageView.5" parent="Base.Theme.TravelApp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">5%</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.App.circleImageView.15" parent="Base.Theme.TravelApp">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">15%</item>
@@ -41,6 +46,11 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="default_tab_text" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 
     <!-- bottomSheetFragment border 20dp 전용 테마 -->
     <style name="AppBottomSheetDialogBorder20WhiteTheme"
@@ -58,6 +68,16 @@
     <style name="CustomDialog" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowMinWidthMajor">90%</item>
         <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <!-- transparent activity -->
+    <style name="Theme.AppCompat.Transparent.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">true</item>
     </style>

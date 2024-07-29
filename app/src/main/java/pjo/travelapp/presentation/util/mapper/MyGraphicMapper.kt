@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.util.mapper
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.util.DisplayMetrics
@@ -37,7 +38,7 @@ object MyGraphicMapper {
         return Pair(pageTransX, decoration)
     }
 
-    private val GESTURE_THRESHOLD_DP = 16.0f
+    private const val GESTURE_THRESHOLD_DP = 16.0f
 
     private var gestureThreshold: Int = 0
     fun getpx(context: Context) {
@@ -47,6 +48,7 @@ object MyGraphicMapper {
             context.resources.displayMetrics)
     }
 
+    @SuppressLint("DiscouragedApi", "InternalInsetResource")
     fun getNavigationBarHeight(context: Context) {
         val resourceId =
             context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
@@ -57,8 +59,6 @@ object MyGraphicMapper {
             Log.d("deviceSize", "navigation bar : ${px2dp(navigationBarHeight)}")
         }
     }
-
-
 
     // offset - viewpager에서 간격으로 사용
     fun offsetPx(context: Context): Int {

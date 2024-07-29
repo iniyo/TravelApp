@@ -1,57 +1,117 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentHomeBinding
 import pjo.travelapp.presentation.adapter.CategoryRecyclerAdapter
-import pjo.travelapp.presentation.adapter.PopularRecyclerAdapter
+import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
+import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
-import pjo.travelapp.presentation.adapter.TopSlideViewPagerAdapter
+import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
+import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
+import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
+class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     @Inject
     lateinit var navigator: AppNavigator
-    private lateinit var a: List<Int>
-    private lateinit var b: List<Int>
-    private lateinit var c: List<Int>
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun initView() {
         super.initView()
-        binding.apply {
-            startRollingTextAnimation()
-            setLottieAnimation()
-            setImgaeList()
-            setAdapter()
-            setTabLayout()
+        startRollingTextAnimation()
+        setLottieAnimation()
+        setTabLayout()
+    }
+
+    override fun initViewModel() {
+        super.initViewModel()
+        bind {
+            launchWhenStarted {
+                launch {
+                    mainViewModel.shuffledHotPlaceList.collectLatest {
+                        when (it) {
+                            is LatestUiState.Loading -> pbPopular.visibility = View.VISIBLE
+                            is LatestUiState.Success -> {
+                                pbPopular.visibility = View.GONE
+                                it.data.forEach { res ->
+                                    popularRecycleAdapter?.addPlace(res)
+                                }
+                            }
+
+                            is LatestUiState.Error -> it.exception.printStackTrace()
+                        }
+                    }
+                }
+
+                launch {
+                    mainViewModel.promotionData.collectLatest {
+                        Log.d("TAG", "promotionData: ")
+                        when (it) {
+                            is LatestUiState.Loading -> pbBanner.visibility = View.VISIBLE
+                            is LatestUiState.Success -> {
+                                Log.d("TAG", "initViewModel: ")
+                                pbBanner.visibility = View.GONE
+                                it.data.forEach { res ->
+                                    topPromotionViewpagerAdapter?.addAd(res)
+                                }
+                            }
+                            is LatestUiState.Error -> it.exception.printStackTrace()
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private fun getForkFragment(): List<Fragment> {
-        val fragmentList: List<Fragment> = listOf(
-            RecycleItemFragment(),
-            RecycleItemFragment(),
-            RecycleItemFragment()
-        )
-        return fragmentList
-    }
-
-
     private fun setTabLayout() {
         val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
-        setTabItemMargin(binding.tlTop, marginSize, marginSize)
+        bind {
+            setTabItemMargin(tlTop, marginSize, marginSize)
+            tlTop.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let {
+                        Log.d("TAG", "onTabSelected: ${tab.position}")
+                        morePlaceViewpagerAdapter =
+                            MorePlacesViewPagerAdapter(requireActivity(), tab.position)
+                        topPromotionViewpagerAdapter?.addAd(R.drawable.banner1)
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            })
+
+            /* vpTabItemsShow.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                 override fun onPageSelected(position: Int) {
+                     tlTop.selectTab(tlTop.getTabAt(position))
+                 }
+             })*/
+        }
     }
+
+    /* override fun onPause() {
+         super.onPause()
+         binding.morePlaceViewpagerAdapter = null
+     }*/
 
     // TabLayout Tab 사이 간격 부여
     private fun setTabItemMargin(tabLayout: TabLayout, marginStart: Int, marginEnd: Int) {
@@ -68,82 +128,34 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
         }
     }
 
-    private fun setImgaeList() {
-        a = listOf(
-            R.drawable.banner1,
-            R.drawable.banner2
-        )
-        b = listOf(
-            R.drawable.cat1,
-            R.drawable.cat2,
-            R.drawable.cat3,
-            R.drawable.cat4,
-            R.drawable.cat5
-        )
-        c = listOf(
-            R.drawable.item_1,
-            R.drawable.item_2,
-            R.drawable.item_3,
-            R.drawable.item_4,
-            R.drawable.item_5
-        )
-    }
-
-    private fun setAdapter() {
-
+    override fun initAdapter() {
         val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
         binding.apply {
-            vpTopSlider.apply {
+            vpPromotion.apply {
                 addItemDecoration(decoration)
-
                 setPageTransformer { page, position ->
                     page.translationX = position * -pageTransX
                 }
-
-                clipToPadding = false
-                clipChildren = false
-                adapter = TopSlideViewPagerAdapter(a)
-                orientation = ViewPager2.ORIENTATION_HORIZONTAL
                 offscreenPageLimit = 2
             }
 
-            rvCategory.apply {
-                adapter = CategoryRecyclerAdapter(b)
-                layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.HORIZONTAL,
-                    false
-                )
-                setItemViewCacheSize(b.size) // cache할 아이템 사이즈
-                setHasFixedSize(true) // size 일정
-            }
+            rvRecommended.setHasFixedSize(true)
+            rvCategory.setHasFixedSize(true)
 
-            rvRecommended.apply {
-                adapter = RecommendedRecyclerAdapter(c)
-                layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.HORIZONTAL,
-                    false
-                )
-                setItemViewCacheSize(c.size)
-                setHasFixedSize(true)
+            topPromotionViewpagerAdapter = PromotionSlideAdapter()
+            recommendedRecycleAdapter = RecommendedRecyclerAdapter()
+            categoryRecycleAdapter = CategoryRecyclerAdapter {
+                when(it) {
+                    "항공" -> {}
+                    "호텔" -> {}
+                    "관광지" -> {}
+                    "내 여행 계획" -> { navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)}
+                    "근처 맛집" -> {}
+                }
             }
-
-            rvPopular.apply {
-                adapter = PopularRecyclerAdapter(c)
-                layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.HORIZONTAL,
-                    false
-                )
-                setItemViewCacheSize(c.size)
-                setHasFixedSize(true)
-            }
-
-            /*vpTabItemsShow.apply {
-                adapter = MorePlacesViewPagerAdapter(requireContext())
-            }*/
+            popularRecycleAdapter = ScheduleDefaultAdapter()
+            morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)
         }
     }
 
@@ -153,7 +165,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
     private fun startRollingTextAnimation() {
         val rollingText = resources.getStringArray(R.array.arr_rolling)
-        var textIndex = 0
 
         binding.rtvSearch.apply {
             /* animationDuration = 1500L
@@ -181,7 +192,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(R.layout.fragment_home) {
 
 
             setOnClickListener {
-                navigator.navigateTo(Fragments.SEARCH_PAGE, "")
+                navigator.navigateTo(Fragments.SEARCH_PAGE)
             }
         }
     }

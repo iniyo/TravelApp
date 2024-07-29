@@ -14,6 +14,7 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -36,6 +37,7 @@ import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class MapsViewModel @Inject constructor(
     private val getDirectionsUseCase: GetDirectionsUseCase,
@@ -82,6 +84,7 @@ class MapsViewModel @Inject constructor(
     val endQuery: StateFlow<PlaceResult?> get() = _endQuery
 
     private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
+
     /**
      * 변수 선언
      */
@@ -93,6 +96,7 @@ class MapsViewModel @Inject constructor(
     fun fetchStartQuery(start: PlaceResult) {
         _startQuery.value = start
     }
+
     fun fetchEndQuery(end: PlaceResult) {
         _endQuery.value = end
     }
@@ -128,12 +132,12 @@ class MapsViewModel @Inject constructor(
                 .collectLatest {
                     clearPlaceList()
                     performSearch(it)
-            }
+                }
         }
     }
 
     // 검색 요청을 실행하고 이전 작업을 취소하는 메서드
-    fun performSearch(query: String, currentLatLng: LatLng? = null) {
+    private fun performSearch(query: String, currentLatLng: LatLng? = null) {
         viewModelScope.launch {
             _predictionList.value = emptyList() // 새로운 검색 시작 시 리스트 초기화
             val token = AutocompleteSessionToken.newInstance()
@@ -199,7 +203,7 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun fetchPlaceResult(res: PlaceResult) {
+    private fun fetchPlaceResult(res: PlaceResult) {
         viewModelScope.launch {
             _placeDetailsResult.value = res
         }
@@ -229,14 +233,18 @@ class MapsViewModel @Inject constructor(
         _predictionList.value = emptyList()
     }
 
-    fun getStartAndEndPlaceId(start: String?, end: String?, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
+    fun getStartAndEndPlaceId(
+        start: String?,
+        end: String?,
+        callback: (Pair<LatLng?, LatLng?>) -> Unit
+    ) {
         viewModelScope.launch {
             val startDeferred = CompletableDeferred<LatLng?>()
             val endDeferred = CompletableDeferred<LatLng?>()
 
-            if(start.isNullOrEmpty() || end.isNullOrEmpty()){
+            if (start.isNullOrEmpty() || end.isNullOrEmpty()) {
                 Log.d("TAG", "getStartAndEndPlaceId: null or empty")
-            }else {
+            } else {
                 searchLocation(start) { result ->
                     startDeferred.complete(result)
                 }
@@ -275,7 +283,8 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
+    @Suppress("DEPRECATION")
+    private fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
         viewModelScope.launch {
             try {
                 val addressList = geocoder.getFromLocationName(location, 1)

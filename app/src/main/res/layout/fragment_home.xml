@@ -12,6 +12,26 @@
         <import type="android.view.View" />
 
         <variable
+            name="more_place_viewpager_adapter"
+            type="pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter" />
+
+        <variable
+            name="popular_recycle_adapter"
+            type="pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter" />
+
+        <variable
+            name="category_recycle_adapter"
+            type="pjo.travelapp.presentation.adapter.CategoryRecyclerAdapter" />
+
+        <variable
+            name="recommended_recycle_adapter"
+            type="pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter" />
+
+        <variable
+            name="top_promotion_viewpager_adapter"
+            type="pjo.travelapp.presentation.adapter.PromotionSlideAdapter" />
+
+        <variable
             name="view"
             type="pjo.travelapp.presentation.ui.fragment.HomeFragment" />
     </data>
@@ -31,8 +51,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp"
-                android:elevation="3dp"
-                android:background="@color/white">
+                android:background="@color/white"
+                android:elevation="3dp">
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/lav_bell"
@@ -49,9 +69,9 @@
                     android:id="@+id/tl_top"
                     android:layout_width="0dp"
                     android:layout_height="60dp"
-                    android:paddingBottom="5dp"
                     android:layout_marginVertical="10dp"
                     android:background="@color/white"
+                    android:paddingBottom="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/lav_bell"
@@ -90,8 +110,8 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:paddingBottom="@dimen/bottom_navigation_height"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintTop_toBottomOf="@+id/tl_top">
 
             <LinearLayout
@@ -107,7 +127,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@drawable/bg_light_gray">
 
-                    <pjo.travelapp.presentation.util.RollingTextView
+                    <pjo.travelapp.presentation.util.customview.RollingTextView
                         android:id="@+id/rtv_search"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -123,26 +143,6 @@
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="RtlSymmetry" />
 
-                    <!--<TextView
-                    android:id="@+id/tv_search_btn"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@null"
-                    android:drawablePadding="8dp"
-                    android:ems="10"
-                    android:gravity="start|center"
-                    android:hint="@string/street_address_city"
-                    android:importantForAutofill="no"
-                    android:padding="8dp"
-                    android:textColor="@color/dark_blue"
-                    android:textColorHint="@color/dark_blue"
-                    android:textSize="16sp"
-                    app:drawableStartCompat="@drawable/search_icon"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />-->
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -151,9 +151,13 @@
                     android:layout_marginTop="16dp">
 
                     <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/vp_top_slider"
+                        android:id="@+id/vp_promotion"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
+                        android:adapter="@{top_promotion_viewpager_adapter}"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -163,39 +167,27 @@
                         android:id="@+id/pb_banner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="@+id/vp_top_slider"
+                        app:layout_constraintBottom_toBottomOf="@+id/vp_promotion"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_category"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_category"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        android:paddingHorizontal="16dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ProgressBar
-                        android:id="@+id/pb_category"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:layout_height="wrap_content"
+                    android:adapter="@{category_recycle_adapter}"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/rv_category_item" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -232,12 +224,16 @@
                         android:id="@+id/rv_recommended"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:adapter="@{recommended_recycle_adapter}"
                         android:clipToPadding="false"
+                        android:orientation="horizontal"
                         android:paddingHorizontal="16dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:listitem="@layout/rv_recommended_item" />
 
                     <ProgressBar
                         android:id="@+id/pb_recommended"
@@ -285,12 +281,16 @@
                         android:id="@+id/rv_popular"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:adapter="@{popular_recycle_adapter}"
                         android:clipToPadding="false"
+                        android:orientation="horizontal"
                         android:paddingHorizontal="16dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:listitem="@layout/rv_schedule_item">
 
                     </androidx.recyclerview.widget.RecyclerView>
 
@@ -302,7 +302,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/rv_popular" />
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
@@ -331,34 +331,18 @@
 
                 </LinearLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vp_tab_items_show"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:adapter="@{more_place_viewpager_adapter}"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/vp_tab_items_show"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        android:paddingHorizontal="16dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                    </androidx.viewpager2.widget.ViewPager2>
-
-                    <ProgressBar
-                        android:id="@+id/pb_tab_items_show"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/vp_tab_items_show" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
 

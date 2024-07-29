@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -50,6 +49,24 @@ open class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    private val requestMultiplePermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.all { it.value }) {
+            // 모든 권한이 허가된 경우
+            setCheckLocationPermission()
+        } else {
+            // 권한이 하나라도 허가되지 않은 경우
+            finish() // 앱 종료
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
@@ -60,11 +77,11 @@ open class MainActivity : AppCompatActivity() {
         startSplash()
         initContentView()
         setNavigationOnClick()
-        setCheckVoicePermission()
+        setFusedLocation()
+        checkPermissionsAndRequestIfNeeded()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
         setViewModel()
-        setFusedLocation()
         setCLickListener()
     }
 
@@ -89,7 +106,7 @@ open class MainActivity : AppCompatActivity() {
     private fun handleBackStack() {
         val fragmentManager = supportFragmentManager
         // back stack 2개 초과시 pop
-        if (fragmentManager.backStackEntryCount > 2) {
+        if (fragmentManager.backStackEntryCount > 1) {
             fragmentManager.popBackStack(
                 fragmentManager.getBackStackEntryAt(0).id,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE
@@ -175,45 +192,28 @@ open class MainActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            setCheckLocationPermission()
+    private fun checkPermissionsAndRequestIfNeeded() {
+        val missingPermissions = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-    }
-
-    private fun setCheckVoicePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (!isPermissionRequestInProgress) {
-                isPermissionRequestInProgress = true
-                ActivityCompat.requestPermissions(
-                    this@MainActivity,
-                    arrayOf(Manifest.permission.RECORD_AUDIO),
-                    0
-                )
-            }
+        if (missingPermissions.isNotEmpty()) {
+            requestMultiplePermissionsLauncher.launch(missingPermissions.toTypedArray())
+        } else {
+            setCheckLocationPermission()
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun setCheckLocationPermission() {
         if (ContextCompat.checkSelfPermission(
-                baseContext,
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(
-                baseContext,
+                this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            if (!isPermissionRequestInProgress) {
-                isPermissionRequestInProgress = true
-            }
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
@@ -240,16 +240,11 @@ open class MainActivity : AppCompatActivity() {
             }
 
             // 위치 업데이트 요청
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(baseContext)
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
                 Looper.getMainLooper()
             )
-
-        } else {
-            // 위치 권한이 없는 경우 다시 요청
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
@@ -280,8 +275,7 @@ open class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (!isPermissionRequestInProgress) {
-            setCheckVoicePermission()
-            setCheckLocationPermission()
+            checkPermissionsAndRequestIfNeeded()
         }
     }
 }

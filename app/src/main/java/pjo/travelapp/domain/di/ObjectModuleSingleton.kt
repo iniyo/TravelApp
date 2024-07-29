@@ -5,6 +5,8 @@ import android.content.Context
 import android.location.Geocoder
 import android.util.Log
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -116,7 +118,7 @@ object ObjectModuleSingleton {
     @Singleton
     fun provideHotelsDetail(okHttpClient: OkHttpClient) : SkyScannerApiService {
         val retro = Retrofit.Builder()
-            .baseUrl("https://sky-scanner3.p.rapidapi.com/")
+            .baseUrl(BuildConfig.skyscanner_base_url)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -184,8 +186,6 @@ object ObjectModuleSingleton {
     /**
      * room database
      */
-
-
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
@@ -193,8 +193,10 @@ object ObjectModuleSingleton {
             context,
             AppDatabase::class.java,
             "app_database"
-        ).build()
+        ).fallbackToDestructiveMigration() // 이전 데이터베이스 스키마를 삭제하고 새로 생성
+            .build()
     }
+
 
     @Provides
     fun provideUserScheduleDao(database: AppDatabase): UserScheduleDao {

@@ -37,6 +37,7 @@ android {
         buildConfigField("String", "maps_api_url", properties.getProperty("maps_api_url"))
         buildConfigField("String", "place_base_url", properties.getProperty("place_base_url"))
         buildConfigField("String", "route_base_url", properties.getProperty("route_base_url"))
+        buildConfigField("String", "skyscanner_base_url", properties.getProperty("skyscanner_base_url"))
 
         /*javaCompileOptions {
             annotationProcessorOptions {

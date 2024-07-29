@@ -16,3 +16,4 @@ data class UserSchduleEntity (
     val planListDate: List<Pair<Int, Int>>,
     val datePeriod: String,
 )
+

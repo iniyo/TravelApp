@@ -1,6 +1,10 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.Log
+import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -11,6 +15,8 @@ import pjo.travelapp.databinding.FragmentPlanBinding
 import pjo.travelapp.presentation.adapter.PlanAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
+import pjo.travelapp.presentation.util.extension.getExternalFilePath
+import pjo.travelapp.presentation.util.extension.saveImageIntoFileFromUri
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -109,7 +115,44 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             "tv_share",
             R.drawable.ic_share,
             R.string.share
-        ) { /* Handle click event for ll_fbl_item_2 */ }
+        ) { v ->
+            // 현재 화면 저장
+            val rtView = v.rootView
+            val bitmap = Bitmap.createBitmap(rtView.width, rtView.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            rtView.draw(canvas)
+
+            val fileName =
+                resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
+
+            // 외부 저장소 이미지 파일 저장
+            val sendfile = saveImageIntoFileFromUri(
+                bitmap,
+                fileName,
+                getExternalFilePath()
+            )
+
+            // 공유 이동
+            val intent = Intent(Intent.ACTION_SEND)
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                sendfile
+            )
+
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.type = "image/png" /* 이미지 "image/jpeg", "image/png", "image/gif" 등
+                                        오디오
+                                        "audio/mpeg", "audio/ogg" 등
+                                        비디오
+                                        "video/mp4", "video/3gpp" 등
+                                        웹 링크
+                                        "text/plain", "text/html"
+                                        PDF 문서
+                                        "application/pdf"*/
+            startActivity(Intent.createChooser(intent, resources.getText(R.string.share_to_friend)))
+
+        }
 
         itemManager.addItem(
             "ll_fbl_item_3",

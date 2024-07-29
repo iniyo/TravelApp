@@ -11,6 +11,8 @@ class SplitCircleImageView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
+    lateinit var rect: RectF
+
     private val paint = Paint().apply {
         isAntiAlias = true
     }

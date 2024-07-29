@@ -1,6 +1,10 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -64,6 +68,18 @@ class VoiceRecognitionFragment : BaseFragment<FragmentVoiceRecognitionBinding>()
                     }
                 }
             }
+        }
+    }
+
+    private fun setCheckVoicePermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+        } else {
+            navigator.navigateUp()
         }
     }
 

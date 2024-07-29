@@ -24,7 +24,7 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
     private fun setClickListner() {
         bind {
             btnLoginAndSignup.setOnClickListener {
-                navigator.navigateTo(Fragments.SIGN_PAGE, "")
+                navigator.navigateTo(Fragments.SIGN_PAGE)
             }
         }
     }

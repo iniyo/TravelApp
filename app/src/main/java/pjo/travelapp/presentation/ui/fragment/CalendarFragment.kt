@@ -78,6 +78,10 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
             binding.btnSave.setOnClickListener {
                 navigator.navigateTo(Fragments.PLAN_PAGE)
             }
+            // 뒤로
+            binding.toolbar.ivSignDisplayBackButton.setOnClickListener {
+                navigator.navigateUp()
+            }
             bindSummaryViews()
         }
     }

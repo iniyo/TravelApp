@@ -40,7 +40,9 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                 imgResId = imageResId
                 // 중복 아이템 체크
                 if (addedItems.contains(title)) {
-                    Log.d("ItemManager", "Item $title already added")
+                    Log.d("ItemManager", "${title}은 이미 추가하셨습니다.")
+                } else if (addedItems.size >= 3) {
+                    Log.d("ItemManager", "3개까지만 선택해주세요")
                 } else {
                     itemManager.addDeletableItem(
                         imageResource = imageResId,
@@ -51,14 +53,12 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                         addedItems.remove(it)
                     }
                     addedItems.add(title!!)
+                    planViewModel.updateSelectedPlace(title!!, imgResId!!)
                 }
             }
 
             fblPlaceContainer.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
                 btnSelectPlace.isEnabled = fblPlaceContainer.childCount > 0
-                if (title != null && imgResId != null) {
-                    planViewModel.updateSelectedPlace(title!!, imgResId!!)
-                }
             }
 
             if (fblPlaceContainer.childCount > 0) {

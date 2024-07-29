@@ -13,6 +13,7 @@ data class UserSchduleEntity (
     val userName: String,
     val place: List<Pair<String, Int>>,
     val period: Int,
+    val title: String,
     val planListDate: List<Pair<Int, Int>>,
     val datePeriod: String,
 )

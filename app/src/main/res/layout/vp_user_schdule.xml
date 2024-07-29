@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient_user_schedule">
@@ -24,7 +25,7 @@
         android:id="@+id/tv_travel_period"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="10dp"
         android:text="nn 외 n일정"
         android:textColor="@color/white"
         android:textSize="16sp"
@@ -40,15 +41,15 @@
         android:text="여행중"
         android:textColor="@color/white"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_travel_period"
+        app:layout_constraintBottom_toBottomOf="@+id/sciv_img_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_travel_period" />
+        app:layout_constraintTop_toTopOf="@+id/sciv_img_container" />
 
     <ImageView
         android:id="@+id/iv_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerInside"
         android:importantForAccessibility="no"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -58,11 +59,10 @@
         android:id="@+id/tv_travel_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
         android:text="state| date"
         android:textColor="@color/white"
         android:textSize="13sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/sciv_img_container"
-        app:layout_constraintStart_toEndOf="@+id/sciv_img_container" />
+        app:layout_constraintStart_toStartOf="@+id/tv_travel_period" />
 </androidx.constraintlayout.widget.ConstraintLayout>

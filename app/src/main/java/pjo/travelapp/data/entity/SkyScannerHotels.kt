@@ -1,5 +1,7 @@
 package pjo.travelapp.data.entity
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * hotel request
  */
@@ -63,7 +65,15 @@ data class AutoCompleteResponse(
 
 data class AutoCompleteEntity(
     val entityId: String,
+    val location: Location,
     val entityName: String,
-    val entityType: String
+    val entityType: String,
+    val poi: List<Poi>
 )
 
+data class Poi(
+    val entityName: String,
+    val entityType: String,
+    @SerializedName("class")
+    val cls: String
+)

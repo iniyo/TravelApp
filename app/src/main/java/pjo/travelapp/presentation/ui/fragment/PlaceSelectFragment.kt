@@ -140,4 +140,12 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        bind {
+            title = null
+            imgResId = null
+        }
+    }
 }

@@ -2,6 +2,7 @@ package pjo.travelapp.presentation.adapter
 
 import android.graphics.Bitmap
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -51,14 +52,16 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
         fun bind(item: HotelCard) {
             binding.apply {
                 try {
+                    tvSatisfaction.visibility = View.VISIBLE
                     ivMainContent.setImageResource(R.drawable.intro_pic) // 기본 이미지
-                    tvTitle.text = item.name ?: "Unknown Hotel"
-                    tvRating.text = item.stars ?: "No Address"
+                    tvTitle.text = item.name
+                    tvRating.text = item.stars
                     Glide.with(root)
                         .load(item.images.first())
                         .error(R.drawable.svg_hotel)
                         .into(ivMainContent)
-                    rbScore.rating = 0f // 호텔의 평점 정보가 없다면 기본값 0f
+                    rbScore.rating = item.stars.toFloat()
+                    tvReviews.text = item.reviewsSummary.scoreDesc
 
                 } catch (e: Throwable) {
                     e.printStackTrace()

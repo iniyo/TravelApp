@@ -11,8 +11,6 @@ class SplitCircleImageView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
-    lateinit var rect: RectF
-
     private val paint = Paint().apply {
         isAntiAlias = true
     }
@@ -38,57 +36,80 @@ class SplitCircleImageView @JvmOverloads constructor(
         }
 
         val count = bitmaps.size
-        val angleStep = 360f / count
         val cx = width / 2f
         val cy = height / 2f
         val radius = width.coerceAtMost(height) / 2f
 
-        bitmaps.forEachIndexed { index, bitmap ->
-            val startAngle = index * angleStep + spaceAngle / 2
-            val sweepAngle = angleStep - spaceAngle
+        canvas.save()
+        path.reset()
+        path.addCircle(cx, cy, radius, Path.Direction.CW)
+        canvas.clipPath(path)
 
-            // Draw the white space
-            path.reset()
-            path.moveTo(cx, cy)
-            path.arcTo(
-                cx - radius,
-                cy - radius,
-                cx + radius,
-                cy + radius,
-                index * angleStep,
-                spaceAngle,
-                false
-            )
-            path.close()
-
-            canvas.save()
-            canvas.clipPath(path)
-            canvas.drawPath(path, whitePaint)
-            canvas.restore()
-
-            // Draw the image slice
-            path.reset()
-            path.moveTo(cx, cy)
-            path.arcTo(
-                cx - radius,
-                cy - radius,
-                cx + radius,
-                cy + radius,
-                startAngle,
-                sweepAngle,
-                false
-            )
-            path.close()
-
-            canvas.save()
-            canvas.clipPath(path)
+        if (count == 1) {
+            // 이미지가 하나일 때는 전체 영역에 이미지를 그립니다.
+            val bitmap = bitmaps[0]
             canvas.drawBitmap(
                 bitmap,
                 null,
                 RectF(cx - radius, cy - radius, cx + radius, cy + radius),
                 paint
             )
-            canvas.restore()
+        } else {
+            // 이미지가 여러 개일 때는 균등하게 분할하여 그립니다.
+            val totalSpaceAngle = spaceAngle * count
+            val angleStep = (360f - totalSpaceAngle) / count
+
+            bitmaps.forEachIndexed { index, bitmap ->
+                val startAngle = index * (angleStep + spaceAngle)
+                val sweepAngle = angleStep
+
+                // Draw the image slice
+                path.reset()
+                path.moveTo(cx, cy)
+                path.arcTo(
+                    cx - radius,
+                    cy - radius,
+                    cx + radius,
+                    cy + radius,
+                    startAngle,
+                    sweepAngle,
+                    false
+                )
+                path.close()
+
+                canvas.save()
+                canvas.clipPath(path)
+                canvas.drawBitmap(
+                    bitmap,
+                    null,
+                    RectF(cx - radius, cy - radius, cx + radius, cy + radius),
+                    paint
+                )
+                canvas.restore()
+
+                // Draw the white space
+                if (spaceAngle > 0) {
+                    path.reset()
+                    path.moveTo(cx, cy)
+                    path.arcTo(
+                        cx - radius,
+                        cy - radius,
+                        cx + radius,
+                        cy + radius,
+                        startAngle + sweepAngle,
+                        spaceAngle,
+                        false
+                    )
+                    path.close()
+
+                    canvas.save()
+                    canvas.clipPath(path)
+                    canvas.drawPath(path, whitePaint)
+                    canvas.restore()
+                }
+            }
         }
+
+        canvas.restore()
     }
 }

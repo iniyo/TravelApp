@@ -65,6 +65,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private var searchMarker: Marker? = null
     private var currentAdapterStyle: AdapterStyle? = null
     var isToolbarToggler = true
+
     @Inject
     lateinit var navigate: AppNavigator
 
@@ -98,7 +99,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             setOnPoiClickListener { poi ->
                 startLocationMove(poi.latLng)
                 fetchPlaceIdAndDetails(placeId = poi.placeId)
-                if(binding.place != null) {
+                if (binding.place != null) {
                     viewModel.fetchEndQuery(binding.place!!)
                 }
                 toggleBottomSheet(infoBottomSheetBehavior, true)
@@ -541,25 +542,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
              }
          }*/
 
-        infoBottomSheetBehavior.addBottomSheetCallback(object :
-            BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
-                } else {
-                    binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_up)
-                }
-                when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        binding.infoBottomSheet.ivUpArrow.setImageResource(R.drawable.ic_arrow_down)
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-
-            }
-        })
     }
 
 
@@ -573,16 +555,19 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
        }*/
 
-    private fun toggleBottomSheet(bottomSheetBehavior: BottomSheetBehavior<View>, choose: Boolean = false) {
+    private fun toggleBottomSheet(
+        bottomSheetBehavior: BottomSheetBehavior<View>,
+        choose: Boolean = false
+    ) {
         when (bottomSheetBehavior.state) {
             BottomSheetBehavior.STATE_EXPANDED -> {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
 
             BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
-                if(choose){
+                if (choose) {
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-                }else {
+                } else {
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 }
             }

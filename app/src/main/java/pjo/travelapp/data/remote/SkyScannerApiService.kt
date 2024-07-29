@@ -16,7 +16,8 @@ interface SkyScannerApiService {
     suspend fun searchHotels(
         @Query("entityId") entityId: String,
         @Query("checkin") checkin: String,
-        @Query("checkout") checkout: String
+        @Query("checkout") checkout: String,
+        @Query("sorting") sorting: String = "-stars" // 5 ~ 1
     ): HotelResponse
 
     @Headers(
@@ -25,6 +26,6 @@ interface SkyScannerApiService {
     )
     @GET("hotels/auto-complete")
     suspend fun autoComplete(
-        @Query("query") query: String,
+        @Query("query") query: String
     ): AutoCompleteResponse
 }

@@ -20,14 +20,10 @@
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         tools:context=".presentation.ui.fragment.MapsBottomSheetFragment">
 
-        <ImageView
-            android:id="@+id/iv_up_arrow"
-            android:layout_width="35dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="5dp"
-            android:importantForAccessibility="no"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_arrow_up"
+        <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+            android:id="@+id/bottom_sheet_dragger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -39,7 +35,7 @@
             android:layout_marginTop="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_up_arrow">
+            app:layout_constraintTop_toBottomOf="@+id/bottom_sheet_dragger">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

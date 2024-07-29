@@ -84,4 +84,5 @@
     <string name="plan_summary">n일간의 nnn 여행</string>
     <string name="plan_added">일정 추가!</string>
     <string name="share_to_friend">공유하기</string>
+    <string name="satisfaction">사용자 만족도:</string>
 </resources>

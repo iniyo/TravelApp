@@ -21,9 +21,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.data.datasource.AppDatabase
 import pjo.travelapp.data.datasource.UserScheduleDao
+import pjo.travelapp.data.remote.AiChatService
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
 import pjo.travelapp.data.remote.SkyScannerApiService
+import pjo.travelapp.data.repo.AiChatRepository
+import pjo.travelapp.data.repo.AiChatRepositoryImpl
 import pjo.travelapp.data.repo.HotelRepository
 import pjo.travelapp.data.repo.HotelRepositoryImpl
 import pjo.travelapp.data.repo.MapsRepository
@@ -127,6 +130,17 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
+    fun provideAiChat(okHttpClient: OkHttpClient) : AiChatService {
+        val retro = Retrofit.Builder()
+            .baseUrl(BuildConfig.skyscanner_base_url)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retro.create(AiChatService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
         if (!Places.isInitialized()) {
             Places.initialize(context, BuildConfig.maps_api_key)
@@ -148,6 +162,14 @@ object ObjectModuleSingleton {
         service: SkyScannerApiService
     ): HotelRepository {
         return HotelRepositoryImpl(service)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAiChatRepository(
+        service: AiChatService
+    ): AiChatRepository {
+        return AiChatRepositoryImpl(service)
     }
 
     @Provides

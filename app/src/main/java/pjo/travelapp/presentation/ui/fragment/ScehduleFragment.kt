@@ -2,6 +2,7 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.app.AlertDialog
 import android.graphics.Bitmap
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import com.google.android.libraries.places.api.model.Place
@@ -17,12 +18,21 @@ import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val planViewModel: PlanViewModel by activityViewModels()
+    @Inject
+    lateinit var navigator: AppNavigator
+
+    override fun initCreate() {
+        planViewModel.fetchUserSchedules()
+    }
 
     override fun initViewModel() {
 
@@ -40,7 +50,14 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 }
                 launch {
                     planViewModel.userScheduleList.collectLatest {
-                        scheduleAdapter?.submitList(it)
+                        if(it.isEmpty()) {
+                            vpTrips.visibility = View.GONE
+                            tvNoSchedule.visibility = View.VISIBLE
+                        }else {
+                            vpTrips.visibility = View.VISIBLE
+                            tvNoSchedule.visibility = View.GONE
+                            scheduleAdapter?.submitList(it)
+                        }
                     }
                 }
             }
@@ -80,9 +97,15 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
     override fun initAdapter() {
         super.initAdapter()
         bind {
-            scheduleAdapter = UserScehduleAdapter {
-                showDeleteConfirmationDialog(it)
-            }
+            scheduleAdapter = UserScehduleAdapter(
+                itemClickList = {
+                    navigator.navigateTo(Fragments.PLAN_PAGE)
+                    planViewModel.fetchUserSchedule(it)
+                },
+                deleteClickList = {
+                    showDeleteConfirmationDialog(it)
+                }
+            )
             defaultAdapter1 = ScheduleDefaultAdapter()
             defaultAdapter2 = ScheduleDefaultAdapter()
 

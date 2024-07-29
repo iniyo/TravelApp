@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.data.entity.UserSchduleEntity
 import pjo.travelapp.databinding.VpUserSchduleBinding
+import pjo.travelapp.presentation.util.extension.setRandomGradientBackground
 
 class UserScehduleAdapter(
-    private val itemClickList: (UserSchduleEntity) -> Unit
+    private val itemClickList: (UserSchduleEntity) -> Unit,
+    private val deleteClickList: (UserSchduleEntity) -> Unit
 ) :
     ListAdapter<UserSchduleEntity, UserScehduleAdapter.ViewHolder>(diffUtil) {
 
@@ -31,7 +33,12 @@ class UserScehduleAdapter(
                     }
                     tvTravelDate.text = item.datePeriod
 
+                    ivDelete.setOnClickListener { deleteClickList(item) }
                     itemView.setOnClickListener { itemClickList(item) }
+
+                    if(position > 0) {
+                        setRandomGradientBackground(clMainContainer)
+                    }
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()

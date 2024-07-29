@@ -91,10 +91,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/cl_search" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+
         <include
             android:id="@+id/info_bottom_sheet"
             layout="@layout/fragment_maps_bottom_sheet"
             app:place="@{place}" />
+
 
         <include
             android:id="@+id/search_bottom_sheet"

@@ -73,17 +73,40 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/vp_trips"
-                    android:layout_width="match_parent"
-                    android:paddingVertical="20dp"
-                    android:layout_height="160dp"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:adapter="@{schedule_adapter}"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_my_trip" />
+               <androidx.constraintlayout.widget.ConstraintLayout
+                   android:id="@+id/cl_user_schedule"
+                   android:layout_width="match_parent"
+                   android:layout_height="160dp"
+                   app:layout_constraintEnd_toEndOf="parent"
+                   app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
+                   app:layout_constraintTop_toBottomOf="@+id/tv_my_trip">
+
+                   <TextView
+                       android:id="@+id/tv_no_schedule"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="내 여행 정보가 없어요"
+                       android:textColor="@color/black"
+                       android:textSize="17sp"
+                       android:textStyle="normal"
+                       app:layout_constraintBottom_toBottomOf="parent"
+                       app:layout_constraintEnd_toEndOf="parent"
+                       app:layout_constraintStart_toStartOf="parent"
+                       app:layout_constraintTop_toTopOf="parent" />
+
+                   <androidx.viewpager2.widget.ViewPager2
+                       android:id="@+id/vp_trips"
+                       android:layout_width="match_parent"
+                       android:layout_height="match_parent"
+                       android:adapter="@{schedule_adapter}"
+                       android:orientation="horizontal"
+                       android:paddingVertical="20dp"
+                       app:layout_constraintBottom_toBottomOf="parent"
+                       app:layout_constraintEnd_toEndOf="parent"
+                       app:layout_constraintStart_toStartOf="parent"
+                       app:layout_constraintTop_toTopOf="parent" />
+
+               </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/tv_next_trip"
@@ -95,7 +118,7 @@
                     android:textSize="17sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
-                    app:layout_constraintTop_toBottomOf="@+id/vp_trips" />
+                    app:layout_constraintTop_toBottomOf="@+id/cl_user_schedule" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_next_trips"

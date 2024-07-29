@@ -122,7 +122,7 @@ class MainViewModel @Inject constructor(
             try {
                 val autoCompleteResponse = hotelRepo.autoComplete(cityName)
                 if (autoCompleteResponse.status && autoCompleteResponse.data.isNotEmpty()) {
-                    val cityEntity = autoCompleteResponse.data.firstOrNull { it.entityType == "도시" }
+                    val cityEntity = autoCompleteResponse.data.firstOrNull { it.entityType == "city" }
                     val entityId = cityEntity?.entityId
                     if (entityId != null) {
                         val response = hotelRepo.searchHotels(entityId, checkin, checkout)
@@ -297,7 +297,6 @@ class MainViewModel @Inject constructor(
 
     fun fetchCurrentLocation(lt: LatLng) {
         _currentLocation.value = lt
-        /*fetchNearbyTouristAttractions()*/
     }
 
     /* fun fetchNearbyPlacesFlow(): Flow<PagingData<Pair<Place, Bitmap?>>> {
@@ -307,7 +306,7 @@ class MainViewModel @Inject constructor(
          }.flow.cachedIn(viewModelScope)
      }*/
 
-    private fun fetchNearbyTouristAttractions() {
+    fun fetchNearbyTouristAttractions() {
         Log.d("TAG", "fetchNearbyTouristAttractions: ")
         try {
             val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()

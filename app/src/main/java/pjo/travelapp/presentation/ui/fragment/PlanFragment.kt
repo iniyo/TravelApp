@@ -33,6 +33,7 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
     private lateinit var userId: String
     private lateinit var planListDate: List<Pair<Int, Int>>
     private lateinit var datePeriod: String
+    private lateinit var title: String
 
     override fun initView() {
         setupFlexboxItems()
@@ -46,6 +47,7 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             val newSchedule = UserSchduleEntity(
                 userId = userId,
                 userName = userName,
+                title = title,
                 place = placeList,
                 period = period,
                 planListDate = planListDate,
@@ -66,12 +68,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                     }
                 }
                 launch {
-                    planViewModel.selectedCalendarDate.collectLatest {
-                        binding.tvTripTitle.text = it
-                    }
-                }
-                launch {
                     planViewModel.title.collectLatest {
+                        title = it
                         binding.tvTripTitle.text = it
                     }
                 }
@@ -197,6 +195,6 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     override fun onPause() {
         super.onPause()
-        planViewModel.deletePlaceList()
+        planViewModel.clearCurrentUserEntity()
     }
 }

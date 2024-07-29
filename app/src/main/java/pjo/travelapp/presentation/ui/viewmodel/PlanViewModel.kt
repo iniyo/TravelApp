@@ -1,15 +1,11 @@
 package pjo.travelapp.presentation.ui.viewmodel
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.datasource.UserScheduleDao
 import pjo.travelapp.data.entity.TravelDestinationAbroad
@@ -21,9 +17,6 @@ import javax.inject.Inject
 class PlanViewModel @Inject constructor(
     private val userScheduleDao: UserScheduleDao
 ) : ViewModel() {
-
-    private var _selectedCalendarDate = MutableStateFlow<String>("")
-    val selectedCalendarDate: StateFlow<String> get() = _selectedCalendarDate
 
     private var _tripPeriod = MutableStateFlow<Int>(0)
     val tripPeriod: StateFlow<Int> get() = _tripPeriod
@@ -52,18 +45,37 @@ class PlanViewModel @Inject constructor(
         fetchAbroadPlace()
     }
 
-    fun fetchTripPeriod(date: Int) {
-        _tripPeriod.value = date
+    fun fetchUserSchedule(userEntity: UserSchduleEntity) {
+        viewModelScope.launch {
+            userScheduleDao.insertSchedule(userEntity)
+
+            fetchTripPeriod(userEntity.period)
+            fetchSelectedCalendarDatePeriod(userEntity.datePeriod)
+            fetchTitle(userEntity.title)
+            fetchUserAdapter(userEntity.planListDate)
+        }
     }
 
-    fun fetchSelectedCalendarDatePeriod(date: CharSequence) {
+    fun clearCurrentUserEntity() {
+        deletePlaceList()
+        fetchSelectedCalendarDatePeriod(null)
+        fetchTitle(null)
+        fetchUserAdapter(null)
+    }
+
+    fun fetchTripPeriod(date: Int) {
+        Log.d("TAG", "fetchTripPeriod: $date ")
+        _tripPeriod.value = date
+        formatTitleList()
+    }
+
+    fun fetchSelectedCalendarDatePeriod(date: CharSequence?) {
         _selectedCalendarDatePeriod.value = date.toString()
     }
 
-    fun fetchUserSchedule(userSchduleEntity: UserSchduleEntity) {
-        viewModelScope.launch {
-            userScheduleDao.insertSchedule(userSchduleEntity)
-            _userScheduleList.value = userScheduleDao.getAllSchedules()
+    fun fetchTitle(title: String?) {
+        if (title != null) {
+            _title.value = title
         }
     }
 
@@ -88,9 +100,10 @@ class PlanViewModel @Inject constructor(
     }
 
     fun updateSelectedPlace(placeName: String, imageResId: Int) {
+        Log.d("TAG", "updateSelectedPlace: $placeName, $imageResId")
         val currentList = _selectedPlace.value.toMutableList()
-        if (currentList.size >= 3) {
-            currentList.removeAt(0)
+        if (currentList.size > 3) {
+            currentList.removeAt(1)
         }
         currentList.add(Pair(placeName, imageResId))
         _selectedPlace.value = currentList
@@ -101,7 +114,8 @@ class PlanViewModel @Inject constructor(
         placeList: List<Pair<String, Int>> = _selectedPlace.value,
         period: Int = _tripPeriod.value
     ) {
-        if (placeList.isNotEmpty() && period > 0) {
+        Log.d("TAG", "formatTitleList: $placeList, $period")
+        if (placeList.isNotEmpty()) {
             val formattedPlaces = placeList.joinToString("-") { it.first }
             _title.value = "$period 일 간 $formattedPlaces 여행"
         } else if (period > 0) {
@@ -121,8 +135,11 @@ class PlanViewModel @Inject constructor(
     }
 
     fun deletePlaceList() {
-        _selectedPlace.value = emptyList()
-        formatTitleList(emptyList(), _tripPeriod.value)
+        val currentList = _selectedPlace.value.toMutableList()
+        currentList.clear()
+        _selectedPlace.value = currentList
+        _tripPeriod.value = 0
+        formatTitleList()
     }
 
     fun deleteUserSchedule(userSchduleEntity: UserSchduleEntity) {

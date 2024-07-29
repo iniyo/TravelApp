@@ -2,18 +2,17 @@ package pjo.travelapp.presentation.ui.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -25,6 +24,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.R
@@ -42,6 +42,7 @@ open class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
     private val planViewModel: PlanViewModel by viewModels()
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     @Inject
     lateinit var navigator: AppNavigator
     private var isPermissionRequestInProgress = false
@@ -81,6 +82,7 @@ open class MainActivity : AppCompatActivity() {
         checkPermissionsAndRequestIfNeeded()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
+        setView()
         setViewModel()
         setCLickListener()
     }
@@ -96,10 +98,12 @@ open class MainActivity : AppCompatActivity() {
 
     private fun setCLickListener() {
         binding.clAnimator.setOnClickListener {
-            Log.d("TAG", "setCLickListener: ")
+            /*Log.d("TAG", "setCLickListener: ")
             val intent = Intent(this@MainActivity, TransparentActivity::class.java)
-            startActivity(intent)
+            startActivity(intent)*/
+            toggleBottomSheet()
         }
+
     }
 
     // backstack control
@@ -128,8 +132,33 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setView() {
+        val bottomSheet = binding.clBottomSheetContainer
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
+            val maxHeight =
+                (resources.displayMetrics.heightPixels * 0.7).toInt() // 최대 높이 설정
+            if (bottomSheet.height > maxHeight) {
+                val params = bottomSheet.layoutParams
+                params.height = maxHeight
+                bottomSheet.layoutParams = params
+            }
+        }
+    }
+
+    private fun toggleBottomSheet() {
+        if(bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+        {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        } else {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
     private fun setViewModel() {
-        /*mainViewModel.fetchData()*/
+        mainViewModel.fetchData()
         mainViewModel.setDates()
         mainViewModel.searchHotels("Tokyo")
         planViewModel.fetchUserSchedules()
@@ -146,7 +175,7 @@ open class MainActivity : AppCompatActivity() {
                     R.id.scehduleFragment -> cnbItem.setItemSelected(R.id.nav_schedule)
                     R.id.userDetailFragment -> cnbItem.setItemSelected(R.id.nav_profile)
                 }
-                if (destinationId == R.id.mainSearchFragment) {
+                /*if (destinationId == R.id.mainSearchFragment) {
                     tvFloatingAiText.visibility = View.GONE
                     lavFloatingAiButton.visibility = View.GONE
                     cnbItem.visibility = View.GONE
@@ -154,7 +183,7 @@ open class MainActivity : AppCompatActivity() {
                     tvFloatingAiText.visibility = View.VISIBLE
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
-                }
+                }*/
                 if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
@@ -219,6 +248,7 @@ open class MainActivity : AppCompatActivity() {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
                     mainViewModel.fetchCurrentLocation(currentLatLng)
+
                 }
             }
             // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
@@ -239,12 +269,13 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // 위치 업데이트 요청
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
+             // 위치 업데이트 요청
+             fusedLocationClient.requestLocationUpdates(
+                 locationRequest,
+                 locationCallback,
+                 Looper.getMainLooper()
+             )
+            mainViewModel.fetchNearbyTouristAttractions()
         }
     }
 

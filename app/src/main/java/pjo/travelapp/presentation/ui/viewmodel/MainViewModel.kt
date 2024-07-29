@@ -297,6 +297,7 @@ class MainViewModel @Inject constructor(
 
     fun fetchCurrentLocation(lt: LatLng) {
         _currentLocation.value = lt
+        fetchNearbyTouristAttractions()
     }
 
     /* fun fetchNearbyPlacesFlow(): Flow<PagingData<Pair<Place, Bitmap?>>> {

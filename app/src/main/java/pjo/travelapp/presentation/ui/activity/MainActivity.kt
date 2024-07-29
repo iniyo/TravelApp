@@ -159,10 +159,10 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        mainViewModel.fetchData()
+        /*mainViewModel.fetchData()
         mainViewModel.setDates()
         mainViewModel.searchHotels("Tokyo")
-        planViewModel.fetchUserSchedules()
+        planViewModel.fetchUserSchedules()*/
     }
 
     // 현재 프래그먼트 계산
@@ -248,16 +248,15 @@ open class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
-                    mainViewModel.fetchCurrentLocation(currentLatLng)
-
+                    /*mainViewModel.fetchCurrentLocation(currentLatLng)*/
                 }
             }
             // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
-            val locationRequest =
+           /* val locationRequest =
                 LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
                     setMinUpdateIntervalMillis(5000)
                     setMaxUpdateDelayMillis(20000)
-                }.build()
+                }.build()*/
 
             // 위치 콜백 설정
             val locationCallback = object : LocationCallback() {
@@ -265,18 +264,16 @@ open class MainActivity : AppCompatActivity() {
                     locationResult.lastLocation?.let { location ->
                         val currentLatLng = LatLng(location.latitude, location.longitude)
                         Log.d("TAG", "Location updated: $currentLatLng")
-                        mainViewModel.fetchCurrentLocation(currentLatLng)
                     }
                 }
             }
 
              // 위치 업데이트 요청
-             fusedLocationClient.requestLocationUpdates(
+           /*  fusedLocationClient.requestLocationUpdates(
                  locationRequest,
                  locationCallback,
                  Looper.getMainLooper()
-             )
-            mainViewModel.fetchNearbyTouristAttractions()
+             )*/
         }
     }
 

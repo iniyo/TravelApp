@@ -131,7 +131,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     override fun initAdapter() {
         val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
-        binding.apply {
+        bind {
             vpPromotion.apply {
                 addItemDecoration(decoration)
                 setPageTransformer { page, position ->
@@ -139,9 +139,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
                 offscreenPageLimit = 2
             }
-
             rvRecommended.setHasFixedSize(true)
             rvCategory.setHasFixedSize(true)
+            vpTabItemsShow.offscreenPageLimit = 2
+
 
             topPromotionViewpagerAdapter = PromotionSlideAdapter()
             recommendedRecycleAdapter = RecommendedRecyclerAdapter()

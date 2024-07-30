@@ -43,18 +43,24 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
     }
 
     override fun initListener() {
-        binding.btnAddedSchedule.setOnClickListener {
-            val newSchedule = UserSchduleEntity(
-                userId = userId,
-                userName = userName,
-                title = title,
-                place = placeList,
-                period = period,
-                planListDate = planListDate,
-                datePeriod = datePeriod
-            )
-            planViewModel.fetchUserSchedule(newSchedule)
-            navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+        bind {
+            btnAddedSchedule.setOnClickListener {
+                val newSchedule = UserSchduleEntity(
+                    userId = userId,
+                    userName = userName,
+                    title = title,
+                    place = placeList,
+                    period = period,
+                    planListDate = planListDate,
+                    datePeriod = datePeriod
+                )
+                planViewModel.fetchUserSchedule(newSchedule)
+                navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+            }
+
+            ivBack.setOnClickListener {
+                navigator.navigateUp()
+            }
         }
     }
 
@@ -195,6 +201,11 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     override fun onPause() {
         super.onPause()
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
         planViewModel.clearCurrentUserEntity()
     }
 }

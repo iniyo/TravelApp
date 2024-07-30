@@ -124,6 +124,7 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
+    implementation(libs.car.ui.lib)
     kapt(libs.hilt.compiler)
 
     // paging

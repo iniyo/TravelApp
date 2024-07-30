@@ -43,7 +43,6 @@ class MapsViewModel @Inject constructor(
     private val getDirectionsUseCase: GetDirectionsUseCase,
     private val getPlaceIdUseCase: GetPlaceIdUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
-    private val getNearbyPlaceUseCase: GetNearbyPlaceUseCase,
     private val geocoder: Geocoder,
     private var placeClient: PlacesClient
 ) : ViewModel() {

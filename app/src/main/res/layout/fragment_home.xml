@@ -233,7 +233,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:listitem="@layout/rv_recommended_item" />
+                        tools:listitem="@layout/rv_schedule_item" />
 
                     <ProgressBar
                         android:id="@+id/pb_recommended"

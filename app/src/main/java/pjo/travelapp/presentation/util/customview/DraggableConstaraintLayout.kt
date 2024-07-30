@@ -15,9 +15,9 @@ class DraggableConstraintLayout @JvmOverloads constructor(
 
     private var dX = 0f
     private var dY = 0f
-    private var lastAction = 0
-    private var widgetInitialX = 0f
-    private var widgetInitialY  = 0f
+    private var initialX = 0f
+    private var initialY = 0f
+    private var threshold = 16
 
     init {
         setOnTouchListener { view, event ->
@@ -25,20 +25,21 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     dX = view.x - event.rawX
                     dY = view.y - event.rawY
-                    lastAction = MotionEvent.ACTION_DOWN
+                    initialX = event.rawX
+                    initialY = event.rawY
                 }
 
                 MotionEvent.ACTION_MOVE -> {
                     view.x = event.rawX + dX
                     view.y = event.rawY + dY
-                    widgetInitialX = view.x
-                    widgetInitialY = view.y
-                    lastAction = MotionEvent.ACTION_MOVE
                 }
 
                 MotionEvent.ACTION_UP -> {
-                    if (lastAction == MotionEvent.ACTION_DOWN) {
-                        // 클릭 이벤트로 간주
+                    val diffX = abs(event.rawX - initialX)
+                    val diffY = abs(event.rawY - initialY)
+
+                    if (diffX < threshold && diffY < threshold) {
+                        // 이동 거리가 임계값 이하이면 클릭으로 간주
                         performClick()
                     } else {
                         // 중앙을 기준으로 정렬
@@ -48,15 +49,11 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                         if (viewCenterX < parentWidth / 2) {
                             // 왼쪽에 붙이기
                             view.animate().x(30f).setDuration(200L)
-
                         } else {
                             // 오른쪽에 붙이기
                             view.animate().x(parentWidth - view.width.toFloat() - 30f).setDuration(200L)
                         }
                     }
-                    // 이동이 별로 없다면 클릭으로 간주
-                    if (abs(view.x - widgetInitialX) <= 16 && abs(view.y - widgetInitialY) <= 16)
-                        view.performClick()
                 }
 
                 else -> return@setOnTouchListener false

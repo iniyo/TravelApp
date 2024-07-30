@@ -28,10 +28,10 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
 
     override fun initView() {
         bind {
-
+            planViewModel.clearCurrentUserEntity()
+            planViewModel.fetchAbroadPlace()
             val abroadData = TravelDestinationAbroad()
             val domesticData = TravelDestinationDomestic()
-            planViewModel.fetchAbroadPlace()
             val itemManager = FlexboxItemManager(requireContext(), fblPlaceContainer)
             val addedItems = mutableSetOf<String>()
 

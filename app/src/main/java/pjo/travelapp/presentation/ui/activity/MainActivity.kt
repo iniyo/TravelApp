@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,21 +15,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import pjo.travelapp.R
+import pjo.travelapp.data.entity.IsMessage
 import pjo.travelapp.databinding.ActivityMainBinding
+import pjo.travelapp.presentation.adapter.AiChatAdapter
+import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -39,9 +47,10 @@ import javax.inject.Inject
 open class MainActivity : AppCompatActivity() {
 
     private lateinit var splashScreen: SplashScreen
-    private val mainViewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+    private val mainViewModel: MainViewModel by viewModels()
     private val planViewModel: PlanViewModel by viewModels()
+    private val aiChatViewModel: AiChatViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     @Inject
     lateinit var navigator: AppNavigator
@@ -83,9 +92,10 @@ open class MainActivity : AppCompatActivity() {
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
         setView()
+        setAdapter()
         setViewModel()
+        setViewModelListener()
         setCLickListener()
-        //
     }
 
     private fun startSplash() {
@@ -93,8 +103,8 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun initContentView() {
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.lifecycleOwner = this
     }
 
     private fun setCLickListener() {
@@ -105,6 +115,12 @@ open class MainActivity : AppCompatActivity() {
             toggleBottomSheet()
         }
 
+        binding.btnSend.setOnClickListener {
+            aiChatViewModel.sendMessage(binding.etSubmitText.text.toString())
+            binding.adapter?.addMessage(IsMessage(binding.etSubmitText.text.toString(), true))
+            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
+            binding.etSubmitText.text.clear()
+        }
     }
 
     // backstack control
@@ -138,6 +154,7 @@ open class MainActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
+
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
                 (resources.displayMetrics.heightPixels * 0.7).toInt() // 최대 높이 설정
@@ -150,8 +167,7 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleBottomSheet() {
-        if(bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
-        {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         } else {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -159,11 +175,43 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        /*mainViewModel.fetchData()
+        mainViewModel.fetchData()
         mainViewModel.setDates()
-        mainViewModel.searchHotels("Tokyo")
-        planViewModel.fetchUserSchedules()*/
+        mainViewModel.searchHotels("tokyo")
+        planViewModel.fetchUserSchedules()
     }
+
+    private fun setAdapter() {
+        binding.adapter = AiChatAdapter()
+        val layoutManager = LinearLayoutManager(this@MainActivity)
+        layoutManager.stackFromEnd = true
+        binding.rvAiChat.layoutManager = layoutManager
+    }
+
+    private fun setViewModelListener() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                aiChatViewModel.response.collectLatest { state ->
+                    when (state) {
+                        is LatestUiState.Success -> {
+                            Log.d("TAG", "setViewModelListener: Success ")
+                            binding.adapter?.addMessage(state.data)
+                            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
+                        }
+                        is LatestUiState.Error -> {
+                            Snackbar.make(binding.root, state.exception.message ?: "Error occurred", Snackbar.LENGTH_LONG).show()
+                        }
+                        is LatestUiState.Loading -> {
+                            // 로딩 상태를 어댑터에 전달
+                            Log.d("TAG", "setViewModelListener: loading ")
+                            binding.adapter?.setLoading(true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     // 현재 프래그먼트 계산
     private fun observeDestinationChanges() {
@@ -176,7 +224,7 @@ open class MainActivity : AppCompatActivity() {
                     R.id.scehduleFragment -> cnbItem.setItemSelected(R.id.nav_schedule)
                     R.id.userDetailFragment -> cnbItem.setItemSelected(R.id.nav_profile)
                 }
-                /*if (destinationId == R.id.mainSearchFragment) {
+                if (destinationId == R.id.mainSearchFragment) {
                     tvFloatingAiText.visibility = View.GONE
                     lavFloatingAiButton.visibility = View.GONE
                     cnbItem.visibility = View.GONE
@@ -184,7 +232,7 @@ open class MainActivity : AppCompatActivity() {
                     tvFloatingAiText.visibility = View.VISIBLE
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
-                }*/
+                }
                 if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
@@ -200,16 +248,20 @@ open class MainActivity : AppCompatActivity() {
             override fun handleOnBackPressed() {
                 val navController = navigator.retrieveNavController()
                 if (navController.currentDestination?.id == R.id.homeFragment) {
-                    if (backPressedOnce) {
-                        finish()
-                    } else {
-                        backPressedOnce = true
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.end_application),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                        handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
+                    if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }else {
+                        if (backPressedOnce) {
+                            finish()
+                        } else {
+                            backPressedOnce = true
+                            Snackbar.make(
+                                binding.root,
+                                getString(R.string.end_application),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                            handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
+                        }
                     }
                 } else {
                     navController.navigateUp()
@@ -248,15 +300,15 @@ open class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     val currentLatLng = LatLng(location.latitude, location.longitude)
                     Log.d("TAG", "enableMyLocation: $currentLatLng")
-                    /*mainViewModel.fetchCurrentLocation(currentLatLng)*/
+                    mainViewModel.fetchCurrentLocation(currentLatLng)
                 }
             }
             // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
-           /* val locationRequest =
-                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
-                    setMinUpdateIntervalMillis(5000)
-                    setMaxUpdateDelayMillis(20000)
-                }.build()*/
+            /* val locationRequest =
+                 LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
+                     setMinUpdateIntervalMillis(5000)
+                     setMaxUpdateDelayMillis(20000)
+                 }.build()*/
 
             // 위치 콜백 설정
             val locationCallback = object : LocationCallback() {
@@ -268,12 +320,12 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
 
-             // 위치 업데이트 요청
-           /*  fusedLocationClient.requestLocationUpdates(
-                 locationRequest,
-                 locationCallback,
-                 Looper.getMainLooper()
-             )*/
+            // 위치 업데이트 요청
+            /*  fusedLocationClient.requestLocationUpdates(
+                  locationRequest,
+                  locationCallback,
+                  Looper.getMainLooper()
+              )*/
         }
     }
 

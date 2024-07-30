@@ -34,7 +34,7 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         Fragments.VOICE_PAGE to R.id.voiceRecognitionFragment,
         Fragments.SCHEDULE_PAGE to R.id.scehduleFragment,
         Fragments.PLACE_SELECT_PAGE to R.id.placeSelectFragment,
-        Fragments.PLACE_DETAIL_PAGE to R.id.placeDetailFragment
+        Fragments.PLACE_DETAIL_PAGE to HomeFragmentDirections.actionHomeFragmentToPlaceDetailFragment3()
     )
 
     override fun navigateTo(screen: Fragments) {

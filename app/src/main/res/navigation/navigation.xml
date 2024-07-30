@@ -33,6 +33,10 @@
         <action
             android:id="@+id/action_homeFragment_to_placeSelectFragment"
             app:destination="@id/placeSelectFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_placeDetailFragment3"
+            app:destination="@id/placeDetailFragment"
+            app:enterAnim="@anim/anim_slide_on_left" />
     </fragment>
     <fragment
         android:id="@+id/accommodationDetailFragment"

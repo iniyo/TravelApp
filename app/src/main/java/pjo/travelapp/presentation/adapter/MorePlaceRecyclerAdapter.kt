@@ -1,19 +1,18 @@
 package pjo.travelapp.presentation.adapter
 
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.libraries.places.api.model.Place
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.HotelCard
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.RvMorePlacesItemBinding
 
 class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+    private val placesWithPhotos = mutableListOf<PlaceDetail>()
     private val hotels = mutableListOf<HotelCard>()
     private var currentDataType: DataType = DataType.PLACE
 
@@ -23,17 +22,17 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 
     inner class PlaceViewHolder(private val binding: RvMorePlacesItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Pair<Place, Bitmap?>) {
+        fun bind(item: PlaceDetail) {
             binding.apply {
                 try {
-                    item.second?.let {
-                        ivMainContent.setImageBitmap(it)
+                    item.bitmap?.let {
+                        ivMainContent.setImageBitmap(it.first())
                     } ?: ivMainContent.setImageResource(R.drawable.intro_pic)
 
-                    tvTitle.text = item.first.name ?: "Unknown Place"
-                    tvRating.text = item.first.rating?.toString() ?: "No Rating"
-                    rbScore.rating = item.first.rating?.toFloat() ?: 0f
-                    val reviews = item.first.reviews
+                    tvTitle.text = item.place.name ?: "Unknown Place"
+                    tvRating.text = item.place.rating?.toString() ?: "No Rating"
+                    rbScore.rating = item.place.rating?.toFloat() ?: 0f
+                    val reviews = item.place.reviews
                     if (reviews != null && reviews.isNotEmpty()) {
                         tvReviews.text = reviews[0].text ?: "No Reviews"
                     } else {
@@ -93,7 +92,7 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
         }
     }
 
-    fun addPlace(placeWithPhoto: Pair<Place, Bitmap?>) {
+    fun addPlace(placeWithPhoto: PlaceDetail) {
         currentDataType = DataType.PLACE
         placesWithPhotos.add(placeWithPhoto)
         notifyItemInserted(placesWithPhotos.size - 1)

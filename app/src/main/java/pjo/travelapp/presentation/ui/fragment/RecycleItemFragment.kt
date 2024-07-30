@@ -1,25 +1,21 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.entity.HotelCard
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.FragmentRecycleItemBinding
 import pjo.travelapp.presentation.adapter.MorePlaceRecyclerAdapter
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.GridSpacingItemDecoration
 import pjo.travelapp.presentation.util.LatestUiState
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 @AndroidEntryPoint
 class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
@@ -89,10 +85,8 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "숙소" -> {
                         title = pop
                         launch {
-                            launch {
-                                viewModel.hotelState.collectLatest { state ->
-                                    handleUiState(hotelState = state)
-                                }
+                            viewModel.hotelState.collectLatest { state ->
+                                handleUiState(hotelState = state)
                             }
                         }
                     }
@@ -108,7 +102,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
     }
 
     private fun handleUiState(
-        placeState: LatestUiState<List<Pair<Place, Bitmap?>>>? = null,
+        placeState: LatestUiState<List<PlaceDetail>>? = null,
         hotelState: LatestUiState<List<HotelCard>>? = null
     ) {
         bind {

@@ -8,6 +8,10 @@
         <variable
             name="place"
             type="pjo.travelapp.data.entity.PlaceResult" />
+
+        <variable
+            name="adapter"
+            type="pjo.travelapp.presentation.adapter.ImageViewPagerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,6 +26,7 @@
             android:layout_height="220dp"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:adapter="@{adapter}"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +60,7 @@
         </LinearLayout>
 
         <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
-            android:id="@+id/dots_indicator"
+            android:id="@+id/di_vp_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -79,7 +84,7 @@
             android:textColor="@color/black"
             android:textSize="28sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dots_indicator" />
+            app:layout_constraintTop_toBottomOf="@+id/di_vp_indicator" />
 
         <TextView
             android:id="@+id/tv_store_type"
@@ -151,14 +156,16 @@
             android:background="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_reviews"></androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toBottomOf="@+id/tv_reviews">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_trip_tourist"
-            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
             android:background="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cl_trip_route">

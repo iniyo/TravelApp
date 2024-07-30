@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
@@ -132,7 +133,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             setBottomSheet()
-            setTextStartAndEnd()
             setClickListener()
             backPressed()
         }
@@ -284,20 +284,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             })
     }
 
-    private fun setTextStartAndEnd() {
-        bind {
-            setFragmentResultListener("start") { requestKey, bundle ->
-                Log.d("TAG", "setTextStartAndEnd: ${bundle.getString("start_address")}")
-                toggleToolbars(SHOW_DIRECTION)
-            }
-            setFragmentResultListener("end") { requestKey, bundle ->
-                Log.d("TAG", "setTextEndAndEnd: ${bundle.getString("end_address")}")
-                toggleToolbars(SHOW_DIRECTION)
-            }
-
-        }
-    }
-
     @SuppressLint("RestrictedApi")
     private fun setAdapter(st: AdapterStyle) {
         if (currentAdapterStyle == st) {
@@ -369,7 +355,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                                 val travelModes =
                                     arrayOf("DRIVE", "BICYCLE", "WALK", "TRANSIT", "TWO_WHEELER")
-                                travelModes.forEachIndexed { index, mode ->
+                                travelModes.forEachIndexed { _, mode ->
                                     val (routingPreference, color) = when (mode) {
                                         "DRIVE" -> "TRAFFIC_AWARE" to Color.RED
                                         "BICYCLE" -> null to Color.BLUE
@@ -416,7 +402,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
             tvSearch.setOnClickListener {
                 setAdapter(AdapterStyle.SEARCH_STYLE_DIRECTION_MAIN)
-                toggleBottomSheet(searchBottomSheetBehavior)
+                toggleBottomSheet(infoBottomSheetBehavior)
             }
 
             infoBottomSheet.clTabContainer1.setOnClickListener {
@@ -438,20 +424,18 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 navigate.navigateTo(Fragments.VOICE_PAGE)
                 toggleBottomSheet(searchBottomSheetBehavior)
             }
-
-
         }
     }
 
     private fun toggleToolbars(bool: Boolean) {
         if (bool) {
             isToolbarToggler = true
-            animateView(binding.toolbarMapsDirection.root, false)
-            animateView(binding.clSearch, true)
+            binding.toolbarMapsDirection.root.visibility = View.GONE
+            binding.clSearch.visibility = View.VISIBLE
         } else {
             isToolbarToggler = false
-            animateView(binding.toolbarMapsDirection.root, true)
-            animateView(binding.clSearch, false)
+            binding.toolbarMapsDirection.root.visibility = View.VISIBLE
+            binding.clSearch.visibility = View.GONE
         }
     }
 
@@ -491,6 +475,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     }
 
 
+
     private fun fetchPlaceIdAndDetails(latLng: LatLng? = null, placeId: String = "") {
         if (placeId.isNotEmpty()) {
             viewModel.fetchLatLngToPlaceId(getPlaceId = placeId)
@@ -507,71 +492,59 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
         searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        // toolbarMapsDirection 높이 측정
-        /*binding.toolbarMapsDirection.root.viewTreeObserver.addOnGlobalLayoutListener {
-            adjustBottomSheetMaxHeight()
-        }*/
-        /* bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
-             val maxHeight =
-                 (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
-             if (bottomSheet.height > maxHeight) {
-                 val params = bottomSheet.layoutParams
-                 params.height = maxHeight
-                 bottomSheet.layoutParams = params
-             }
-         }*/
-
-        /* searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                 // 상태 변경 처리
-             }
-
-             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                 // BottomSheet가 슬라이딩될 때 상단 뷰 애니메이션 처리
-                 val params = binding.toolbarMapsDirection.root.layoutParams as ConstraintLayout.LayoutParams
-                 params.bottomMargin = (binding.toolbarMapsDirection.root.height * slideOffset).toInt()
-                 binding.toolbarMapsDirection.root.layoutParams = params
-             }
-         })*/
         infoBottomSheetBehavior.isFitToContents = false
         infoBottomSheetBehavior.halfExpandedRatio = 0.5f
-        /* val nestedScrollView = bottomSheet.findViewById<NestedScrollView>(R.id.nsv_cotainer)
-         nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-             if (scrollY == 0) {
-                 // 스크롤이 상단에 있을 때 추가 처리
-             }
-         }*/
 
     }
-
-
-    /*   private fun adjustBottomSheetMaxHeight() {
-           bind {
-               val toolbarHeight = clSearch.height
-               val layoutParams = binding.searchBottomSheet.clMainContainer.layoutParams
-               layoutParams.height = resources.displayMetrics.heightPixels - toolbarHeight
-               binding.searchBottomSheet.clMainContainer.layoutParams = layoutParams
-           }
-
-       }*/
 
     private fun toggleBottomSheet(
         bottomSheetBehavior: BottomSheetBehavior<View>,
         choose: Boolean = false
     ) {
-        when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_EXPANDED -> {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bind {
+            // 다른 BottomSheet의 상태를 관리하는 함수
+            fun hideOtherBottomSheet(
+                currentBehavior: BottomSheetBehavior<View>,
+                otherBehavior: BottomSheetBehavior<View>
+            ) {
+                if (otherBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    otherBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                }
+                currentBehavior.state = if (choose) {
+                    BottomSheetBehavior.STATE_HALF_EXPANDED
+                } else {
+                    BottomSheetBehavior.STATE_EXPANDED
+                }
             }
 
-            BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
-                if (choose) {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-                } else {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            // BottomSheet 상태 전환 로직
+            when (bottomSheetBehavior.state) {
+                BottomSheetBehavior.STATE_EXPANDED -> {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    hideKeyboard(searchBottomSheet.etDefaultSearch)
+                }
+
+                BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
+                    if (bottomSheetBehavior == infoBottomSheetBehavior) {
+                        hideOtherBottomSheet(bottomSheetBehavior, searchBottomSheetBehavior)
+                    } else {
+                        hideOtherBottomSheet(bottomSheetBehavior, infoBottomSheetBehavior)
+                    }
+                }
+
+                BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                    if (bottomSheetBehavior == infoBottomSheetBehavior && searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
                 }
             }
         }
+    }
+
+    // 키보드를 숨기는 함수
+    private fun hideKeyboard(view: View) {
+        val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 

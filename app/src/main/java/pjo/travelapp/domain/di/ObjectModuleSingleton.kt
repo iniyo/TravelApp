@@ -132,8 +132,7 @@ object ObjectModuleSingleton {
     @Singleton
     fun provideAiChat(okHttpClient: OkHttpClient) : AiChatService {
         val retro = Retrofit.Builder()
-            .baseUrl(BuildConfig.skyscanner_base_url)
-            .client(okHttpClient)
+            .baseUrl("https://api.openai.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retro.create(AiChatService::class.java)
@@ -166,14 +165,6 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
-    fun provideAiChatRepository(
-        service: AiChatService
-    ): AiChatRepository {
-        return AiChatRepositoryImpl(service)
-    }
-
-    @Provides
-    @Singleton
     fun provideUseCases(
         repo: MapsRepository,
         rs: RoutesApiService
@@ -184,6 +175,11 @@ object ObjectModuleSingleton {
             getPlaceDetailUseCase = GetPlaceDetailUseCase(repo),
             getNearbyPlaces = GetNearbyPlaceUseCase(repo)
         )
+    }
+
+    @Provides
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
     }
 
     @Provides

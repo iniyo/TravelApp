@@ -39,6 +39,9 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         Fragments.PLACE_DETAIL_PAGE_ITEM to ScehduleFragmentDirections.actionScehduleFragmentToPlaceDetailFragment()
     )
 
+    override fun navigateTo() {
+        navController.navigate(R.id.voiceRecognitionFragment)
+    }
     override fun navigateTo(screen: Fragments) {
         val currentDestination = navController.currentDestination?.id
         val destination = fragmentMap[screen]

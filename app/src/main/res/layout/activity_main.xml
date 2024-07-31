@@ -30,6 +30,22 @@
                 app:defaultNavHost="true"
                 app:navGraph="@navigation/navigation" />
 
+            <com.ismaeldivita.chipnavigation.ChipNavigationBar
+                android:id="@+id/cnb_item"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/bottom_navigation_height"
+                android:background="@color/white"
+                android:elevation="3dp"
+                android:padding="4dp"
+                app:cnb_iconSize="20sp"
+                app:cnb_menuResource="@menu/menu_bottom"
+                app:cnb_orientationMode="horizontal"
+                app:cnb_radius="50dp"
+                app:cnb_unselectedColor="@color/dark_blue"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <pjo.travelapp.presentation.util.customview.DraggableConstraintLayout
                 android:id="@+id/cl_animator"
                 android:layout_width="wrap_content"
@@ -61,22 +77,6 @@
                     app:lottie_rawRes="@raw/animation_ai_robot" />
 
             </pjo.travelapp.presentation.util.customview.DraggableConstraintLayout>
-
-            <com.ismaeldivita.chipnavigation.ChipNavigationBar
-                android:id="@+id/cnb_item"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/bottom_navigation_height"
-                android:background="@color/white"
-                android:elevation="3dp"
-                android:padding="4dp"
-                app:cnb_iconSize="20sp"
-                app:cnb_menuResource="@menu/menu_bottom"
-                app:cnb_orientationMode="horizontal"
-                app:cnb_radius="50dp"
-                app:cnb_unselectedColor="@color/dark_blue"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

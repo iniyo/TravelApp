@@ -13,19 +13,20 @@ class TravelApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-    }
-
-    private fun setNaverSdk() {
-        /** Naver Login Module Initialize */
-        val naverClientId = getString(R.string.social_login_info_naver_client_id)
-        val naverClientSecret = getString(R.string.social_login_info_naver_client_secret)
-        val naverClientName = getString(R.string.social_login_info_naver_client_name)
-        NaverIdLoginSDK.initialize(this, naverClientId, naverClientSecret, naverClientName)
+        setKakaoSdk()
+        setNaverSdk()
     }
 
     private fun setKakaoSdk() {
         KakaoSdk.init(this, BuildConfig.kakao_native_api_key)
+    }
+
+    private fun setNaverSdk() {
+        /** Naver Login Module Initialize */
+        val naverClientId = BuildConfig.naver_client_id
+        val naverClientSecret = BuildConfig.naver_client_secret
+        val naverClientName = getString(R.string.social_login_info_naver_client_name)
+        NaverIdLoginSDK.initialize(this, naverClientId, naverClientSecret, naverClientName)
     }
 
     private fun setFacebookSdk() {

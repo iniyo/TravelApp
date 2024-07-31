@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.util.Log
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -8,6 +9,7 @@ import pjo.travelapp.databinding.FragmentPlaceDetailBinding
 import pjo.travelapp.presentation.adapter.ImageViewPagerAdapter
 import pjo.travelapp.presentation.ui.consts.TAKE_REVIEWS
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
+import pjo.travelapp.presentation.util.extension.copyTextToClipboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import javax.inject.Inject
 
@@ -51,10 +53,10 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
                         stringBuilder.clear()
                         tvRatingScore.text = it.place.rating?.toString()
                         rbScore.rating = it.place.rating?.toFloat()!!
-                        it.place.openingHours?.weekdayText?.forEach { week ->
-                            stringBuilder.append("$week\n")
-                        } ?: {
-                            tvOpeningHours.text = getString(R.string.no_opening_hours)
+                        val weekDayText = it.place.currentOpeningHours?.weekdayText
+                        if(!weekDayText.isNullOrEmpty()) {
+                            Log.d("TAG", "initViewModel: ${weekDayText}")
+                            stringBuilder.append(weekDayText.joinToString("\n"))
                         }
                         tvOpeningHours.text = stringBuilder
                     }
@@ -67,6 +69,12 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
         bind {
             toolbar.ivSignDisplayBackButton.setOnClickListener {
                 navigator.navigateUp()
+            }
+
+            // text copy
+            tvStoreTitle.setOnLongClickListener {
+                requireContext().copyTextToClipboard(tvStoreTitle.text.toString())
+                true
             }
         }
     }

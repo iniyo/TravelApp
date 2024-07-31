@@ -12,13 +12,13 @@ import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvMapsSearchListBinding
 
 class AutoCompleteItemAdapter(
-    private val itemClickListener: (PlaceResult) -> Unit
+    private val itemClickListener: (Pair<PlaceResult, Int>) -> Unit
 ) : ListAdapter<PlaceResult, AutoCompleteItemAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: RvMapsSearchListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: PlaceResult?) {
+        fun bind(item: PlaceResult?, position: Int) {
             try {
                 binding.apply {
                     if (item != null) {
@@ -38,7 +38,8 @@ class AutoCompleteItemAdapter(
                         } else {
                             sivSearchListItem.setImageResource(R.drawable.img_bg_title)
                         }
-                        itemView.setOnClickListener { itemClickListener(item) }
+                        val pair = Pair(item, position)
+                        itemView.setOnClickListener { itemClickListener(pair) }
                     } else {
                         // 아이템이 null일 경우 기본값 설정
                         tvSearchListItemTitle.text = "정보 없음"
@@ -62,7 +63,7 @@ class AutoCompleteItemAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     // DiffUtil.ItemCallback 구현

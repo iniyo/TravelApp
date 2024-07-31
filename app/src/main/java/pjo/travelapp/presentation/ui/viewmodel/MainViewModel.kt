@@ -184,7 +184,7 @@ class MainViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            hotPlaceList.collectLatest { state ->
+            hotPlaceList.collect { state ->
                 if (state is LatestUiState.Success) {
                     onSuccess()
                     if (isAllListsInitialized()) {

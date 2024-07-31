@@ -135,3 +135,8 @@ data class PlaceDetail(
     val place: Place,
     val bitmap: List<Bitmap?>?
 )
+
+data class PlaceDetailExtension(
+    val place: PlaceResult,
+    val bitmap: List<Bitmap?>?
+)

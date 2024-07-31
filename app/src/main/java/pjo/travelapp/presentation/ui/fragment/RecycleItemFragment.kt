@@ -129,7 +129,9 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
                 is LatestUiState.Success -> {
                     pbPopularMore.visibility = View.GONE
-                    adapter?.updatePlaces(placeState.data)
+                    placeState.data.forEach {
+                        adapter?.addPlace(it)
+                    }
                 }
 
                 is LatestUiState.Error -> {
@@ -152,8 +154,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                 is LatestUiState.Success -> {
                     pbPopularMore.visibility = View.GONE
                     hotelState.data.forEach {
-                        Log.d("TAG", "hotel handle: $it")
-                        adapter?.updateHotels(hotelState.data)
+                        adapter?.addHotel(it)
                     }
                 }
 

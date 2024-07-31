@@ -29,4 +29,5 @@ interface AppNavigator {
     fun retrieveNavController(): NavController
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
     fun navigateTo(screen: Fragments)
+    fun navigateTo()
 }

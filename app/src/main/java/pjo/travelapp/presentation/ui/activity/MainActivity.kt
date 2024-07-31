@@ -39,6 +39,7 @@ import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.extension.copyTextToClipboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -154,7 +155,6 @@ open class MainActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
                 (resources.displayMetrics.heightPixels * 0.7).toInt() // 최대 높이 설정
@@ -175,14 +175,16 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        mainViewModel.fetchData()
+       /* mainViewModel.fetchData()
         mainViewModel.setDates()
         mainViewModel.searchHotels("tokyo")
-        planViewModel.fetchUserSchedules()
+        planViewModel.fetchUserSchedules()*/
     }
 
     private fun setAdapter() {
-        binding.adapter = AiChatAdapter()
+        binding.adapter = AiChatAdapter {
+            baseContext.copyTextToClipboard(it.message)
+        }
         val layoutManager = LinearLayoutManager(this@MainActivity)
         layoutManager.stackFromEnd = true
         binding.rvAiChat.layoutManager = layoutManager

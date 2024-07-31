@@ -16,7 +16,7 @@ class MorePlaceRecyclerAdapter(
     private val hotelItemClickListener: (HotelCard) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val places = mutableListOf<PlaceDetail>()
+    private val placesWithPhotos = mutableListOf<PlaceDetail>()
     private val hotels = mutableListOf<HotelCard>()
     private var currentDataType: DataType = DataType.PLACE
 
@@ -87,38 +87,28 @@ class MorePlaceRecyclerAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is PlaceViewHolder -> holder.bind(places[position])
+            is PlaceViewHolder -> holder.bind(placesWithPhotos[position])
             is HotelViewHolder -> holder.bind(hotels[position])
         }
     }
 
     override fun getItemCount(): Int {
         return when (currentDataType) {
-            DataType.PLACE -> places.size
+            DataType.PLACE -> placesWithPhotos.size
             DataType.HOTEL -> hotels.size
         }
     }
 
-    fun updatePlaces(newPlaces: List<PlaceDetail>) {
-        places.clear()
-        places.addAll(newPlaces)
-        notifyDataSetChanged()
+    fun addPlace(placeWithPhoto: PlaceDetail) {
+        currentDataType = DataType.PLACE
+        placesWithPhotos.add(placeWithPhoto)
+        notifyItemInserted(placesWithPhotos.size - 1)
     }
 
-    fun updateHotels(newHotels: List<HotelCard>) {
-        hotels.clear()
-        hotels.addAll(newHotels)
-        notifyDataSetChanged()
+    fun addHotel(hotel: HotelCard) {
+        currentDataType = DataType.HOTEL
+        hotels.add(hotel)
+        notifyItemInserted(hotels.size - 1)
     }
 
-
-    fun clearPlaces() {
-        places.clear()
-        notifyDataSetChanged()
-    }
-
-    fun clearHotels() {
-        hotels.clear()
-        notifyDataSetChanged()
-    }
 }

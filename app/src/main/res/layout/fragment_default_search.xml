@@ -8,6 +8,10 @@
         <import type="pjo.travelapp.presentation.util.bindadapter.MapsBindAdapter" />
 
         <variable
+            name="navigator"
+            type="pjo.travelapp.presentation.util.navigator.AppNavigator" />
+
+        <variable
             name="adapter"
             type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
 
@@ -59,6 +63,7 @@
             android:layout_weight="1"
             android:importantForAccessibility="no"
             android:padding="10dp"
+            android:onClick="@{() -> navigator.navigateTo()}"
             app:layout_constraintBottom_toBottomOf="@+id/et_default_search"
             app:layout_constraintEnd_toEndOf="@+id/et_default_search"
             app:layout_constraintTop_toTopOf="@+id/et_default_search"
@@ -70,7 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
-            android:text="최근 검색"
+            android:text="@string/recent_text"
             android:textColor="@color/dark_blue"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -83,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:onClick="@{() -> viewmodel.clearPlaceList()}"
-            android:text="전체 삭제"
+            android:text="@string/all_delete"
             android:textColor="@color/blue"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/tv_recent_search"

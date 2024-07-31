@@ -4,18 +4,32 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.xwray.groupie.ExpandableGroup
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.GroupieViewHolder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
+import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.data.entity.UserSchduleEntity
 import pjo.travelapp.databinding.FragmentPlanBinding
-import pjo.travelapp.presentation.adapter.PlanAdapter
+import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.adapter.ChildCommentItem
+import pjo.travelapp.presentation.adapter.ParentCommentItem
+import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
+import pjo.travelapp.presentation.util.dialog.NoteDialog
 import pjo.travelapp.presentation.util.extension.getExternalFilePath
+import pjo.travelapp.presentation.util.extension.hideKeyboard
 import pjo.travelapp.presentation.util.extension.saveImageIntoFileFromUri
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -25,19 +39,31 @@ import javax.inject.Inject
 class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     @Inject
-    lateinit var navigator: AppNavigator
+    lateinit var appNavigator: AppNavigator
     private val planViewModel: PlanViewModel by activityViewModels()
+    private val mapsViewModel: MapsViewModel by viewModels()
     private var period: Int = 0
-    private lateinit var placeList: List<Pair<String, Int>>
+    lateinit var searchBottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var placeAndPhotoList: List<Pair<String, Bitmap>>
+    private lateinit var placeDetailList: List<PlaceResult>
     private lateinit var userName: String
     private lateinit var userId: String
     private lateinit var planListDate: List<Pair<Int, Int>>
     private lateinit var datePeriod: String
     private lateinit var title: String
+    private val groupAdapter = GroupAdapter<GroupieViewHolder>()
+    private lateinit var parentGroup: ExpandableGroup
 
     override fun initView() {
+        bind {
+            viewmodel = mapsViewModel
+            navigator = appNavigator
+            adapter = groupAdapter
+        }
         setupFlexboxItems()
+        setBottomSheet()
         setupAdapter()
+        backPressed()
         userName = "test"
         userId = "testId"
     }
@@ -49,17 +75,14 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                     userId = userId,
                     userName = userName,
                     title = title,
-                    place = placeList,
+                    placeList = placeDetailList,
+                    placeAndPhoto = placeAndPhotoList,
                     period = period,
                     planListDate = planListDate,
                     datePeriod = datePeriod
                 )
                 planViewModel.fetchUserSchedule(newSchedule)
-                navigator.navigateTo(Fragments.SCHEDULE_PAGE)
-            }
-
-            ivBack.setOnClickListener {
-                navigator.navigateUp()
+                appNavigator.navigateTo(Fragments.SCHEDULE_PAGE)
             }
         }
     }
@@ -81,25 +104,97 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                 }
                 launch {
                     planViewModel.selectedPlace.collectLatest {
-                        placeList = it
+                        placeAndPhotoList = it
                     }
                 }
                 launch {
-                    planViewModel.planAdapterList.collectLatest {
-                        planListDate = it
-                        Log.d("TAG", "dd: ")
-                        adapter?.submitList(it)
+                    planViewModel.planAdapterList.collectLatest { planListDate ->
+                        val parentCommentItems = planListDate.map { date ->
+                            val parentCommentItem = ParentCommentItem(
+                                item = date,
+                                noteClickListener = { showNoteDialog() },
+                                placeClickListener = {
+                                    Log.d("TAG", "initViewModel: $it")
+                                    parentGroup = groupAdapter.getGroup(it) as ExpandableGroup
+                                    toggleBottomSheet(searchBottomSheetBehavior)
+                                }
+                            )
+                            ExpandableGroup(parentCommentItem).apply {
+                                // 초기 자식 아이템 설정 (없을 경우 빈 리스트)
+                                addAll(emptyList())
+                            }
+                        }
+                        groupAdapter.update(parentCommentItems)
+                    }
+                }
+
+                launch {
+                    mapsViewModel.query.collectLatest {
+
+                    }
+                }
+
+
+                launch {
+                    mapsViewModel.placeDetailsList.collectLatest {
+                        Log.d("TAG", "placeDetailsList: ")
+                        placeDetailList = it
+                        autoAdapter?.submitList(it.toMutableList())
                     }
                 }
             }
         }
     }
 
+    private fun setBottomSheet() {
+        bind {
+            val bottomSheet = searchBottomSheet.clMainContainer
+            searchBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+            searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            searchBottomSheetBehavior.addBottomSheetCallback(object :
+                BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    if (searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                        hideKeyboard(clPlanMainContainer)
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    // 슬라이드 중
+                }
+            })
+        }
+    }
+
     private fun setupAdapter() {
         bind {
-            adapter = PlanAdapter {
-                // 아이템 클릭 이벤트
+            autoAdapter = AutoCompleteItemAdapter {
+                hideKeyboard(clPlanMainContainer)
+
+                parentGroup.add(ChildCommentItem(it.first))
+                if (!parentGroup.isExpanded) {
+                    parentGroup.onToggleExpanded()
+                }
+
+                toggleBottomSheet(searchBottomSheetBehavior)
             }
+        }
+    }
+
+    private fun toggleBottomSheet(
+        currentBehavior: BottomSheetBehavior<View>
+    ) {
+        bind {
+            if (currentBehavior.state == BottomSheetBehavior.STATE_HIDDEN) currentBehavior.state =
+                BottomSheetBehavior.STATE_EXPANDED
+            else currentBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    private fun showNoteDialog() {
+        val noteDialog = NoteDialog(requireContext())
+        noteDialog.show { note ->
+            Toast.makeText(requireContext(), "노트가 저장되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -111,7 +206,7 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             "tv_map",
             R.drawable.ic_map,
             R.string.map
-        ) { navigator.navigateTo(Fragments.MAPS_PAGE) }
+        ) { appNavigator.navigateTo(Fragments.MAPS_PAGE) }
 
         itemManager.addItem(
             "ll_fbl_item_2",
@@ -155,7 +250,6 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                                         PDF 문서
                                         "application/pdf"*/
             startActivity(Intent.createChooser(intent, resources.getText(R.string.share_to_friend)))
-
         }
 
         itemManager.addItem(
@@ -199,10 +293,14 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         ) { /* Handle click event for ll_fbl_item_7 */ }
     }
 
-    override fun onPause() {
-        super.onPause()
-
+    private fun backPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    else appNavigator.navigateUp()
+                }
+            })
     }
-
-
 }

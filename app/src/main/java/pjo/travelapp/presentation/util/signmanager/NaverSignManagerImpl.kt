@@ -7,8 +7,9 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.navercorp.nid.profile.NidProfileCallback
 import com.navercorp.nid.profile.data.NidProfileResponse
+import javax.inject.Inject
 
-class NaverSignManagerImpl: NaverSignManager {
+class NaverSignManagerImpl @Inject constructor(): NaverSignManager {
 
     /**
      * 로그인

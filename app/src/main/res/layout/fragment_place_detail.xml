@@ -134,9 +134,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:text="@{placeDetail.place.openingHours.weekdayText[0]}"
                 android:textColor="@color/black"
                 android:textSize="28sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ll_rating_container" />
 

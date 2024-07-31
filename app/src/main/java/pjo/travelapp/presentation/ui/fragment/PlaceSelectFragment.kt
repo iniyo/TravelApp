@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayout
@@ -37,11 +38,11 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
 
             adapter = PlaceSelectAdapter { (place, imageResId) ->
                 title = place
-                imgResId = imageResId
+                val bitmaps = BitmapFactory.decodeResource(binding.root.context.resources, imageResId)
                 // 중복 아이템 체크
                 if (addedItems.contains(title)) {
                     Log.d("ItemManager", "${title}은 이미 추가하셨습니다.")
-                } else if (addedItems.size >= 3) {
+                } else if (addedItems.size > 2) {
                     Log.d("ItemManager", "3개까지만 선택해주세요")
                 } else {
                     itemManager.addDeletableItem(
@@ -49,11 +50,12 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                         textResId = title!!
                     ) {
                         Log.d("TAG", "Deleting: $it")
-                        planViewModel.deletePlace(Pair(it, imageResId))
+                        planViewModel.deletePlace(Pair(it, bitmaps))
                         addedItems.remove(it)
                     }
                     addedItems.add(title!!)
-                    planViewModel.updateSelectedPlace(title!!, imgResId!!)
+
+                    planViewModel.updateSelectedPlace(title!!, bitmaps)
                 }
             }
 

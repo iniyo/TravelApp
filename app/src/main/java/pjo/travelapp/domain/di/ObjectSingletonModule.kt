@@ -39,7 +39,7 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-object ObjectModuleSingleton {
+object ObjectSingletonModule {
 
     /**
      * 공통 HTTP 설정
@@ -243,6 +243,7 @@ object ObjectModuleSingleton {
     fun provideTypes(): List<String> {
         return listOf("restaurant", "museum", "park", "cafe")
     }
+
     /**
      * 기타 설정 끝
      */

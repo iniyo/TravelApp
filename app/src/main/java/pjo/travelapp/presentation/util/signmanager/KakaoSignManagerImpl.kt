@@ -2,13 +2,18 @@ package pjo.travelapp.presentation.util.signmanager
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Base64
 import android.util.Log
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import javax.inject.Inject
 
-class KakaoSignManagerImpl: KakaoSignManager {
+class KakaoSignManagerImpl @Inject constructor(): KakaoSignManager {
 
     private val mCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
         if (error != null) {
@@ -39,7 +44,7 @@ class KakaoSignManagerImpl: KakaoSignManager {
                 }
                 // 로그인 성공 부분
                 else if (token != null) {
-                    Log.e(TAG, "로그인 성공 ${token.accessToken}")
+                    Log.d(TAG, "로그인 성공 ${token.accessToken}")
                 }
             }
         } else {
@@ -48,3 +53,4 @@ class KakaoSignManagerImpl: KakaoSignManager {
     }
 
 }
+

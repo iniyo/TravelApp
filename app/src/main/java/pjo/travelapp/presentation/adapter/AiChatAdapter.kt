@@ -6,10 +6,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
+import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.AiChatItemBinding
 import pjo.travelapp.databinding.ItemLoadingBinding
 
-class AiChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AiChatAdapter(
+    private val itemClickListener: (IsMessage) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val messages = mutableListOf<IsMessage>()
     private var isLoading = false
@@ -77,6 +80,10 @@ class AiChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 binding.tvAssistant.text = item.message
                 binding.llLeftChat.visibility = View.VISIBLE
                 binding.llRightChat.visibility = View.GONE
+            }
+            itemView.setOnLongClickListener {
+                itemClickListener(item)
+                true
             }
         }
     }

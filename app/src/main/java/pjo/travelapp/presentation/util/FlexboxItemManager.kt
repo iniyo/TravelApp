@@ -88,10 +88,6 @@ class FlexboxItemManager(private val context: Context, private val flexboxLayout
         clickListener: ((String) -> Unit)? = null
     ) {
 
-/*
-        // 아이템 추가
-        addedItems.add(textResId)*/
-
         val generatedLayoutId = layoutId?.let { idMap[it] } ?: View.generateViewId().also { idMap[layoutId ?: "layout"] = it }
         val generatedImageViewId = imageViewId?.let { idMap[it] } ?: View.generateViewId().also { idMap[imageViewId ?: "imageView"] = it }
         val generatedTextViewId = textViewId?.let { idMap[it] } ?: View.generateViewId().also { idMap[textViewId ?: "textView"] = it }

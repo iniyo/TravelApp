@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.viewmodel
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.datasource.UserScheduleDao
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.data.entity.TravelDestinationAbroad
 import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.data.entity.UserSchduleEntity
@@ -37,14 +39,20 @@ class PlanViewModel @Inject constructor(
     private val _userScheduleList = MutableStateFlow<List<UserSchduleEntity>>(emptyList())
     val userScheduleList: StateFlow<List<UserSchduleEntity>> get() = _userScheduleList
 
-    private val _selectedPlace = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
-    val selectedPlace: StateFlow<List<Pair<String, Int>>> get() = _selectedPlace
+    private val _selectedPlace = MutableStateFlow<List<Pair<String, Bitmap>>>(emptyList())
+    val selectedPlace: StateFlow<List<Pair<String, Bitmap>>> get() = _selectedPlace
+
+    private val _placeDetailLiist = MutableStateFlow<List<PlaceDetail>?>(null)
+    val placeDetailLiist: StateFlow<List<PlaceDetail>?> get() = _placeDetailLiist
 
     init {
         fetchDomesticPlace()
         fetchAbroadPlace()
     }
 
+    /**
+     * public function
+     */
     fun fetchUserSchedule(userEntity: UserSchduleEntity) {
         viewModelScope.launch {
             userScheduleDao.insertSchedule(userEntity)
@@ -99,33 +107,24 @@ class PlanViewModel @Inject constructor(
         _abroadPlace.value = TravelDestinationAbroad()
     }
 
-    fun updateSelectedPlace(placeName: String, imageResId: Int) {
-        Log.d("TAG", "updateSelectedPlace: $placeName, $imageResId")
+    fun fetchSelectedPlace(place: PlaceDetail) {
+        val currnetList = _placeDetailLiist.value?.toMutableList()
+        currnetList?.add(place)
+        _placeDetailLiist.value = currnetList
+    }
+
+    fun updateSelectedPlace(placeName: String, bitmap: Bitmap) {
+        Log.d("TAG", "updateSelectedPlace: $placeName, $bitmap")
         val currentList = _selectedPlace.value.toMutableList()
         if (currentList.size > 3) {
             currentList.removeAt(1)
         }
-        currentList.add(Pair(placeName, imageResId))
+        currentList.add(Pair(placeName, bitmap))
         _selectedPlace.value = currentList
         formatTitleList(currentList, _tripPeriod.value)
     }
 
-    private fun formatTitleList(
-        placeList: List<Pair<String, Int>> = _selectedPlace.value,
-        period: Int = _tripPeriod.value
-    ) {
-        Log.d("TAG", "formatTitleList: $placeList, $period")
-        if (placeList.isNotEmpty()) {
-            val formattedPlaces = placeList.joinToString("-") { it.first }
-            _title.value = "$period 일 간 $formattedPlaces 여행"
-        } else if (period > 0) {
-            _title.value = "$period 일 간의 여행"
-        } else {
-            _title.value = ""
-        }
-    }
-
-    fun deletePlace(removeItem: Pair<String, Int>) {
+    fun deletePlace(removeItem: Pair<String, Bitmap>) {
         val currentList = _selectedPlace.value.toMutableList()
         if (currentList.contains(removeItem)) {
             currentList.remove(removeItem)
@@ -153,6 +152,25 @@ class PlanViewModel @Inject constructor(
         viewModelScope.launch {
             userScheduleDao.deleteAllSchedules()
             _userScheduleList.value = emptyList()
+        }
+    }
+
+    /**
+     * public function end
+     */
+
+    private fun formatTitleList(
+        placeList: List<Pair<String, Bitmap>> = _selectedPlace.value,
+        period: Int = _tripPeriod.value
+    ) {
+        Log.d("TAG", "formatTitleList: $placeList, $period")
+        if (placeList.isNotEmpty()) {
+            val formattedPlaces = placeList.joinToString("-") { it.first }
+            _title.value = "$period 일 간 $formattedPlaces 여행"
+        } else if (period > 0) {
+            _title.value = "$period 일 간의 여행"
+        } else {
+            _title.value = ""
         }
     }
 }

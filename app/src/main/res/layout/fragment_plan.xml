@@ -6,11 +6,24 @@
     <data>
 
         <variable
+            name="viewmodel"
+            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
+
+        <variable
             name="adapter"
-            type="pjo.travelapp.presentation.adapter.PlanAdapter" />
+            type="com.xwray.groupie.GroupAdapter" />
+
+        <variable
+            name="auto_adapter"
+            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+
+        <variable
+            name="navigator"
+            type="pjo.travelapp.presentation.util.navigator.AppNavigator" />
     </data>
 
-    <androidx.core.widget.NestedScrollView
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -56,6 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
+                    android:importantForAccessibility="no"
                     android:src="@drawable/back_white"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -68,7 +82,7 @@
                     android:layout_marginBottom="5dp"
                     android:text="@string/plan_summary"
                     android:textColor="@color/white"
-                    android:textSize="25dp"
+                    android:textSize="25sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tv_trip_date"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -78,7 +92,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="yyyy.m.d ~ yyyy.m.d"
+                    android:text="@string/fotmat_date"
                     android:textColor="@color/white_blue"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toTopOf="@+id/fbl_button_container"
@@ -102,7 +116,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_plan"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:adapter="@{adapter}"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -128,5 +142,14 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+
+        <include
+            android:id="@+id/search_bottom_sheet"
+            layout="@layout/fragment_default_search"
+            app:navigator="@{navigator}"
+            app:adapter="@{auto_adapter}"
+            app:viewmodel="@{viewmodel}" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>

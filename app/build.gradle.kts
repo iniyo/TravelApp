@@ -112,6 +112,9 @@ dependencies {
     implementation(libs.logging.interceptor)
     // viewpager circle indicator
     implementation(libs.dotsindicator)
+    // groupie
+    implementation(libs.groupie)
+    implementation(libs.groupie.viewbinding)
     /**
      * open source end
      */

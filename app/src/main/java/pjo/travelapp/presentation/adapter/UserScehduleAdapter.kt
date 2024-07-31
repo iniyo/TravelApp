@@ -1,6 +1,5 @@
 package pjo.travelapp.presentation.adapter
 
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -23,12 +22,12 @@ class UserScehduleAdapter(
             try {
                 binding.apply {
 
-                    val bitmaps = item.place.map { pair ->
-                        BitmapFactory.decodeResource(binding.root.context.resources, pair.second)
+                    val bitmaps = item.placeAndPhoto.map { pair ->
+                        pair.second
                     }
                     scivImgContainer.setBitmaps(bitmaps)
 
-                    tvTravelPeriod.text = item.place.joinToString(separator = ",") {
+                    tvTravelPeriod.text = item.placeAndPhoto.joinToString(separator = ",") {
                         it.first
                     }
                     tvTravelDate.text = item.datePeriod
@@ -36,7 +35,7 @@ class UserScehduleAdapter(
                     ivDelete.setOnClickListener { deleteClickList(item) }
                     itemView.setOnClickListener { itemClickList(item) }
 
-                    if(position > 0) {
+                    if (position > 0) {
                         setRandomGradientBackground(clMainContainer)
                     }
                 }

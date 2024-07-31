@@ -1,10 +1,12 @@
 package pjo.travelapp.presentation.adapter
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.databinding.VpItemSlideImgBinding
+import kotlin.math.log
 
 class ImageViewPagerAdapter : RecyclerView.Adapter<ImageViewPagerAdapter.ViewHolder>() {
 
@@ -15,6 +17,7 @@ class ImageViewPagerAdapter : RecyclerView.Adapter<ImageViewPagerAdapter.ViewHol
         fun bind(item: Bitmap) {
             binding.apply {
                 try {
+                    Log.d("TAG", "bind: $item")
                     ivImgContainer.setImageBitmap(item)
                 } catch (e: Throwable) {
                     e.printStackTrace()

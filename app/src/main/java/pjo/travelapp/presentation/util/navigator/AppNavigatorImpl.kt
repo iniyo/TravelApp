@@ -9,6 +9,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import pjo.travelapp.R
 import pjo.travelapp.presentation.ui.fragment.HomeFragmentDirections
+import pjo.travelapp.presentation.ui.fragment.ScehduleFragmentDirections
 import pjo.travelapp.presentation.ui.fragment.UserDetailFragmentDirections
 import javax.inject.Inject
 
@@ -34,7 +35,8 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         Fragments.VOICE_PAGE to R.id.voiceRecognitionFragment,
         Fragments.SCHEDULE_PAGE to R.id.scehduleFragment,
         Fragments.PLACE_SELECT_PAGE to R.id.placeSelectFragment,
-        Fragments.PLACE_DETAIL_PAGE to HomeFragmentDirections.actionHomeFragmentToPlaceDetailFragment3()
+        Fragments.PLACE_DETAIL_PAGE to HomeFragmentDirections.actionHomeFragmentToPlaceDetailFragment3(),
+        Fragments.PLACE_DETAIL_PAGE_ITEM to ScehduleFragmentDirections.actionScehduleFragmentToPlaceDetailFragment()
     )
 
     override fun navigateTo(screen: Fragments) {

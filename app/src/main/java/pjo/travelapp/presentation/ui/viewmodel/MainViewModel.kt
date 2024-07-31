@@ -339,7 +339,6 @@ class MainViewModel @Inject constructor(
                     .filter { it.photoMetadatas != null && it.photoMetadatas!!.isNotEmpty() && it.rating != null }
                     .sortedByDescending { it.rating } // 평점 순으로 정렬
 
-                Log.d("TAG", "fetchNearbyTouristAttractions: ${res.places}")
                 newPlaces.forEach {
                     val photoMetadatas = it.photoMetadatas
                     if (!photoMetadatas.isNullOrEmpty()) {

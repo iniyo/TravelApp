@@ -22,7 +22,7 @@ class UserScehduleAdapter(
         fun bind(item: UserSchduleEntity, position: Int) {
             try {
                 binding.apply {
-                    // UserSchduleEntity의 place 리스트를 순회하면서 이미지뷰를 동적으로 추가합니다.
+
                     val bitmaps = item.place.map { pair ->
                         BitmapFactory.decodeResource(binding.root.context.resources, pair.second)
                     }

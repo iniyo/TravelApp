@@ -15,7 +15,8 @@ enum class Fragments {
     VOICE_PAGE,
     SCHEDULE_PAGE,
     PLACE_SELECT_PAGE,
-    PLACE_DETAIL_PAGE
+    PLACE_DETAIL_PAGE,
+    PLACE_DETAIL_PAGE_ITEM
 }
 
 /**

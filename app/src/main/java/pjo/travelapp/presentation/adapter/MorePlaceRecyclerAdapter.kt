@@ -8,11 +8,15 @@ import com.bumptech.glide.Glide
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.HotelCard
 import pjo.travelapp.data.entity.PlaceDetail
+import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvMorePlacesItemBinding
 
-class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MorePlaceRecyclerAdapter(
+    private val placeItemClickListener: (PlaceDetail) -> Unit,
+    private val hotelItemClickListener: (HotelCard) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val placesWithPhotos = mutableListOf<PlaceDetail>()
+    private val places = mutableListOf<PlaceDetail>()
     private val hotels = mutableListOf<HotelCard>()
     private var currentDataType: DataType = DataType.PLACE
 
@@ -39,6 +43,8 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                         tvReviews.text = "No Reviews"
                     }
 
+                    itemView.setOnClickListener { placeItemClickListener(item) }
+
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }
@@ -62,6 +68,7 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                     rbScore.rating = item.stars.toFloat()
                     tvReviews.text = item.reviewsSummary.scoreDesc
 
+                    itemView.setOnClickListener { hotelItemClickListener(item) }
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }
@@ -80,27 +87,38 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is PlaceViewHolder -> holder.bind(placesWithPhotos[position])
+            is PlaceViewHolder -> holder.bind(places[position])
             is HotelViewHolder -> holder.bind(hotels[position])
         }
     }
 
     override fun getItemCount(): Int {
         return when (currentDataType) {
-            DataType.PLACE -> placesWithPhotos.size
+            DataType.PLACE -> places.size
             DataType.HOTEL -> hotels.size
         }
     }
 
-    fun addPlace(placeWithPhoto: PlaceDetail) {
-        currentDataType = DataType.PLACE
-        placesWithPhotos.add(placeWithPhoto)
-        notifyItemInserted(placesWithPhotos.size - 1)
+    fun updatePlaces(newPlaces: List<PlaceDetail>) {
+        places.clear()
+        places.addAll(newPlaces)
+        notifyDataSetChanged()
     }
 
-    fun addHotel(hotel: HotelCard) {
-        currentDataType = DataType.HOTEL
-        hotels.add(hotel)
-        notifyItemInserted(hotels.size - 1)
+    fun updateHotels(newHotels: List<HotelCard>) {
+        hotels.clear()
+        hotels.addAll(newHotels)
+        notifyDataSetChanged()
+    }
+
+
+    fun clearPlaces() {
+        places.clear()
+        notifyDataSetChanged()
+    }
+
+    fun clearHotels() {
+        hotels.clear()
+        notifyDataSetChanged()
     }
 }

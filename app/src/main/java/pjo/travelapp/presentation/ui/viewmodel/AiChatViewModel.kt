@@ -39,7 +39,8 @@ class AiChatViewModel @Inject constructor(
                 if (assistant != null && thread != null) {
                     startRun(thread.id)  // Run 시작
                 } else {
-                    _response.value = LatestUiState.Error(Exception("Failed to initialize assistant or thread."))
+                    _response.value =
+                        LatestUiState.Error(Exception("Failed to initialize assistant or thread."))
                 }
             } catch (e: Exception) {
                 _response.value = LatestUiState.Error(e)

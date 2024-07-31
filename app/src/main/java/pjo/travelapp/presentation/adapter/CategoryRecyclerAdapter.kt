@@ -1,17 +1,9 @@
 package pjo.travelapp.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.google.android.libraries.places.api.model.Place
-import pjo.travelapp.R
 import pjo.travelapp.data.entity.Category
-import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvCategoryItemBinding
 
 class CategoryRecyclerAdapter(

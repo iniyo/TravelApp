@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.activityViewModels
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -16,6 +17,8 @@ import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
 import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
+import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
+import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.LatestUiState
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
@@ -29,6 +32,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     @Inject
     lateinit var navigator: AppNavigator
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val detailViewModel: DetailViewModel by activityViewModels()
 
     override fun initView() {
         super.initView()
@@ -47,11 +51,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                             is LatestUiState.Loading -> pbPopular.visibility = View.VISIBLE
                             is LatestUiState.Success -> {
                                 pbPopular.visibility = View.GONE
+                                pbRecommended.visibility = View.GONE
                                 it.data.forEach { res ->
+                                    recommendedRecycleAdapter?.addPlace(res)
                                     popularRecycleAdapter?.addPlace(res)
                                 }
                             }
-
                             is LatestUiState.Error -> it.exception.printStackTrace()
                         }
                     }
@@ -81,32 +86,33 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
         bind {
             setTabItemMargin(tlTop, marginSize, marginSize)
+
             tlTop.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
+                        // ViewPager의 어댑터를 탭의 위치에 따라 다시 설정
+                        morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), it.position)
+                        vpTabItemsShow.adapter = morePlaceViewpagerAdapter
+
+                        // ViewPager의 현재 페이지를 0으로 설정 (첫 페이지)
+                        vpTabItemsShow.setCurrentItem(0, true)
+
                         Log.d("TAG", "onTabSelected: ${tab.position}")
-                        morePlaceViewpagerAdapter =
-                            MorePlacesViewPagerAdapter(requireActivity(), tab.position)
-                        topPromotionViewpagerAdapter?.addAd(R.drawable.banner1)
                     }
                 }
 
                 override fun onTabUnselected(tab: TabLayout.Tab?) {
-
+                    // 필요한 경우 추가적인 처리를 여기에 작성
                 }
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {
-
+                    // 필요한 경우 추가적인 처리를 여기에 작성
                 }
             })
 
-            /* vpTabItemsShow.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                 override fun onPageSelected(position: Int) {
-                     tlTop.selectTab(tlTop.getTabAt(position))
-                 }
-             })*/
         }
     }
+
 
     /* override fun onPause() {
          super.onPause()
@@ -143,9 +149,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             rvCategory.setHasFixedSize(true)
             vpTabItemsShow.offscreenPageLimit = 2
 
+            val scehduleAdapter = ScheduleDefaultAdapter{
+                detailViewModel.fetchPlaceDetails(it)
+                navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+            }
 
             topPromotionViewpagerAdapter = PromotionSlideAdapter()
-            recommendedRecycleAdapter = RecommendedRecyclerAdapter()
+
             categoryRecycleAdapter = CategoryRecyclerAdapter {
                 when(it) {
                     "항공" -> {}
@@ -155,7 +165,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     "근처 맛집" -> {}
                 }
             }
-            popularRecycleAdapter = ScheduleDefaultAdapter()
+            recommendedRecycleAdapter = RecommendedRecyclerAdapter{
+                detailViewModel.fetchPlaceDetails(it)
+                navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+            }
+            popularRecycleAdapter = scehduleAdapter
             morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)
         }
     }

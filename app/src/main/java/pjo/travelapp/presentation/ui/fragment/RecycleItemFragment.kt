@@ -1,30 +1,33 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.entity.HotelCard
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.FragmentRecycleItemBinding
 import pjo.travelapp.presentation.adapter.MorePlaceRecyclerAdapter
+import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.GridSpacingItemDecoration
 import pjo.travelapp.presentation.util.LatestUiState
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
-    private val viewModel: MainViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val detailViewModel: DetailViewModel by activityViewModels()
+    @Inject
+    lateinit var navigator: AppNavigator
     private lateinit var pop: String
 
     override fun initView() {
@@ -40,7 +43,16 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         true
                     )
                 ) // 16dp의 마진 적용
-                adapter = MorePlaceRecyclerAdapter()
+                adapter = MorePlaceRecyclerAdapter(
+                    placeItemClickListener = {
+                        detailViewModel.fetchPlaceDetails(it)
+                        navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+                    },
+                    hotelItemClickListener = {
+                        detailViewModel.fetchHotelDetail(it)
+                        navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+                    }
+                )
             }
         }
     }
@@ -53,7 +65,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "도쿄" -> {
                         title = pop
                         launch {
-                            viewModel.tokyoHotPlaceList.collectLatest {
+                            mainViewModel.tokyoHotPlaceList.collectLatest {
                                 handleUiState(it)
                             }
                         }
@@ -62,7 +74,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "후쿠오카" -> {
                         title = pop
                         launch {
-                            viewModel.fukuokaHotPlaceList.collectLatest {
+                            mainViewModel.fukuokaHotPlaceList.collectLatest {
                                 handleUiState(it)
                             }
                         }
@@ -71,7 +83,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "파리" -> {
                         title = pop
                         launch {
-                            viewModel.parisHotPlaceList.collectLatest {
+                            mainViewModel.parisHotPlaceList.collectLatest {
                                 handleUiState(it)
                             }
                         }
@@ -80,7 +92,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "근처" -> {
                         title = pop
                         launch {
-                            viewModel.nearbySearch.collectLatest {
+                            mainViewModel.nearbySearch.collectLatest {
                                 handleUiState(it)
                             }
                         }
@@ -89,10 +101,8 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     "숙소" -> {
                         title = pop
                         launch {
-                            launch {
-                                viewModel.hotelState.collectLatest { state ->
-                                    handleUiState(hotelState = state)
-                                }
+                            mainViewModel.hotelState.collectLatest { state ->
+                                handleUiState(hotelState = state)
                             }
                         }
                     }
@@ -108,7 +118,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
     }
 
     private fun handleUiState(
-        placeState: LatestUiState<List<Pair<Place, Bitmap?>>>? = null,
+        placeState: LatestUiState<List<PlaceDetail>>? = null,
         hotelState: LatestUiState<List<HotelCard>>? = null
     ) {
         bind {
@@ -119,9 +129,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
                 is LatestUiState.Success -> {
                     pbPopularMore.visibility = View.GONE
-                    placeState.data.forEach {
-                        adapter?.addPlace(it)
-                    }
+                    adapter?.updatePlaces(placeState.data)
                 }
 
                 is LatestUiState.Error -> {
@@ -145,7 +153,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                     pbPopularMore.visibility = View.GONE
                     hotelState.data.forEach {
                         Log.d("TAG", "hotel handle: $it")
-                        adapter?.addHotel(it)
+                        adapter?.updateHotels(hotelState.data)
                     }
                 }
 

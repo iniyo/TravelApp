@@ -204,8 +204,5 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        planViewModel.clearCurrentUserEntity()
-    }
+
 }

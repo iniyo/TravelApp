@@ -1,6 +1,8 @@
 package pjo.travelapp.data.entity
 
+import android.graphics.Bitmap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
 
@@ -127,4 +129,9 @@ data class Review(
     @SerializedName("text") val text: String,
     @SerializedName("time") val time: Long,
     @SerializedName("translated") val translated: Boolean
+)
+
+data class PlaceDetail(
+    val place: Place,
+    val bitmap: List<Bitmap?>?
 )

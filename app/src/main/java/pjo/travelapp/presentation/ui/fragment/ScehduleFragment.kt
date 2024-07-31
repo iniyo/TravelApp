@@ -1,19 +1,18 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.app.AlertDialog
-import android.graphics.Bitmap
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import com.google.android.libraries.places.api.model.Place
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.data.entity.UserSchduleEntity
 import pjo.travelapp.databinding.FragmentScehduleBinding
-import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
 import pjo.travelapp.presentation.adapter.UserScehduleAdapter
+import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
@@ -27,10 +26,13 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val planViewModel: PlanViewModel by activityViewModels()
+    private val detailViewModel: DetailViewModel by activityViewModels()
+
     @Inject
     lateinit var navigator: AppNavigator
 
     override fun initCreate() {
+        planViewModel.clearCurrentUserEntity()
         planViewModel.fetchUserSchedules()
     }
 
@@ -38,7 +40,7 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
         bind {
             launchWhenStarted {
-                launch{
+                launch {
                     mainViewModel.nearbySearch.collectLatest {
                         handleUiState(it, choose = true)
                     }
@@ -50,10 +52,10 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 }
                 launch {
                     planViewModel.userScheduleList.collectLatest {
-                        if(it.isEmpty()) {
+                        if (it.isEmpty()) {
                             vpTrips.visibility = View.GONE
                             tvNoSchedule.visibility = View.VISIBLE
-                        }else {
+                        } else {
                             vpTrips.visibility = View.VISIBLE
                             tvNoSchedule.visibility = View.GONE
                             scheduleAdapter?.submitList(it)
@@ -64,12 +66,13 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
         }
     }
 
-    private fun handleUiState(state: LatestUiState<List<Pair<Place, Bitmap?>>>? = null, choose: Boolean) {
+    private fun handleUiState(state: LatestUiState<List<PlaceDetail>>? = null, choose: Boolean) {
         bind {
             when (state) {
                 is LatestUiState.Loading -> {
 
                 }
+
                 is LatestUiState.Success -> {
                     when (choose) {
                         true -> {
@@ -77,6 +80,7 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                                 defaultAdapter1?.addPlace(it)
                             }
                         }
+
                         else -> {
                             state.data.forEach {
                                 defaultAdapter2?.addPlace(it)
@@ -84,11 +88,13 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                         }
                     }
                 }
+
                 is LatestUiState.Error -> {
                     // 에러 처리 로직 추가
                     Toast.makeText(context, "Error: ${state.exception.message}", Toast.LENGTH_SHORT)
                         .show()
                 }
+
                 null -> {}
             }
         }
@@ -106,8 +112,13 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
                     showDeleteConfirmationDialog(it)
                 }
             )
-            defaultAdapter1 = ScheduleDefaultAdapter()
-            defaultAdapter2 = ScheduleDefaultAdapter()
+            val scheduleAdapter = ScheduleDefaultAdapter {
+                detailViewModel.fetchPlaceDetails(it)
+                navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_ITEM)
+            }
+            defaultAdapter1 = scheduleAdapter
+            defaultAdapter2 = scheduleAdapter
+
 
             vpTrips.apply {
                 val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
@@ -120,6 +131,7 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
             }
         }
     }
+
     private fun showDeleteConfirmationDialog(userSchedule: UserSchduleEntity) {
         AlertDialog.Builder(requireContext())
             .setTitle("삭제 확인")

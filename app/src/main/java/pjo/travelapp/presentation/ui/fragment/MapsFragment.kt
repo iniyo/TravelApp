@@ -1,15 +1,13 @@
 package pjo.travelapp.presentation.ui.fragment
 
-import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -24,7 +22,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.internal.ViewUtils.hideKeyboard
 import com.google.maps.android.PolyUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -54,7 +51,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var googleMap: GoogleMap
-    private val viewModel: MapsViewModel by activityViewModels()
+    private val mapsViewModel: MapsViewModel by activityViewModels()
     private val speechViewModel: SpeechRecognitionViewModel by activityViewModels()
     private lateinit var mainViewModel: MainViewModel
     private var lat: LatLng = LatLng(35.1179923, 129.0419654)
@@ -100,7 +97,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 startLocationMove(poi.latLng)
                 fetchPlaceIdAndDetails(placeId = poi.placeId)
                 if (binding.place != null) {
-                    viewModel.fetchEndQuery(binding.place!!)
+                    mapsViewModel.fetchEndQuery(binding.place!!)
                 }
                 toggleBottomSheet(infoBottomSheetBehavior, true)
             }
@@ -116,9 +113,9 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        // 액티비티에 연결될 때 ViewModel을 초기화합니다.
+        // 액티비티에 연결될 때 ViewModel을 초기화
         activity?.let {
-            mainViewModel = ViewModelProvider(it).get(MainViewModel::class.java)
+            mainViewModel = ViewModelProvider(it)[MainViewModel::class.java]
         }
     }
 
@@ -132,7 +129,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
             setBottomSheet()
-            setTextStartAndEnd()
             setClickListener()
             backPressed()
         }
@@ -142,11 +138,11 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         super.initViewModel()
         if (::mainViewModel.isInitialized) {
             bind {
-                viewmodel = viewModel
+                viewmodel = mapsViewModel
                 launchWhenStarted {
                     // 장소 세부정보 리스트
                     launch {
-                        viewModel.placeDetailsList.collectLatest {
+                        mapsViewModel.placeDetailsList.collectLatest {
                             Log.d("TAG", "placeDetailsList: ")
                             placeDetailsList = it.toMutableList()
                             adapter?.submitList(placeDetailsList)
@@ -155,7 +151,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                     // 장소 세부정보
                     launch {
-                        viewModel.placeDetailsResult.collectLatest {
+                        mapsViewModel.placeDetailsResult.collectLatest {
                             it?.let {
                                 lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
                                 place = it
@@ -165,16 +161,16 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                     // 검색 결과
                     launch {
-                        viewModel.predictionList.collectLatest { predictions ->
+                        mapsViewModel.predictionList.collectLatest { predictions ->
                             predictions.forEach { prediction ->
-                                viewModel.fetchPlaceDetails(prediction.placeId)
+                                mapsViewModel.fetchPlaceDetails(prediction.placeId)
                             }
                         }
                     }
 
                     // 경로 정보
                     launch {
-                        viewModel.directions.collectLatest {
+                        mapsViewModel.directions.collectLatest {
                             when (it) {
                                 is LatestUiState.Loading -> {
                                     Log.d("TAG", "maps dialog showLoad: $it")
@@ -193,7 +189,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                     // 경로 출발위치
                     launch {
-                        viewModel.startQuery.collectLatest {
+                        mapsViewModel.startQuery.collectLatest {
                             Log.d("TAG", "startQuery: $it")
                             if (it != null) {
                                 toolbarMapsDirection.tvStart.text = it.name
@@ -206,7 +202,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                     // 경로 도착위치
                     launch {
-                        viewModel.endQuery.collectLatest {
+                        mapsViewModel.endQuery.collectLatest {
                             Log.d("TAG", "endQuery: $it")
                             if (it != null) {
                                 toolbarMapsDirection.tvEnd.text = it.name
@@ -242,7 +238,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
         val decodedPath = PolyUtil.decode(encodedPolyline)
-        val polyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+        googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
 
         // 경로의 중간지점에 거리 마커 추가
         distanceMeters?.let {
@@ -284,20 +280,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             })
     }
 
-    private fun setTextStartAndEnd() {
-        bind {
-            setFragmentResultListener("start") { requestKey, bundle ->
-                Log.d("TAG", "setTextStartAndEnd: ${bundle.getString("start_address")}")
-                toggleToolbars(SHOW_DIRECTION)
-            }
-            setFragmentResultListener("end") { requestKey, bundle ->
-                Log.d("TAG", "setTextEndAndEnd: ${bundle.getString("end_address")}")
-                toggleToolbars(SHOW_DIRECTION)
-            }
-
-        }
-    }
-
     @SuppressLint("RestrictedApi")
     private fun setAdapter(st: AdapterStyle) {
         if (currentAdapterStyle == st) {
@@ -310,7 +292,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             when (st) {
                 AdapterStyle.SEARCH_STYLE_DIRECTION_START -> {
                     adapter = AutoCompleteItemAdapter {
-                        viewModel.fetchPlaceDetails(it.placeId)
+                        mapsViewModel.fetchPlaceDetails(it.placeId)
                         startLocationMove(
                             LatLng(
                                 it.geometry.location.lat,
@@ -318,15 +300,15 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                             )
                         )
                         toggleBottomSheet(searchBottomSheetBehavior)
-                        viewModel.fetchStartQuery(it)
+                        mapsViewModel.fetchStartQuery(it)
                         hideKeyboard(searchBottomSheet.etDefaultSearch)
                     }
                 }
 
                 AdapterStyle.SEARCH_STYLE_DIRECTION_END -> {
                     adapter = AutoCompleteItemAdapter {
-                        viewModel.fetchPlaceDetails(it.placeId)
-                        viewModel.fetchEndQuery(it)
+                        mapsViewModel.fetchPlaceDetails(it.placeId)
+                        mapsViewModel.fetchEndQuery(it)
                         toggleBottomSheet(searchBottomSheetBehavior)
                         hideKeyboard(searchBottomSheet.etDefaultSearch)
                     }
@@ -334,7 +316,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                 else -> {
                     adapter = AutoCompleteItemAdapter {
-                        viewModel.fetchPlaceDetails(it.placeId)
+                        mapsViewModel.fetchPlaceDetails(it.placeId)
                         startLocationMove(
                             LatLng(
                                 it.geometry.location.lat,
@@ -356,10 +338,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             toolbarMapsDirection.apply {
                 btnSearchDirection.setOnClickListener {
                     toggleToolbars(true)
-                    viewModel.apply {
+                    mapsViewModel.apply {
                         getStartAndEndPlaceId(
-                            viewModel.startQuery.value?.formattedAddress,
-                            viewModel.endQuery.value?.formattedAddress
+                            mapsViewModel.startQuery.value?.formattedAddress,
+                            mapsViewModel.endQuery.value?.formattedAddress
                         ) { locations ->
                             val startLatLng = locations.first
                             val endLatLng = locations.second
@@ -369,7 +351,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                                 val travelModes =
                                     arrayOf("DRIVE", "BICYCLE", "WALK", "TRANSIT", "TWO_WHEELER")
-                                travelModes.forEachIndexed { index, mode ->
+                                travelModes.forEachIndexed { _, mode ->
                                     val (routingPreference, color) = when (mode) {
                                         "DRIVE" -> "TRAFFIC_AWARE" to Color.RED
                                         "BICYCLE" -> null to Color.BLUE
@@ -423,13 +405,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 toggleBottomSheet(infoBottomSheetBehavior)
                 toggleToolbars(SHOW_DIRECTION)
                 if (place != null) {
-                    viewModel.fetchEndQuery(place!!)
+                    mapsViewModel.fetchEndQuery(place!!)
                 }
             }
 
             ibtnMyLocation.setOnClickListener {
                 if (place != null) {
-                    viewModel.fetchStartQuery(place!!)
+                    mapsViewModel.fetchStartQuery(place!!)
                 }
                 startLocationMove(currentLatLng)
             }
@@ -439,23 +421,25 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 toggleBottomSheet(searchBottomSheetBehavior)
             }
 
-
+            searchBottomSheet.ivVoice.setOnClickListener {
+                navigate.navigateTo(Fragments.VOICE_PAGE)
+            }
         }
     }
 
     private fun toggleToolbars(bool: Boolean) {
         if (bool) {
             isToolbarToggler = true
-            animateView(binding.toolbarMapsDirection.root, false)
-            animateView(binding.clSearch, true)
+            binding.toolbarMapsDirection.root.visibility = View.GONE
+            binding.clSearch.visibility = View.VISIBLE
         } else {
             isToolbarToggler = false
-            animateView(binding.toolbarMapsDirection.root, true)
-            animateView(binding.clSearch, false)
+            binding.toolbarMapsDirection.root.visibility = View.VISIBLE
+            binding.clSearch.visibility = View.GONE
         }
     }
 
-    private fun animateView(view: View, show: Boolean) {
+    /*private fun animateView(view: View, show: Boolean) {
         view.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -488,14 +472,13 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 }
             }
         })
-    }
-
+    }*/
 
     private fun fetchPlaceIdAndDetails(latLng: LatLng? = null, placeId: String = "") {
         if (placeId.isNotEmpty()) {
-            viewModel.fetchLatLngToPlaceId(getPlaceId = placeId)
+            mapsViewModel.fetchPlaceId(getPlaceId = placeId)
         } else if (latLng != null) {
-            viewModel.fetchLatLngToPlaceId(latLng = latLng)
+            mapsViewModel.fetchLatLngToPlaceId(latLng = latLng)
         }
     }
 
@@ -507,71 +490,88 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         searchBottomSheetBehavior = BottomSheetBehavior.from(searchBottomSheet)
         searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        // toolbarMapsDirection 높이 측정
-        /*binding.toolbarMapsDirection.root.viewTreeObserver.addOnGlobalLayoutListener {
-            adjustBottomSheetMaxHeight()
-        }*/
-        /* bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
-             val maxHeight =
-                 (resources.displayMetrics.heightPixels * 0.4).toInt() // 최대 높이를 화면의 40%로 설정
-             if (bottomSheet.height > maxHeight) {
-                 val params = bottomSheet.layoutParams
-                 params.height = maxHeight
-                 bottomSheet.layoutParams = params
-             }
-         }*/
-
-        /* searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                 // 상태 변경 처리
-             }
-
-             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                 // BottomSheet가 슬라이딩될 때 상단 뷰 애니메이션 처리
-                 val params = binding.toolbarMapsDirection.root.layoutParams as ConstraintLayout.LayoutParams
-                 params.bottomMargin = (binding.toolbarMapsDirection.root.height * slideOffset).toInt()
-                 binding.toolbarMapsDirection.root.layoutParams = params
-             }
-         })*/
         infoBottomSheetBehavior.isFitToContents = false
         infoBottomSheetBehavior.halfExpandedRatio = 0.5f
-        /* val nestedScrollView = bottomSheet.findViewById<NestedScrollView>(R.id.nsv_cotainer)
-         nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-             if (scrollY == 0) {
-                 // 스크롤이 상단에 있을 때 추가 처리
-             }
-         }*/
 
+        // 상태 변경 콜백 추가
+        infoBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                checkAndHideSheets()
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // 슬라이드 중
+            }
+        })
+
+        searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                checkAndHideSheets()
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // 슬라이드 중
+            }
+        })
     }
 
+    // 상태를 체크하고 필요에 따라 시트를 숨기는 함수
+    private fun checkAndHideSheets() {
 
-    /*   private fun adjustBottomSheetMaxHeight() {
-           bind {
-               val toolbarHeight = clSearch.height
-               val layoutParams = binding.searchBottomSheet.clMainContainer.layoutParams
-               layoutParams.height = resources.displayMetrics.heightPixels - toolbarHeight
-               binding.searchBottomSheet.clMainContainer.layoutParams = layoutParams
-           }
+        if (searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            infoBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
 
-       }*/
-
+    @SuppressLint("SwitchIntDef")
     private fun toggleBottomSheet(
         bottomSheetBehavior: BottomSheetBehavior<View>,
         choose: Boolean = false
     ) {
-        when (bottomSheetBehavior.state) {
-            BottomSheetBehavior.STATE_EXPANDED -> {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bind {
+            // 다른 BottomSheet의 상태를 관리하는 함수
+            fun hideOtherBottomSheet(
+                currentBehavior: BottomSheetBehavior<View>,
+                otherBehavior: BottomSheetBehavior<View>
+            ) {
+                if (otherBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    otherBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                }
+                currentBehavior.state = if (choose) {
+                    BottomSheetBehavior.STATE_HALF_EXPANDED
+                } else {
+                    BottomSheetBehavior.STATE_EXPANDED
+                }
             }
 
-            BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
-                if (choose) {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-                } else {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            // BottomSheet 상태 전환 로직
+            when (bottomSheetBehavior.state) {
+                BottomSheetBehavior.STATE_EXPANDED -> {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    hideKeyboard(searchBottomSheet.etDefaultSearch)
+                }
+
+                BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
+                    if (bottomSheetBehavior == infoBottomSheetBehavior) {
+                        hideOtherBottomSheet(bottomSheetBehavior, searchBottomSheetBehavior)
+                    } else {
+                        hideOtherBottomSheet(bottomSheetBehavior, infoBottomSheetBehavior)
+                    }
+                }
+
+                BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                    if (bottomSheetBehavior == infoBottomSheetBehavior && searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                        searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
                 }
             }
         }
+    }
+
+    // 키보드를 숨기는 함수
+    private fun hideKeyboard(view: View) {
+        val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 

@@ -1,37 +1,41 @@
 package pjo.travelapp.presentation.adapter
 
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.libraries.places.api.model.Place
 import pjo.travelapp.R
-import pjo.travelapp.databinding.RvMorePlacesItemBinding
+import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.RvScheduleItemBinding
 
-class ScheduleDefaultAdapter :
+class ScheduleDefaultAdapter(
+    private val itemClickListener: (PlaceDetail) -> Unit
+) :
     RecyclerView.Adapter<ScheduleDefaultAdapter.ViewHolder>() {
 
-    private val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+    private val placesWithPhotos = mutableListOf<PlaceDetail>()
 
     inner class ViewHolder(private val binding: RvScheduleItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Pair<Place, Bitmap?>) {
+        fun bind(item: PlaceDetail) {
             binding.apply {
                 try {
-                    item.second?.let {
-                        ivMainContent.setImageBitmap(it)
+                    item.bitmap?.let {
+                        ivMainContent.setImageBitmap(it.first())
                     } ?: ivMainContent.setImageResource(R.drawable.intro_pic)
 
-                    tvTitle.text = item.first.name ?: "Unknown Place"
-                    tvRating.text = item.first.rating?.toString() ?: "No Rating"
-                    rbScore.rating = item.first.rating?.toFloat() ?: 0f
-                    val reviews = item.first.reviews
+                    tvTitle.text = item.place.name ?: "Unknown Place"
+                    tvRating.text = item.place.rating?.toString() ?: "No Rating"
+                    rbScore.rating = item.place.rating?.toFloat() ?: 0f
+                    val reviews = item.place.reviews
                     if (reviews != null && reviews.isNotEmpty()) {
                         // 첫 번째 리뷰의 텍스트를 가져옴
                         tvReviews.text = reviews[0].text ?: "No Reviews"
                     } else {
                         tvReviews.text = "No Reviews"
+                    }
+
+                    itemView.setOnClickListener {
+                        itemClickListener(item)
                     }
 
                 } catch (e: Throwable) {
@@ -42,7 +46,8 @@ class ScheduleDefaultAdapter :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = RvScheduleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            RvScheduleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
@@ -52,7 +57,7 @@ class ScheduleDefaultAdapter :
 
     override fun getItemCount(): Int = placesWithPhotos.size
 
-    fun addPlace(placeWithPhoto: Pair<Place, Bitmap?>) {
+    fun addPlace(placeWithPhoto: PlaceDetail) {
         placesWithPhotos.add(placeWithPhoto)
 
         notifyItemInserted(placesWithPhotos.size - 1)

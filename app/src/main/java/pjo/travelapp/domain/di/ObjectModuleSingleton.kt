@@ -3,12 +3,8 @@ package pjo.travelapp.domain.di
 import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
-import android.util.Log
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
@@ -25,8 +21,6 @@ import pjo.travelapp.data.remote.AiChatService
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
 import pjo.travelapp.data.remote.SkyScannerApiService
-import pjo.travelapp.data.repo.AiChatRepository
-import pjo.travelapp.data.repo.AiChatRepositoryImpl
 import pjo.travelapp.data.repo.HotelRepository
 import pjo.travelapp.data.repo.HotelRepositoryImpl
 import pjo.travelapp.data.repo.MapsRepository
@@ -40,12 +34,16 @@ import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.util.Locale
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 object ObjectModuleSingleton {
 
+    /**
+     * 공통 HTTP 설정
+     */
     @Provides
     @Singleton
     fun provideCache(@ApplicationContext context: Context): Cache {
@@ -87,6 +85,26 @@ object ObjectModuleSingleton {
             }
             .build()
     }
+    /**
+     * 공통 HTTP 설정
+     */
+
+    /**
+     * maps api 설정
+     */
+    @Provides
+    fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
+        return Geocoder(context)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
+        if (!Places.isInitialized()) {
+            Places.initialize(context, BuildConfig.maps_api_key, Locale.KOREAN)
+        }
+        return Places.createClient(context)
+    }
 
     @Provides
     @Singleton
@@ -96,7 +114,6 @@ object ObjectModuleSingleton {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        Log.d("TAG", "provideGoogleMapDirectionRetrofit: ${BuildConfig.maps_api_url}")
         return retro
     }
 
@@ -116,10 +133,15 @@ object ObjectModuleSingleton {
             .build()
         return retro.create(RoutesApiService::class.java)
     }
-
+    /**
+     * maps api 설정 끝
+     */
+    /**
+     * skyscanner api 설정
+     */
     @Provides
     @Singleton
-    fun provideHotelsDetail(okHttpClient: OkHttpClient) : SkyScannerApiService {
+    fun provideHotelsDetail(okHttpClient: OkHttpClient): SkyScannerApiService {
         val retro = Retrofit.Builder()
             .baseUrl(BuildConfig.skyscanner_base_url)
             .client(okHttpClient)
@@ -128,26 +150,22 @@ object ObjectModuleSingleton {
         return retro.create(SkyScannerApiService::class.java)
     }
 
+    /**
+     * skyscanner api 설정 끝
+     */
     @Provides
     @Singleton
-    fun provideAiChat(okHttpClient: OkHttpClient) : AiChatService {
+    fun provideAiChat(): AiChatService {
         val retro = Retrofit.Builder()
-            .baseUrl(BuildConfig.skyscanner_base_url)
-            .client(okHttpClient)
+            .baseUrl(BuildConfig.open_api_base_url)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retro.create(AiChatService::class.java)
     }
 
-    @Provides
-    @Singleton
-    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
-        if (!Places.isInitialized()) {
-            Places.initialize(context, BuildConfig.maps_api_key)
-        }
-        return Places.createClient(context)
-    }
-
+    /**
+     * repository, 유스케이스 설정 끝
+     */
     @Provides
     @Singleton
     fun provideMapsRepository(
@@ -166,14 +184,6 @@ object ObjectModuleSingleton {
 
     @Provides
     @Singleton
-    fun provideAiChatRepository(
-        service: AiChatService
-    ): AiChatRepository {
-        return AiChatRepositoryImpl(service)
-    }
-
-    @Provides
-    @Singleton
     fun provideUseCases(
         repo: MapsRepository,
         rs: RoutesApiService
@@ -187,16 +197,6 @@ object ObjectModuleSingleton {
     }
 
     @Provides
-    fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
-        return Geocoder(context)
-    }
-
-    @Provides
-    fun provideTypes(): List<String> {
-        return listOf("restaurant", "museum", "park", "cafe")
-    }
-
-    @Provides
     @Singleton
     fun provideRepo(
         placesClient: PlacesClient,
@@ -204,7 +204,9 @@ object ObjectModuleSingleton {
     ): PlaceRepository {
         return PlaceRepositoryImpl(placesClient, types)
     }
-
+    /**
+     * repository 설정 끝
+     */
     /**
      * room database
      */
@@ -224,10 +226,24 @@ object ObjectModuleSingleton {
     fun provideUserScheduleDao(database: AppDatabase): UserScheduleDao {
         return database.userScheduleDao()
     }
-
     /**
-     *
+     * room database 끝
+     */
+    /**
+     * 기타 설정
      */
 
+    @Provides
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
+    }
 
+
+    @Provides
+    fun provideTypes(): List<String> {
+        return listOf("restaurant", "museum", "park", "cafe")
+    }
+    /**
+     * 기타 설정 끝
+     */
 }

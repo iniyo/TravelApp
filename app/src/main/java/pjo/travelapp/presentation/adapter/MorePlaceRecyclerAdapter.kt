@@ -1,19 +1,22 @@
 package pjo.travelapp.presentation.adapter
 
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.libraries.places.api.model.Place
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.HotelCard
+import pjo.travelapp.data.entity.PlaceDetail
+import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvMorePlacesItemBinding
 
-class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MorePlaceRecyclerAdapter(
+    private val placeItemClickListener: (PlaceDetail) -> Unit,
+    private val hotelItemClickListener: (HotelCard) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val placesWithPhotos = mutableListOf<Pair<Place, Bitmap?>>()
+    private val places = mutableListOf<PlaceDetail>()
     private val hotels = mutableListOf<HotelCard>()
     private var currentDataType: DataType = DataType.PLACE
 
@@ -23,22 +26,24 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 
     inner class PlaceViewHolder(private val binding: RvMorePlacesItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Pair<Place, Bitmap?>) {
+        fun bind(item: PlaceDetail) {
             binding.apply {
                 try {
-                    item.second?.let {
-                        ivMainContent.setImageBitmap(it)
+                    item.bitmap?.let {
+                        ivMainContent.setImageBitmap(it.first())
                     } ?: ivMainContent.setImageResource(R.drawable.intro_pic)
 
-                    tvTitle.text = item.first.name ?: "Unknown Place"
-                    tvRating.text = item.first.rating?.toString() ?: "No Rating"
-                    rbScore.rating = item.first.rating?.toFloat() ?: 0f
-                    val reviews = item.first.reviews
+                    tvTitle.text = item.place.name ?: "Unknown Place"
+                    tvRating.text = item.place.rating?.toString() ?: "No Rating"
+                    rbScore.rating = item.place.rating?.toFloat() ?: 0f
+                    val reviews = item.place.reviews
                     if (reviews != null && reviews.isNotEmpty()) {
                         tvReviews.text = reviews[0].text ?: "No Reviews"
                     } else {
                         tvReviews.text = "No Reviews"
                     }
+
+                    itemView.setOnClickListener { placeItemClickListener(item) }
 
                 } catch (e: Throwable) {
                     e.printStackTrace()
@@ -63,6 +68,7 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                     rbScore.rating = item.stars.toFloat()
                     tvReviews.text = item.reviewsSummary.scoreDesc
 
+                    itemView.setOnClickListener { hotelItemClickListener(item) }
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }
@@ -81,27 +87,38 @@ class MorePlaceRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is PlaceViewHolder -> holder.bind(placesWithPhotos[position])
+            is PlaceViewHolder -> holder.bind(places[position])
             is HotelViewHolder -> holder.bind(hotels[position])
         }
     }
 
     override fun getItemCount(): Int {
         return when (currentDataType) {
-            DataType.PLACE -> placesWithPhotos.size
+            DataType.PLACE -> places.size
             DataType.HOTEL -> hotels.size
         }
     }
 
-    fun addPlace(placeWithPhoto: Pair<Place, Bitmap?>) {
-        currentDataType = DataType.PLACE
-        placesWithPhotos.add(placeWithPhoto)
-        notifyItemInserted(placesWithPhotos.size - 1)
+    fun updatePlaces(newPlaces: List<PlaceDetail>) {
+        places.clear()
+        places.addAll(newPlaces)
+        notifyDataSetChanged()
     }
 
-    fun addHotel(hotel: HotelCard) {
-        currentDataType = DataType.HOTEL
-        hotels.add(hotel)
-        notifyItemInserted(hotels.size - 1)
+    fun updateHotels(newHotels: List<HotelCard>) {
+        hotels.clear()
+        hotels.addAll(newHotels)
+        notifyDataSetChanged()
+    }
+
+
+    fun clearPlaces() {
+        places.clear()
+        notifyDataSetChanged()
+    }
+
+    fun clearHotels() {
+        hotels.clear()
+        notifyDataSetChanged()
     }
 }

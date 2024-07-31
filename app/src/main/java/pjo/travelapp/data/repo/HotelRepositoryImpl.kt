@@ -15,7 +15,7 @@ class HotelRepositoryImpl @Inject constructor(
 
     override suspend fun searchHotels(entityId: String, checkin: String, checkout: String): HotelResponse {
         return withContext(Dispatchers.IO) {
-            apiService.searchHotels(entityId, checkin, checkout)
+            apiService.searchHotels(entityId = entityId, checkIn = "2024-07-31", checkOut = "2024-08-02")
         }
     }
 

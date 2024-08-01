@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.databinding.FragmentPlaceDetailBinding
 import pjo.travelapp.presentation.adapter.ImageViewPagerAdapter
@@ -33,32 +34,64 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-                detailViewModel.placeDetails.collectLatest {
-                    val stringBuilder = StringBuilder()
-                    it?.let { detail ->
-                        placeDetail = detail
-                        stringBuilder.append(detail.bitmap?.size.toString())
-                        stringBuilder.append(getString(R.string.page))
-                        tvImagesSize.text = stringBuilder
-                        stringBuilder.clear()
-                        val nonNullBitmaps = detail.bitmap.orEmpty().filterNotNull()
-                        imageViewPagerAdapter.setBitmaps(nonNullBitmaps)
-                        tvStoreTitle.text = it.place.name
-                        tvStoreType.text =
-                            it.place.placeTypes?.get(0) ?: getString(R.string.travel_destination)
-                        it.place.reviews?.take(TAKE_REVIEWS)?.forEach { review ->
-                            stringBuilder.append("${review.authorAttribution.name}: ${review.text}\n\n")
+                launch {
+                    detailViewModel.placeDetails.collectLatest {
+                        val stringBuilder = StringBuilder()
+                        it?.let { detail ->
+                            stringBuilder.append(detail.bitmap?.size.toString())
+                            stringBuilder.append(getString(R.string.page))
+                            tvImagesSize.text = stringBuilder
+                            stringBuilder.clear()
+                            val nonNullBitmaps = detail.bitmap.orEmpty().filterNotNull()
+                            imageViewPagerAdapter.setBitmaps(nonNullBitmaps)
+                            tvStoreTitle.text = it.place.name
+                            tvStoreType.text =
+                                it.place.placeTypes?.get(0) ?: getString(R.string.travel_destination)
+                            it.place.reviews?.take(TAKE_REVIEWS)?.forEach { review ->
+                                stringBuilder.append("${review.authorAttribution.name}: ${review.text}\n\n")
+                            }
+                            tvReviews.text = stringBuilder.toString().trim()
+                            stringBuilder.clear()
+                            tvRatingScore.text = it.place.rating?.toString()
+                            rbScore.rating = it.place.rating?.toFloat()!!
+                            val weekDayText = it.place.currentOpeningHours?.weekdayText
+                            if(!weekDayText.isNullOrEmpty()) {
+                                Log.d("TAG", "initViewModel: ${weekDayText}")
+                                stringBuilder.append(weekDayText.joinToString("\n"))
+                            }
+                            tvOpeningHours.text = stringBuilder
                         }
-                        tvReviews.text = stringBuilder.toString().trim()
-                        stringBuilder.clear()
-                        tvRatingScore.text = it.place.rating?.toString()
-                        rbScore.rating = it.place.rating?.toFloat()!!
-                        val weekDayText = it.place.currentOpeningHours?.weekdayText
-                        if(!weekDayText.isNullOrEmpty()) {
-                            Log.d("TAG", "initViewModel: ${weekDayText}")
-                            stringBuilder.append(weekDayText.joinToString("\n"))
+                    }
+                }
+                launch {
+                    detailViewModel.placeResult.collectLatest {
+                        val stringBuilder = StringBuilder()
+                        it?.let { result ->
+                            if(result.photos != null ){
+                                stringBuilder.append(result.photos.size.toString())
+                                stringBuilder.append(getString(R.string.page))
+                                tvImagesSize.text = stringBuilder
+                                stringBuilder.clear()
+                                val nonNullPhotos = result.photos
+                                imageViewPagerAdapter.setPhotos(nonNullPhotos)
+                            }
+                            tvStoreTitle.text = it.name
+                            tvStoreType.text =
+                                it.types?.get(0) ?: getString(R.string.travel_destination)
+                            it.reviews?.take(TAKE_REVIEWS)?.forEach { review ->
+                                stringBuilder.append("${review.authorName}: ${review.text}\n\n")
+                            }
+                            tvReviews.text = stringBuilder.toString().trim()
+                            stringBuilder.clear()
+                            tvRatingScore.text = it.rating?.toString()
+                            rbScore.rating = it.rating?.toFloat()!!
+                            val weekDayText = it.openingHours?.weekdayText
+                            if(!weekDayText.isNullOrEmpty()) {
+                                Log.d("TAG", "initViewModel: ${weekDayText}")
+                                stringBuilder.append(weekDayText.joinToString("\n"))
+                            }
+                            tvOpeningHours.text = stringBuilder
                         }
-                        tvOpeningHours.text = stringBuilder
                     }
                 }
             }

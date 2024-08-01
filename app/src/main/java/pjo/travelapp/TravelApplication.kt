@@ -4,9 +4,17 @@ import android.app.Application
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.kakao.sdk.common.KakaoSdk
 import com.navercorp.nid.NaverIdLoginSDK
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import pjo.travelapp.presentation.ui.consts.EXIT_PROCESS
+import java.io.PrintWriter
+import java.io.StringWriter
+import kotlin.system.exitProcess
 
 @HiltAndroidApp
 class TravelApplication : Application() {
@@ -15,7 +23,20 @@ class TravelApplication : Application() {
         super.onCreate()
         setKakaoSdk()
         setNaverSdk()
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+
+        /*Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
+            handleUncaughtException(throwable)
+        }*/
     }
+    /*private fun handleUncaughtException(throwable: Throwable) {
+        // Crashlytics로 예외를 로그
+        FirebaseCrashlytics.getInstance().recordException(throwable)
+
+        // 앱을 종료
+        exitProcess(EXIT_PROCESS)
+    }
+*/
 
     private fun setKakaoSdk() {
         KakaoSdk.init(this, BuildConfig.kakao_native_api_key)

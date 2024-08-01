@@ -6,10 +6,6 @@
     <data>
 
         <variable
-            name="placeDetail"
-            type="pjo.travelapp.data.entity.PlaceDetail" />
-
-        <variable
             name="adapter"
             type="pjo.travelapp.presentation.adapter.ImageViewPagerAdapter" />
     </data>
@@ -28,7 +24,7 @@
 
             <include
                 android:id="@+id/toolbar"
-                layout="@layout/top_toolbar"/>
+                layout="@layout/top_toolbar" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/vp_image_slider"
@@ -134,16 +130,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
+                android:paddingStart="10dp"
                 android:textColor="@color/black"
-                android:textSize="28sp"
+                android:layout_marginTop="10dp"
+                android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ll_rating_container" />
+                app:layout_constraintTop_toBottomOf="@+id/ll_rating_container"
+                tools:ignore="RtlSymmetry" />
 
             <TextView
                 android:id="@+id/tv_reviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:layout_marginHorizontal="20dp"
                 app:layout_constraintTop_toBottomOf="@+id/tv_opening_hours" />
 

@@ -1,6 +1,9 @@
 package pjo.travelapp.data.entity
 
 import android.graphics.Bitmap
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.gson.annotations.SerializedName
@@ -22,26 +25,34 @@ data class PlaceDetailsResponse(
     @SerializedName("status") val status: String
 )
 
+@Entity(tableName = "place_result",
+    foreignKeys = [ForeignKey(
+        entity = UserSchduleEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["parentId"],
+        onDelete = ForeignKey.CASCADE
+    )])
 data class PlaceResult(
-    /* @SerializedName("address_components") val addressComponents: List<AddressComponent>,
-     @SerializedName("adr_address") val adrAddress: String,
-     @SerializedName("business_status") val businessStatus: String,
-     @SerializedName("dine_in") val dineIn: Boolean,
-     @SerializedName("icon") val icon: String,
-     @SerializedName("icon_background_color") val iconBackgroundColor: String,
-     @SerializedName("icon_mask_base_uri") val iconMaskBaseUri: String,
-     @SerializedName("international_phone_number") val internationalPhoneNumber: String?,
-     @SerializedName("plus_code") val plusCode: PlusCode,
-     @SerializedName("reference") val reference: String,
-     @SerializedName("reservable") val reservable: Boolean,
-     @SerializedName("takeout") val takeout: Boolean,
-     @SerializedName("utc_offset") val utcOffset: Int,
-     @SerializedName("url") val url: String,
-     @SerializedName("current_opening_hours") val currentOpeningHours: CurrentOpeningHours?,
-     @SerializedName("user_ratings_total") val userRatingsTotal: Int,
-     @SerializedName("serves_dinner") val servesDinner: Boolean,
-     @SerializedName("serves_lunch") val servesLunch: Boolean,*/
-
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val parentId: Int,
+    @SerializedName("address_components") val addressComponents: List<AddressComponent>,
+    @SerializedName("adr_address") val adrAddress: String,
+    @SerializedName("business_status") val businessStatus: String,
+    @SerializedName("dine_in") val dineIn: Boolean,
+    @SerializedName("icon") val icon: String,
+    @SerializedName("icon_background_color") val iconBackgroundColor: String,
+    @SerializedName("icon_mask_base_uri") val iconMaskBaseUri: String,
+    @SerializedName("international_phone_number") val internationalPhoneNumber: String?,
+    @SerializedName("plus_code") val plusCode: PlusCode,
+    @SerializedName("reference") val reference: String,
+    @SerializedName("reservable") val reservable: Boolean,
+    @SerializedName("takeout") val takeout: Boolean,
+    @SerializedName("utc_offset") val utcOffset: Int,
+    @SerializedName("url") val url: String,
+    @SerializedName("current_opening_hours") val currentOpeningHours: CurrentOpeningHours?,
+    @SerializedName("user_ratings_total") val userRatingsTotal: Int,
+    @SerializedName("serves_dinner") val servesDinner: Boolean,
+    @SerializedName("serves_lunch") val servesLunch: Boolean,
     @SerializedName("formatted_address") val formattedAddress: String,
     @SerializedName("formatted_phone_number") val formattedPhoneNumber: String?,
     @SerializedName("geometry") val geometry: Geometry,

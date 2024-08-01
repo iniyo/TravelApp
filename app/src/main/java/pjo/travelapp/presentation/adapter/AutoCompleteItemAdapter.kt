@@ -22,7 +22,7 @@ class AutoCompleteItemAdapter(
             try {
                 binding.apply {
                     if (item != null) {
-                        Log.d("TAG", "AutoCompleteItemAdapter bind: $item")
+                        Log.d("TAG", "AutoCompleteItemAdapter bind:")
                         tvSearchListItemTitle.text = item.name
                         tvRating.text = item.rating.toString()
                         rbScore.rating = item.rating.toFloat()

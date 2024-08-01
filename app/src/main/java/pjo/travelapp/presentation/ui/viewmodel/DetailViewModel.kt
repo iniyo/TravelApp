@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import pjo.travelapp.data.entity.HotelCard
 import pjo.travelapp.data.entity.PlaceDetail
+import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
@@ -17,6 +18,9 @@ class DetailViewModel @Inject constructor(
     private val _placeDetails = MutableStateFlow<PlaceDetail?>(null)
     val placeDetails: StateFlow<PlaceDetail?> get() = _placeDetails
 
+    private val _placeResult = MutableStateFlow<PlaceResult?>(null)
+    val placeResult: StateFlow<PlaceResult?> get() = _placeResult
+
     private val _shuffledHotPlaceList =
         MutableStateFlow<LatestUiState<List<PlaceDetail>>>(LatestUiState.Loading)
     val shuffledHotPlaceList: StateFlow<LatestUiState<List<PlaceDetail>>> get() = _shuffledHotPlaceList
@@ -24,6 +28,9 @@ class DetailViewModel @Inject constructor(
     private val _hotelDetail = MutableStateFlow<HotelCard?>(null)
     val hotelDetail: StateFlow<HotelCard?> get() = _hotelDetail
 
+    fun fetchPlaceResult(placeResult: PlaceResult) {
+        _placeResult.value = placeResult
+    }
 
     fun fetchPlaceDetails(placeDetail: PlaceDetail) {
         _placeDetails.value = placeDetail

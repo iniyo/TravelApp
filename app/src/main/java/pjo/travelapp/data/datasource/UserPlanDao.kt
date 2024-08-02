@@ -1,25 +1,27 @@
 package pjo.travelapp.data.datasource
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import pjo.travelapp.data.entity.PlaceResult
-import pjo.travelapp.data.entity.UserSchduleEntity
+import androidx.room.Update
+import pjo.travelapp.data.entity.UserPlan
 
 @Dao
-interface ParentDao {
-    @Query("SELECT * FROM user_schedule")
-    fun getAllParents(): List<UserSchduleEntity>
+interface UserPlanDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserPlan(userPlan: UserPlan): Long
 
-    @Insert
-    fun insertParents(parents: List<UserSchduleEntity>)
-}
+    @Update
+    suspend fun updateUserPlan(userPlan: UserPlan)
 
-@Dao
-interface ChildDao {
-    @Query("SELECT * FROM place_result")
-    fun getAllChildren(): List<PlaceResult>
+    @Query("SELECT * FROM user_plan WHERE id = :planId")
+    suspend fun getUserPlanById(planId: String): UserPlan?
 
-    @Insert
-    fun insertChildren(children: List<PlaceResult>)
+    @Delete
+    suspend fun deleteUserPlan(userPlan: UserPlan)
+
+    @Query("SELECT * FROM user_plan")
+    suspend fun getAllUserPlans(): List<UserPlan>
 }

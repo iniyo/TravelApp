@@ -16,7 +16,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.data.datasource.AppDatabase
-import pjo.travelapp.data.datasource.UserScheduleDao
+import pjo.travelapp.data.datasource.UserPlanDao
 import pjo.travelapp.data.remote.AiChatService
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
@@ -223,8 +223,8 @@ object ObjectSingletonModule {
 
 
     @Provides
-    fun provideUserScheduleDao(database: AppDatabase): UserScheduleDao {
-        return database.userScheduleDao()
+    fun provideUserScheduleDao(database: AppDatabase): UserPlanDao {
+        return database.userPlanDao()
     }
     /**
      * room database 끝

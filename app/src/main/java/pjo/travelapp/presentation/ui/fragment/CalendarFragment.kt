@@ -2,7 +2,6 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
@@ -19,24 +18,27 @@ import com.kizitonwose.calendar.view.ViewContainer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import pjo.travelapp.R
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
 import pjo.travelapp.databinding.FragmentCalendarBinding
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.getSelection
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isInDateBetweenSelection
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isOutDateBetweenSelection
 import pjo.travelapp.presentation.util.calendar.DateSelection
 import pjo.travelapp.presentation.util.calendar.dateRangeDisplayText
-import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
-import pjo.travelapp.presentation.util.extension.displayText
 import pjo.travelapp.presentation.util.calendar.formatDaysBetween
-import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.calendar.headerDateFormatDisplayText
 import pjo.travelapp.presentation.util.calendar.selectedMonthsAndDays
+import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
+import pjo.travelapp.presentation.util.extension.displayText
+import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.extension.makeInVisible
 import pjo.travelapp.presentation.util.extension.makeVisible
 import pjo.travelapp.presentation.util.extension.setTextColorRes
+import pjo.travelapp.presentation.util.makeItemId
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.LocalDate
@@ -89,12 +91,14 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-               viewModel.planAdapterList.collectLatest {
+                viewModel.planAdapterList.collectLatest {
 
-               }
+                }
             }
         }
     }
+
+    private lateinit var placeAndPhotoList: List<Pair<String, String>>
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {
@@ -120,14 +124,44 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
             }
         }
 
-        if(selection.daysBetween != null){
+        if (selection.daysBetween != null) {
             val period = formatDaysBetween(selection.daysBetween)
             binding.tvTourDate.text = period
             viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
-            viewModel.fetchSelectedCalendarDatePeriod(dateRangeDisplayText(selection.startDate, selection.endDate))
+            viewModel.fetchSelectedCalendarDatePeriod(
+                dateRangeDisplayText(
+                    selection.startDate,
+                    selection.endDate
+                )
+            )
+            val bitmapUtil = BitmapUtil(requireContext())
+            placeAndPhotoList = viewModel.selectedPlace.value.map { (place, bitmap) ->
+                val path = bitmapUtil.saveBitmap(
+                    bitmap,
+                    "${System.currentTimeMillis()}_${place.hashCode()}.png"
+                )
+                place to path
+            }
+            viewModel.fetchUserPlan(
+                userPlan = UserPlan(
+                    id = makeItemId(),
+                    title = viewModel.title.value,
+                    period = selection.daysBetween!!.toInt(),
+                    datePeriod = dateRangeDisplayText(
+                        selection.startDate,
+                        selection.endDate
+                    ).toString(),
+                    placeAndPhotoPaths = placeAndPhotoList,
+                )
+            )
 
-            viewModel.fetchUserAdapter( selectedMonthsAndDays(selection.startDate, selection.endDate))
-        }else {
+            viewModel.fetchUserAdapter(
+                selectedMonthsAndDays(
+                    selection.startDate,
+                    selection.endDate
+                )
+            )
+        } else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }
 

@@ -8,10 +8,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.entity.PlaceDetail
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.FragmentScehduleBinding
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
-import pjo.travelapp.presentation.adapter.UserScehduleAdapter
+import pjo.travelapp.presentation.adapter.UserScheduleAdapter
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
@@ -103,7 +103,7 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
     override fun initAdapter() {
         super.initAdapter()
         bind {
-            scheduleAdapter = UserScehduleAdapter(
+            scheduleAdapter = UserScheduleAdapter(
                 itemClickList = {
                     navigator.navigateTo(Fragments.PLAN_PAGE)
                     planViewModel.fetchUserSchedule(it)
@@ -132,7 +132,7 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
         }
     }
 
-    private fun showDeleteConfirmationDialog(userSchedule: UserSchduleEntity) {
+    private fun showDeleteConfirmationDialog(userSchedule: UserPlan) {
         AlertDialog.Builder(requireContext())
             .setTitle("삭제 확인")
             .setMessage("정말로 이 항목을 삭제하시겠습니까?")

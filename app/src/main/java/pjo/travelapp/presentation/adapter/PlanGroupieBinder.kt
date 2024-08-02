@@ -25,20 +25,25 @@ class ParentPlanItem(
 
     override fun bind(viewBinding: RvPlanItemBinding, position: Int) {
         viewBinding.apply {
-            val stringBuilder = StringBuilder()
-            stringBuilder.apply {
-                append(position.inc().toString())
-                append("일차 ")
-                append(" / ")
-                append(item.first.toString())
-                append("월 ")
-                append(item.second.toString())
-                append("일")
-            }
-            tvDate.text = stringBuilder
+            if(item != null){
+                item.first?.let{
+                    val stringBuilder = StringBuilder()
+                    stringBuilder.apply {
+                        append(position.inc().toString())
+                        append("일차 ")
+                        append(" / ")
+                        append(item.first.toString())
+                        append("월 ")
+                        append(item.second.toString())
+                        append("일")
+                    }
+                    tvDate.text = stringBuilder
 
-            btnNote.setOnClickListener { noteClickListener() }
-            btnSelectPlace.setOnClickListener { placeClickListener(position) }
+                    btnNote.setOnClickListener { noteClickListener() }
+                    btnSelectPlace.setOnClickListener { placeClickListener(position) }
+                }
+
+            }
         }
     }
 

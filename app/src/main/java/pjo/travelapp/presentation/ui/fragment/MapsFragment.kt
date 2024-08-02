@@ -39,7 +39,7 @@ import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.SpeechRecognitionViewModel
 import pjo.travelapp.presentation.util.LatestUiState
-import pjo.travelapp.presentation.util.extension.hideKeyboard
+import pjo.travelapp.presentation.util.hideKeyboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.Instant

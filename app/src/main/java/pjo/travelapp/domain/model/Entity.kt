@@ -12,12 +12,3 @@ data class UseCases(
     val getPlaceDetailUseCase: GetPlaceDetailUseCase,
     val getNearbyPlaces: GetNearbyPlaceUseCase
 )
-
-data class ParentList(
-    val parentItemList: List<ParentItem>
-)
-
-data class ParentItem(
-    val date: Pair<Int, Int>,
-    val children: MutableList<PlaceResult> = mutableListOf()
-)

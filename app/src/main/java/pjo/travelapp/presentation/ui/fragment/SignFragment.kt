@@ -1,11 +1,13 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.databinding.FragmentSignBinding
 import pjo.travelapp.presentation.util.signmanager.KakaoSignManager
 import pjo.travelapp.presentation.util.signmanager.NaverSignManager
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SignFragment : BaseFragment<FragmentSignBinding>() {
 
     @Inject

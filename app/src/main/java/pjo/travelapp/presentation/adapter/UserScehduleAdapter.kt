@@ -5,29 +5,33 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.VpUserSchduleBinding
-import pjo.travelapp.presentation.util.extension.setRandomGradientBackground
+import pjo.travelapp.presentation.util.BitmapUtil
+import pjo.travelapp.presentation.util.setRandomGradientBackground
 
-class UserScehduleAdapter(
-    private val itemClickList: (UserSchduleEntity) -> Unit,
-    private val deleteClickList: (UserSchduleEntity) -> Unit
+class UserScheduleAdapter(
+    private val itemClickList: (UserPlan) -> Unit,
+    private val deleteClickList: (UserPlan) -> Unit
 ) :
-    ListAdapter<UserSchduleEntity, UserScehduleAdapter.ViewHolder>(diffUtil) {
+    ListAdapter<UserPlan, UserScheduleAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: VpUserSchduleBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: UserSchduleEntity, position: Int) {
+        fun bind(item: UserPlan, position: Int) {
             try {
                 binding.apply {
+                    val context = itemView.context
+                    val bitmapUtil = BitmapUtil(context)
 
-                    val bitmaps = item.placeAndPhoto.map { pair ->
-                        pair.second
+                    val bitmaps = item.placeAndPhotoPaths.map { pair ->
+                        bitmapUtil.loadBitmap(pair.second)
                     }
+
                     scivImgContainer.setBitmaps(bitmaps)
 
-                    tvTravelPeriod.text = item.placeAndPhoto.joinToString(separator = ",") {
+                    tvTravelPeriod.text = item.placeAndPhotoPaths.joinToString(separator = ",") {
                         it.first
                     }
                     tvTravelDate.text = item.datePeriod
@@ -57,18 +61,18 @@ class UserScehduleAdapter(
 
     // DiffUtil.ItemCallback 구현
     companion object {
-        private val diffUtil = object : DiffUtil.ItemCallback<UserSchduleEntity>() {
+        private val diffUtil = object : DiffUtil.ItemCallback<UserPlan>() {
             override fun areItemsTheSame(
-                oldItem: UserSchduleEntity,
-                newItem: UserSchduleEntity
+                oldItem: UserPlan,
+                newItem: UserPlan
             ): Boolean {
                 // 아이템 고유 ID로 비교 (예: placeId)
                 return oldItem === newItem
             }
 
             override fun areContentsTheSame(
-                oldItem: UserSchduleEntity,
-                newItem: UserSchduleEntity
+                oldItem: UserPlan,
+                newItem: UserPlan
             ): Boolean {
                 // 아이템의 내용이 같은지 비교
                 return oldItem == newItem

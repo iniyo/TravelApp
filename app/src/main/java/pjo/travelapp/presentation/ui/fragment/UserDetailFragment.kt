@@ -5,11 +5,9 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import pjo.travelapp.R
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.FragmentUserDetailBinding
-import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
-import pjo.travelapp.presentation.adapter.UserScehduleAdapter
+import pjo.travelapp.presentation.adapter.UserScheduleAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
@@ -36,16 +34,16 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-                planViewModel.userScheduleList.collectLatest {
-                    if(it.isEmpty()) {
+                /*planViewModel.userScheduleList.collectLatest {
+                    if (it.isEmpty()) {
                         vpSchedules.visibility = View.GONE
                         tvNoSchedule.visibility = View.VISIBLE
-                    }else {
+                    } else {
                         vpSchedules.visibility = View.VISIBLE
                         tvNoSchedule.visibility = View.GONE
                         adapter?.submitList(it)
                     }
-                }
+                }*/
             }
         }
     }
@@ -63,13 +61,13 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
         val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
         bind {
-            adapter = UserScehduleAdapter(
+            adapter = UserScheduleAdapter(
                 itemClickList = {
                     navigator.navigateTo(Fragments.PLAN_PAGE)
-                    planViewModel.fetchUserSchedule(it)
+                    /*planViewModel.fetchUserSchedule(it)*/
                 },
                 deleteClickList = {
-                    showDeleteConfirmationDialog(it)
+                    /*showDeleteConfirmationDialog(it)*/
                 }
             )
 
@@ -99,7 +97,8 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
             btnScheduleCalendar.layoutParams.width = (screenWidth * 0.4).toInt()*/
         }
     }
-    private fun showDeleteConfirmationDialog(userSchedule: UserSchduleEntity) {
+
+    private fun showDeleteConfirmationDialog(userSchedule: UserPlan) {
         AlertDialog.Builder(requireContext())
             .setTitle("삭제 확인")
             .setMessage("정말로 이 항목을 삭제하시겠습니까?")

@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
+import java.io.Serializable
 
 data class PlaceDetailRequest(
     @SerializedName("place_id") val placeId: String,
@@ -25,13 +26,7 @@ data class PlaceDetailsResponse(
     @SerializedName("status") val status: String
 )
 
-@Entity(tableName = "place_result",
-    foreignKeys = [ForeignKey(
-        entity = UserSchduleEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["parentId"],
-        onDelete = ForeignKey.CASCADE
-    )])
+
 data class PlaceResult(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val parentId: Int,
@@ -65,7 +60,7 @@ data class PlaceResult(
     @SerializedName("reviews") val reviews: List<Review>,
     @SerializedName("vicinity") val vicinity: String,
     @SerializedName("website") val website: String?
-)
+): Serializable
 
 data class AddressComponent(
     @SerializedName("long_name") val longName: String,

@@ -13,7 +13,7 @@
             type="pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter" />
         <variable
             name="schedule_adapter"
-            type="pjo.travelapp.presentation.adapter.UserScehduleAdapter" />
+            type="pjo.travelapp.presentation.adapter.UserScheduleAdapter" />
     </data>
 
 

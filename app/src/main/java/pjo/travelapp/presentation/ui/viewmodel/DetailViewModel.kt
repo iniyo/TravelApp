@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,7 @@ class DetailViewModel @Inject constructor(
     val hotelDetail: StateFlow<HotelCard?> get() = _hotelDetail
 
     fun fetchPlaceResult(placeResult: PlaceResult) {
+        Log.d("TAG", "fetchPlaceResult: ")
         _placeResult.value = placeResult
     }
 

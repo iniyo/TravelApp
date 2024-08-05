@@ -23,6 +23,7 @@ import pjo.travelapp.data.entity.ChildItemWithPosition
 import pjo.travelapp.data.entity.ParentGroupData
 import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.UserNote
 import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.FragmentPlanBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
@@ -31,7 +32,6 @@ import pjo.travelapp.presentation.adapter.ParentPlanItem
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
-import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.FlexboxItemManager
 import pjo.travelapp.presentation.util.dialog.NoteDialog
 import pjo.travelapp.presentation.util.getExternalFilePath
@@ -68,25 +68,28 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
         setupFlexboxItems()
         setBottomSheet()
-        setupAdapter()
+        setAdapter()
         backPressed()
     }
 
     override fun initListener() {
         bind {
             btnAddedSchedule.setOnClickListener {
+                /*splContainer.addPanelSlideListener()*/
                 lifecycleScope.launch {
                     val parentGroupDataList = parentGroups.mapIndexed { index, parentGroup ->
                         val parentItem = (parentGroup.getGroup(0) as ParentPlanItem).item
+                        val userNote = (parentGroup.getGroup(0) as ParentPlanItem).note
                         val childItems = (1 until parentGroup.groupCount).map { childIndex ->
-                            val placeResult = (parentGroup.getGroup(childIndex) as ChildPlanItem).item
+                            val placeResult =
+                                (parentGroup.getGroup(childIndex) as ChildPlanItem).item
                             ChildItemWithPosition(placeResult, index)
                         }
-                        ParentGroupData(parentItem, childItems)
+                        ParentGroupData(parentItem, userNote, childItems)
                     }
 
                     val newPlan = UserPlan(
-                        id = id, // 여기에 프래그먼트 ID를 사용하거나 새 ID를 생성
+                        id = id,
                         title = title,
                         period = period,
                         placeResultList = placeDetailList,
@@ -94,13 +97,17 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                         datePeriod = datePeriod,
                         parentGroups = ParentGroups(parentGroupDataList)
                     )
+                    Log.d("TAG", "저장: $newPlan")
 
-                    // ViewModel에서 저장/업데이트 처리
                     val isUpdated = planViewModel.saveOrUpdateUserPlan(newPlan)
                     if (isUpdated) {
-                        Toast.makeText(requireContext(), "항목이 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(),
+                            getString(R.string.update_schedule), Toast.LENGTH_SHORT)
+                            .show()
                     } else {
-                        Toast.makeText(requireContext(), "새로운 항목이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(),
+                            getString(R.string.new_schedule), Toast.LENGTH_SHORT)
+                            .show()
                     }
                     appNavigator.navigateTo(Fragments.SCHEDULE_PAGE)
                 }
@@ -112,30 +119,12 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
     }
 
-
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-                // toggleBottomSheetEvent를 처리하는 부분
                 launch {
-                    planViewModel.toggleBottomSheetEvent.collect { position ->
-                        toggleBottomSheet(searchBottomSheetBehavior)
-                        selectedPosition = position  // 선택된 position 저장
-                        Log.d("TAG", "initListener: $selectedPosition")
-                    }
-                }
-
-                // showDialogEvent를 처리하는 부분
-                launch {
-                    planViewModel.showDialogEvent.collect {
-                        showNoteDialog()
-                    }
-                }
-
-                // userPlan 데이터를 처리하는 부분
-                launch {
-                    Log.d("TAG", "initViewModel: 이거임 ")
                     planViewModel.userPlan.collectLatest { userPlan ->
+                        Log.d("TAG", "initViewModel: 이거임 ")
                         if (userPlan != null) {
                             title = userPlan.title
                             binding.tvTripTitle.text = userPlan.title
@@ -143,58 +132,64 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                             binding.tvTripDate.text = userPlan.datePeriod
                             id = userPlan.id
                             placeAndPhotoList = userPlan.placeAndPhotoPaths
+                            Log.d("TAG", "parentGroup: ${userPlan.title} ")
+                            Log.d("TAG", "parentGroup: ${userPlan.parentGroups.parentGroupDataList.size} ")
 
-                            // 먼저 parentGroups를 초기화
-                            val newParentGroups = userPlan.parentGroups.parentGroupDataList.map { parentGroupData ->
+                            val newParentGroups = userPlan.parentGroups.parentGroupDataList.mapIndexed { index, parentGroupData ->
                                 val parentPlanItem = ParentPlanItem(
                                     item = parentGroupData.parentItem,
-                                    noteClickListener = { showNoteDialog() },
+                                    note = parentGroupData.userNote,
+                                    parentIndex = index,
+                                    noteClickListener = {
+                                        val tempNote = planViewModel.getTempUserNote(index) ?: parentGroupData.userNote ?: UserNote("", index)
+                                        showNoteDialog(tempNote.text) { newNote ->
+                                            (parentGroups[index].getGroup(0) as ParentPlanItem).note = UserNote(
+                                                text = newNote,
+                                                position = index
+                                            )
+                                            planViewModel.updateTempUserNote((parentGroups[index].getGroup(0) as ParentPlanItem).note!!)
+                                        }
+                                    },
                                     placeClickListener = { position ->
                                         toggleBottomSheet(searchBottomSheetBehavior)
-                                        selectedPosition = position  // 선택된 position 저장
+                                        selectedPosition = position
                                     }
                                 )
-                                ExpandableGroup(parentPlanItem)
-                            }
-                            parentGroups.clear()
-                            parentGroups.addAll(newParentGroups)
-                            // 자식 항목들을 추가
-                            userPlan.parentGroups.parentGroupDataList.forEachIndexed { index, parentGroupData ->
-                                parentGroupData.childItems.forEach { childItem ->
-                                    val parentGroup = parentGroups[index]
-                                    parentGroup.add(
+                                val expandableGroup = ExpandableGroup(parentPlanItem)
+                                parentGroupData.childItems?.forEach { childItem ->
+                                    expandableGroup.add(
                                         ChildPlanItem(
                                             item = childItem.placeResult,
                                             itemClickListener = { placeResult ->
                                                 detailViewModel.fetchPlaceResult(placeResult)
                                                 appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
                                             },
-                                            parentGroup = parentGroup
+                                            parentGroup = expandableGroup
                                         )
                                     )
                                 }
+                                expandableGroup
                             }
+                            Log.d("TAG", "parentGroup1: ${newParentGroups.size} ")
 
-                            parentGroups.forEach {
-                                it.onToggleExpanded()
-                            }
-
-                            groupAdapter.update(parentGroups)
+                            planViewModel.fetchParentGroups(newParentGroups)
                         }
                     }
                 }
 
-                // parentGroups 데이터를 처리하는 부분
                 launch {
-                    planViewModel.parentGroups.collectLatest { groups ->
-                        Log.d("TAG", "check parent group: ${groups.size}")
+                    planViewModel.parentGroups.collectLatest { group ->
+                        group.map {
+                            it.onToggleExpanded()
+                        }
                         parentGroups.clear()
-                        parentGroups.addAll(groups)
+                        parentGroups.addAll(group)
+                        Log.d("TAG", "initViewModel: ${group.size}")
+                        Log.d("TAG", "initViewModel: ${parentGroups.size}")
                         groupAdapter.update(parentGroups)
                     }
                 }
 
-                // placeDetailsList 데이터를 처리하는 부분
                 launch {
                     mapsViewModel.placeDetailsList.collectLatest { placeDetails ->
                         Log.d("TAG", "placeDetailsList: ")
@@ -206,6 +201,42 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
     }
 
+    private fun setAdapter() {
+        bind {
+            autoAdapter = AutoCompleteItemAdapter { selectedItem ->
+                hideKeyboard(clPlanMainContainer)
+
+                if (selectedPosition != -1 && selectedPosition < parentGroups.size) {
+                    parentGroups[selectedPosition].add(
+                        ChildPlanItem(
+                            item = selectedItem.first,
+                            itemClickListener = { placeResult ->
+                                detailViewModel.fetchPlaceResult(placeResult)
+                                toggleLayout()
+                            },
+                            parentGroup = parentGroups[selectedPosition]
+                        )
+                    )
+                    Log.d("TAG", "setupAdapter: ${parentGroups[selectedPosition]}")
+                    if (!parentGroups[selectedPosition].isExpanded) {
+                        parentGroups[selectedPosition].onToggleExpanded()
+                    }
+                }
+                planViewModel.fetchParentGroups(parentGroups)
+                toggleBottomSheet(searchBottomSheetBehavior)
+            }
+        }
+    }
+
+    private fun toggleLayout() {
+        bind {
+            if (splContainer.isOpen) {
+                splContainer.closePane()
+            } else {
+                splContainer.openPane()
+            }
+        }
+    }
 
     private fun setBottomSheet() {
         bind {
@@ -227,33 +258,6 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
     }
 
-    private fun setupAdapter() {
-        bind {
-            autoAdapter = AutoCompleteItemAdapter { selectedItem ->
-                hideKeyboard(clPlanMainContainer)
-
-                Log.d("TAG", "setupAdapter: $selectedItem ")
-
-                if (selectedPosition != -1 && selectedPosition < parentGroups.size) {
-                    parentGroups[selectedPosition].add(
-                        ChildPlanItem(
-                            item = selectedItem.first,
-                            itemClickListener = { placeResult ->
-                                detailViewModel.fetchPlaceResult(placeResult)
-                                appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
-                            },
-                            parentGroup = parentGroups[selectedPosition]
-                        )
-                    )
-                    if (!parentGroups[selectedPosition].isExpanded) {
-                        parentGroups[selectedPosition].onToggleExpanded()
-                    }
-                }
-                toggleBottomSheet(searchBottomSheetBehavior)
-            }
-        }
-    }
-
     private fun toggleBottomSheet(currentBehavior: BottomSheetBehavior<View>) {
         bind {
             if (currentBehavior.state == BottomSheetBehavior.STATE_HIDDEN) currentBehavior.state =
@@ -262,9 +266,10 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
     }
 
-    private fun showNoteDialog() {
+    private fun showNoteDialog(initialNote: String?, onSave: (String) -> Unit) {
         val noteDialog = NoteDialog(requireContext())
-        noteDialog.show {
+        noteDialog.show(initialNote) {
+            onSave(it)
             Toast.makeText(requireContext(), "노트가 저장되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
@@ -286,23 +291,19 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             R.drawable.ic_share,
             R.string.share
         ) { v ->
-            // 현재 화면 저장
             val rtView = v.rootView
             val bitmap = Bitmap.createBitmap(rtView.width, rtView.height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             rtView.draw(canvas)
 
-            val fileName =
-                resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
+            val fileName = resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
 
-            // 외부 저장소 이미지 파일 저장
             val sendfile = saveImageIntoFileFromUri(
                 bitmap,
                 fileName,
                 getExternalFilePath()
             )
 
-            // 공유 이동
             val intent = Intent(Intent.ACTION_SEND)
             val uri = FileProvider.getUriForFile(
                 requireContext(),
@@ -361,13 +362,16 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state =
-                        BottomSheetBehavior.STATE_HIDDEN
-                    else appNavigator.navigateUp()
+                    bind {
+                        if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state =
+                            BottomSheetBehavior.STATE_HIDDEN
+                        else if(splContainer.isOpen) {
+                            splContainer.closePane()
+                        }
+                        else appNavigator.navigateUp()
+                    }
                 }
             })
     }
+
 }
-
-
-

@@ -7,42 +7,42 @@ import com.xwray.groupie.ExpandableItem
 import com.xwray.groupie.viewbinding.BindableItem
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.UserNote
 import pjo.travelapp.databinding.ItemChildPlaceBinding
 import pjo.travelapp.databinding.RvPlanItemBinding
 import pjo.travelapp.presentation.ui.consts.TAKE_REVIEWS
 
-
 class ParentPlanItem(
     val item: Pair<Int, Int>,
-    private val noteClickListener: () -> Unit,
-    private val placeClickListener: (Int) -> Unit
+    var note: UserNote?,
+    private val noteClickListener: (Int) -> Unit,
+    private val placeClickListener: (Int) -> Unit,
+    private val parentIndex: Int // 고유 인덱스 추가
 ) : BindableItem<RvPlanItemBinding>(), ExpandableItem {
 
     private lateinit var childCommentGroup: ExpandableGroup
+
     override fun getLayout(): Int = R.layout.rv_plan_item
 
     override fun getId(): Long = item.hashCode().toLong()
 
     override fun bind(viewBinding: RvPlanItemBinding, position: Int) {
         viewBinding.apply {
-            if(item != null){
-                item.first?.let{
-                    val stringBuilder = StringBuilder()
-                    stringBuilder.apply {
-                        append(position.inc().toString())
-                        append("일차 ")
-                        append(" / ")
-                        append(item.first.toString())
-                        append("월 ")
-                        append(item.second.toString())
-                        append("일")
-                    }
-                    tvDate.text = stringBuilder
-
-                    btnNote.setOnClickListener { noteClickListener() }
-                    btnSelectPlace.setOnClickListener { placeClickListener(position) }
+            item.let {
+                val stringBuilder = StringBuilder()
+                stringBuilder.apply {
+                    append(parentIndex.inc().toString())
+                    append("일차 ")
+                    append(" / ")
+                    append(item.first.toString())
+                    append("월 ")
+                    append(item.second.toString())
+                    append("일")
                 }
+                tvDate.text = stringBuilder
 
+                btnNote.setOnClickListener { noteClickListener(parentIndex) }
+                btnSelectPlace.setOnClickListener { placeClickListener(parentIndex) } // position 대신 parentIndex 사용
             }
         }
     }
@@ -78,6 +78,7 @@ class ChildPlanItem(
             tvTitle.text = item.name
             tvRatingScore.text = item.rating.toString()
             rbScore.rating = item.rating.toFloat()
+            tvIconPosition.text = position.toString()
             item.reviews?.take(TAKE_REVIEWS)?.forEach { review ->
                 tvReviews.text = stringBuilder.append("${review.authorName}: ${review.text}\n\n")
             }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.RvSearchPlaceItemBinding
@@ -15,7 +16,7 @@ class MainSearchItemAdapter(
 ) : ListAdapter<PlaceDetail, MainSearchItemAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: RvSearchPlaceItemBinding) :
-        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: PlaceDetail?) {
             try {

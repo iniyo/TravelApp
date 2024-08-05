@@ -40,7 +40,7 @@ class ImageViewPagerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             binding.apply {
                 try {
                     Glide.with(root)
-                        .load(item)
+                        .load(item.getPhotoUrl())
                         .error(com.android.car.ui.R.drawable.car_ui_icon_error)
                         .placeholder(R.drawable.img_bg_title)
                         .into(ivImgContainer)

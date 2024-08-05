@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
@@ -61,7 +62,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private var placeDetailsList = mutableListOf<PlaceResult>()
     private var searchMarker: Marker? = null
     private var currentAdapterStyle: AdapterStyle? = null
-    var isToolbarToggler = true
+    private var isToolbarToggler = true
+    private var currentPolyline: Polyline? = null
 
     @Inject
     lateinit var navigate: AppNavigator
@@ -238,7 +240,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
         val decodedPath = PolyUtil.decode(encodedPolyline)
-        googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+
+        currentPolyline?.remove()
+
+        currentPolyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
 
         // 경로의 중간지점에 거리 마커 추가
         distanceMeters?.let {
@@ -259,7 +264,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         // 경로가 모두 보이도록 카메라 이동
         val padding = 200 // 경계와 지도 사이의 여백 (픽셀 단위)
         googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-
     }
 
     private fun backPressed() {
@@ -420,6 +424,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 toggleBottomSheet(searchBottomSheetBehavior)
             }
 
+            searchBottomSheet.ivVoice.setOnClickListener {
+                navigate.navigateTo(Fragments.VOICE_PAGE)
+                toggleBottomSheet(searchBottomSheetBehavior)
+            }
         }
     }
 

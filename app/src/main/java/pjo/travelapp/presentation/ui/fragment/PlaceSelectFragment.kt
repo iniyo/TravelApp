@@ -59,6 +59,7 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
                     addedItems.add(title!!)
 
                     planViewModel.updateSelectedPlace(title!!, bitmaps)
+                    planViewModel.saveBitmaps(requireContext())
                 }
             }
 

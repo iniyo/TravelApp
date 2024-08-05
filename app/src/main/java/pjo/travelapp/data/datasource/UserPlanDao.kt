@@ -22,6 +22,6 @@ interface UserPlanDao {
     @Delete
     suspend fun deleteUserPlan(userPlan: UserPlan)
 
-    @Query("SELECT * FROM user_plan")
+    @Query("SELECT * FROM user_plan ORDER BY forkDate DESC") // DESC or ASC
     suspend fun getAllUserPlans(): List<UserPlan>
 }

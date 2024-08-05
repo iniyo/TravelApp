@@ -133,6 +133,7 @@ class Event<out T>(private val content: T) {
 
     fun peekContent(): T = content
 }
+
 class BitmapUtil(context: Context) {
     private val bitmapDirectory: File = context.getDir("bitmaps", Context.MODE_PRIVATE)
 

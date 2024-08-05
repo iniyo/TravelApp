@@ -17,7 +17,10 @@ import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import pjo.travelapp.R
+import pjo.travelapp.data.entity.ParentGroupData
+import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
@@ -53,6 +56,7 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     private val viewModel: PlanViewModel by activityViewModels()
     private val today = LocalDate.now()
     private var selection = DateSelection() // data class
+    private lateinit var placeAndPhotoList: List<Pair<String, String>>
 
     override fun initView() {
         super.initView()
@@ -91,14 +95,16 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-                viewModel.planAdapterList.collectLatest {
-
+                launch {
+                    viewModel.placeAndPhotoList.collectLatest {
+                        it?.let {
+                            placeAndPhotoList = it
+                        }
+                    }
                 }
             }
         }
     }
-
-    private lateinit var placeAndPhotoList: List<Pair<String, String>>
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {
@@ -134,33 +140,14 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
                     selection.endDate
                 )
             )
-            val bitmapUtil = BitmapUtil(requireContext())
-            placeAndPhotoList = viewModel.selectedPlace.value.map { (place, bitmap) ->
-                val path = bitmapUtil.saveBitmap(
-                    bitmap,
-                    "${System.currentTimeMillis()}_${place.hashCode()}.png"
-                )
-                place to path
-            }
-            viewModel.fetchUserPlan(
-                userPlan = UserPlan(
-                    id = makeItemId(),
-                    title = viewModel.title.value,
-                    period = selection.daysBetween!!.toInt(),
-                    datePeriod = dateRangeDisplayText(
-                        selection.startDate,
-                        selection.endDate
-                    ).toString(),
-                    placeAndPhotoPaths = placeAndPhotoList,
-                )
-            )
-
             viewModel.fetchUserAdapter(
                 selectedMonthsAndDays(
                     selection.startDate,
                     selection.endDate
                 )
             )
+
+            viewModel.fetchUserPlan()
         } else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }

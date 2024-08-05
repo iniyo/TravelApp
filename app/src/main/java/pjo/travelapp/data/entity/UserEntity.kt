@@ -3,8 +3,8 @@ package pjo.travelapp.data.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.xwray.groupie.ExpandableGroup
 import pjo.travelapp.data.datasource.Converters
+import java.util.Date
 
 @Entity(tableName = "user_plan")
 @TypeConverters(Converters::class)
@@ -13,10 +13,16 @@ data class UserPlan(
     val id: String = "",
     val title: String = "",
     val period: Int = 0,
+    val forkDate: Date = Date(),
     val placeResultList: List<PlaceResult> = emptyList(),
     val placeAndPhotoPaths: List<Pair<String, String>> = emptyList(),
     val datePeriod: String = "",
     val parentGroups: ParentGroups = ParentGroups(emptyList())
+)
+
+data class UserNote(
+    val text: String,
+    val position: Int
 )
 
 data class ParentGroups(
@@ -25,8 +31,10 @@ data class ParentGroups(
 
 data class ParentGroupData(
     val parentItem: Pair<Int, Int>,
-    val childItems: List<ChildItemWithPosition>
+    val userNote: UserNote?,
+    val childItems: List<ChildItemWithPosition>?
 )
+
 data class ChildItemWithPosition(
     val placeResult: PlaceResult,
     val parentPosition: Int

@@ -20,8 +20,16 @@
         <variable
             name="navigator"
             type="pjo.travelapp.presentation.util.navigator.AppNavigator" />
-    </data>
 
+        <variable
+            name="adapter_d"
+            type="pjo.travelapp.presentation.adapter.ImageViewPagerAdapter" />
+
+    </data>
+    <androidx.slidingpanelayout.widget.SlidingPaneLayout
+        android:id="@+id/spl_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -156,4 +164,8 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
+        <include
+            android:id="@+id/slide"
+            layout="@layout/fragment_place_detail"/>
+    </androidx.slidingpanelayout.widget.SlidingPaneLayout>
 </layout>

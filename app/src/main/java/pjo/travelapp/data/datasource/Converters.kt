@@ -11,7 +11,9 @@ import pjo.travelapp.data.entity.ChildItemWithPosition
 import pjo.travelapp.data.entity.ParentGroupData
 import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.UserNote
 import java.lang.reflect.Type
+import java.util.Date
 
 
 class Converters {
@@ -19,6 +21,15 @@ class Converters {
         .registerTypeAdapter(ParentGroupData::class.java, ParentGroupDataDeserializer())
         .create()
 
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
+    }
 
     @TypeConverter
     fun fromParentGroups(parentGroups: ParentGroups): String {
@@ -73,24 +84,32 @@ class Converters {
         val listType = object : TypeToken<List<ChildItemWithPosition>>() {}.type
         return gson.fromJson(childItemsString, listType)
     }
-
-
 }
 
 class ParentGroupDataDeserializer : JsonDeserializer<ParentGroupData> {
     override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): ParentGroupData {
-        val jsonObject = json!!.asJsonObject
+        val jsonObject = json?.asJsonObject ?: return ParentGroupData(Pair(0, 0), null, emptyList())
 
         val parentItem = context!!.deserialize<Pair<Int, Int>>(jsonObject.get("parentItem"), Pair::class.java)
 
-        val childItemsElement = jsonObject.get("childItems")
-        val childItems: List<ChildItemWithPosition> = if (childItemsElement.isJsonArray) {
-            context.deserialize(childItemsElement, object : TypeToken<List<ChildItemWithPosition>>() {}.type)
+        val userNoteElement = jsonObject.get("userNote")
+        val userNote: UserNote? = if (userNoteElement == null || userNoteElement.isJsonNull) {
+            null
         } else {
-            // Handle object format if necessary
-            listOf(context.deserialize(childItemsElement, ChildItemWithPosition::class.java))
+            context.deserialize(userNoteElement, UserNote::class.java)
         }
 
-        return ParentGroupData(parentItem, childItems)
+        val childItemsElement = jsonObject.get("childItems")
+        val childItems: List<ChildItemWithPosition>? = if (childItemsElement == null || childItemsElement.isJsonNull) {
+            emptyList()
+        } else {
+            if (childItemsElement.isJsonArray) {
+                context.deserialize(childItemsElement, object : TypeToken<List<ChildItemWithPosition>>() {}.type)
+            } else {
+                listOf(context.deserialize(childItemsElement, ChildItemWithPosition::class.java))
+            }
+        }
+
+        return ParentGroupData(parentItem, userNote, childItems)
     }
 }

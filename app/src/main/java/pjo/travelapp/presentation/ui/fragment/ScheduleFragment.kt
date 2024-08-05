@@ -22,7 +22,7 @@ import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
+class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val planViewModel: PlanViewModel by activityViewModels()
@@ -118,7 +118,6 @@ class ScehduleFragment : BaseFragment<FragmentScehduleBinding>() {
             }
             defaultAdapter1 = scheduleAdapter
             defaultAdapter2 = scheduleAdapter
-
 
             vpTrips.apply {
                 val (pageTransX, decoration) = MyGraphicMapper.getDecoration()

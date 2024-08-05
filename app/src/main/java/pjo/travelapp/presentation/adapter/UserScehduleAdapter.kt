@@ -39,9 +39,9 @@ class UserScheduleAdapter(
                     ivDelete.setOnClickListener { deleteClickList(item) }
                     itemView.setOnClickListener { itemClickList(item) }
 
-                    if (position > 0) {
+                   /* if (position > 0) {
                         setRandomGradientBackground(clMainContainer)
-                    }
+                    }*/
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()

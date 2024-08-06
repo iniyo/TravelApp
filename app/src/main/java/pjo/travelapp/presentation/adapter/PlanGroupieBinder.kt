@@ -4,6 +4,8 @@ import android.view.View
 import com.bumptech.glide.Glide
 import com.xwray.groupie.ExpandableGroup
 import com.xwray.groupie.ExpandableItem
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.viewbinding.BindableItem
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceResult
@@ -57,12 +59,16 @@ class ParentPlanItem(
 class ChildPlanItem(
     val item: PlaceResult,
     val itemClickListener: (PlaceResult) -> Unit,
-    private val parentGroup: ExpandableGroup
+    private val parentGroup: ExpandableGroup,
+    private val adapter: GroupAdapter<GroupieViewHolder> // Adapter 추가
 ) : BindableItem<ItemChildPlaceBinding>() {
 
     override fun getLayout(): Int = R.layout.item_child_place
 
     override fun bind(viewBinding: ItemChildPlaceBinding, position: Int) {
+
+        val childPosition = getChildPosition()
+
         viewBinding.apply {
             val stringBuilder = StringBuilder()
             val photoUrl = item.photos?.firstOrNull()?.getPhotoUrl()
@@ -78,9 +84,10 @@ class ChildPlanItem(
             tvTitle.text = item.name
             tvRatingScore.text = item.rating.toString()
             rbScore.rating = item.rating.toFloat()
-            tvIconPosition.text = position.toString()
-            item.reviews?.take(TAKE_REVIEWS)?.forEach { review ->
-                tvReviews.text = stringBuilder.append("${review.authorName}: ${review.text}\n\n")
+            tvIconPosition.text = childPosition.toString()
+            val longestReview = item.reviews?.maxByOrNull { it.text.length }
+            longestReview?.let { review ->
+                tvReviews.text = stringBuilder.append("${review.authorName}: ${review.text}")
             }
             root.setOnClickListener {
                 itemClickListener(item)
@@ -88,8 +95,20 @@ class ChildPlanItem(
 
             ivDelete.setOnClickListener {
                 parentGroup.remove(this@ChildPlanItem)
+                adapter.notifyItemRemoved(position) // 아이템 제거 후 어댑터 업데이트
+                adapter.notifyItemRangeChanged(position, parentGroup.itemCount) // 포지션 갱신
             }
         }
+    }
+
+    private fun getChildPosition(): Int {
+        // Iterate through the parent group's children to find the position of this item
+        for (i in 0 until parentGroup.itemCount) {
+            if (parentGroup.getItem(i) == this) {
+                return i
+            }
+        }
+        return -1 // If not found, return an invalid position
     }
 
     override fun initializeViewBinding(view: View): ItemChildPlaceBinding =

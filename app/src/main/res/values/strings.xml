@@ -60,8 +60,8 @@
     <string name="tour_date">여행일</string>
     <string name="pick">근처 추천 pick!</string>
     <string name="next_trip">다음 여행지</string>
-    <string name="opening">운영중</string>
-    <string name="closed">운영안함</string>
+    <string name="opening">ㆍ운영중</string>
+    <string name="closed">ㆍ운영안함</string>
     <string name="location_not_found">위치를 찾지 못했습니다.</string>
     <string name="type">type</string>
     <string name="overview">개요</string>
@@ -130,4 +130,9 @@
     <string name="write_user_memo">여행 정보를 적어주세요!</string>
     <string name="update_schedule">일정이 업데이트되었어요.</string>
     <string name="new_schedule">새로운 일정 추가!</string>
+    <string name="not_info">정보 없음</string>
+    <string name="pipe">-</string>
+    <string name="not_founded_opening_hours">운영 정보가 없는 시설입니다.</string>
+    <string name="not_founded_review">리뷰가 없어요</string>
+    <string name="operating_time">운영시간</string>
 </resources>

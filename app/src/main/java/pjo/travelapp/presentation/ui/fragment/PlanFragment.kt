@@ -9,8 +9,11 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.xwray.groupie.ExpandableGroup
 import com.xwray.groupie.GroupAdapter
@@ -33,6 +36,8 @@ import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
+import pjo.travelapp.presentation.util.RecyclerViewAnimation
+import pjo.travelapp.presentation.util.SlidingPaneListener
 import pjo.travelapp.presentation.util.dialog.NoteDialog
 import pjo.travelapp.presentation.util.getExternalFilePath
 import pjo.travelapp.presentation.util.hideKeyboard
@@ -42,7 +47,7 @@ import pjo.travelapp.presentation.util.saveImageIntoFileFromUri
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PlanFragment : BaseFragment<FragmentPlanBinding>() {
+class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
 
     @Inject
     lateinit var appNavigator: AppNavigator
@@ -64,6 +69,9 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         bind {
             viewmodel = mapsViewModel
             navigator = appNavigator
+            rvPlan.apply {
+                itemAnimator = RecyclerViewAnimation()
+            }
             adapter = groupAdapter
         }
         setupFlexboxItems()
@@ -74,8 +82,35 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     override fun initListener() {
         bind {
+            splContainer.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED
+            splContainer.addPanelSlideListener(object : SlidingPaneLayout.PanelSlideListener {
+                override fun onPanelSlide(panel: View, slideOffset: Float) {
+                    Log.d("TAG", "onPanelOpened: slide ")
+                }
+
+                override fun onPanelOpened(panel: View) {
+                    Log.d("TAG", "onPanelOpened: opened ")
+                    val fragment = childFragmentManager.findFragmentById(R.id.place_detail_fragment)
+                    if (fragment == null) {
+                        childFragmentManager.commit {
+                            add(R.id.place_detail_fragment, PlaceDetailFragment())
+                        }
+                    } else {
+                        childFragmentManager.commit {
+                            show(fragment)
+                        }
+                    }
+                    panel.isEnabled = true
+                }
+
+                override fun onPanelClosed(panel: View) {
+                    // 패널이 닫혔을 때 동작
+                    Log.d("TAG", "onPanelClosed: Panel closed")
+                    panel.isEnabled = false
+                }
+            })
+
             btnAddedSchedule.setOnClickListener {
-                /*splContainer.addPanelSlideListener()*/
                 lifecycleScope.launch {
                     val parentGroupDataList = parentGroups.mapIndexed { index, parentGroup ->
                         val parentItem = (parentGroup.getGroup(0) as ParentPlanItem).item
@@ -92,7 +127,6 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                         id = id,
                         title = title,
                         period = period,
-                        placeResultList = placeDetailList,
                         placeAndPhotoPaths = placeAndPhotoList,
                         datePeriod = datePeriod,
                         parentGroups = ParentGroups(parentGroupDataList)
@@ -101,12 +135,16 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
                     val isUpdated = planViewModel.saveOrUpdateUserPlan(newPlan)
                     if (isUpdated) {
-                        Toast.makeText(requireContext(),
-                            getString(R.string.update_schedule), Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.update_schedule), Toast.LENGTH_SHORT
+                        )
                             .show()
                     } else {
-                        Toast.makeText(requireContext(),
-                            getString(R.string.new_schedule), Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.new_schedule), Toast.LENGTH_SHORT
+                        )
                             .show()
                     }
                     appNavigator.navigateTo(Fragments.SCHEDULE_PAGE)
@@ -114,7 +152,11 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             }
 
             searchBottomSheet.ivBack.setOnClickListener {
-                appNavigator.navigateUp()
+                if (searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                } else {
+                    appNavigator.navigateUp()
+                }
             }
         }
     }
@@ -133,43 +175,54 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                             id = userPlan.id
                             placeAndPhotoList = userPlan.placeAndPhotoPaths
                             Log.d("TAG", "parentGroup: ${userPlan.title} ")
-                            Log.d("TAG", "parentGroup: ${userPlan.parentGroups.parentGroupDataList.size} ")
+                            Log.d(
+                                "TAG",
+                                "parentGroup: ${userPlan.parentGroups.parentGroupDataList.size} "
+                            )
 
-                            val newParentGroups = userPlan.parentGroups.parentGroupDataList.mapIndexed { index, parentGroupData ->
-                                val parentPlanItem = ParentPlanItem(
-                                    item = parentGroupData.parentItem,
-                                    note = parentGroupData.userNote,
-                                    parentIndex = index,
-                                    noteClickListener = {
-                                        val tempNote = planViewModel.getTempUserNote(index) ?: parentGroupData.userNote ?: UserNote("", index)
-                                        showNoteDialog(tempNote.text) { newNote ->
-                                            (parentGroups[index].getGroup(0) as ParentPlanItem).note = UserNote(
-                                                text = newNote,
-                                                position = index
-                                            )
-                                            planViewModel.updateTempUserNote((parentGroups[index].getGroup(0) as ParentPlanItem).note!!)
+                            val newParentGroups =
+                                userPlan.parentGroups.parentGroupDataList.mapIndexed { index, parentGroupData ->
+                                    val parentPlanItem = ParentPlanItem(
+                                        item = parentGroupData.parentItem,
+                                        note = parentGroupData.userNote,
+                                        parentIndex = index,
+                                        noteClickListener = {
+                                            val tempNote = planViewModel.getTempUserNote(index)
+                                                ?: parentGroupData.userNote ?: UserNote("", index)
+                                            showNoteDialog(tempNote.text) { newNote ->
+                                                (parentGroups[index].getGroup(0) as ParentPlanItem).note =
+                                                    UserNote(
+                                                        text = newNote,
+                                                        position = index
+                                                    )
+                                                planViewModel.updateTempUserNote(
+                                                    (parentGroups[index].getGroup(
+                                                        0
+                                                    ) as ParentPlanItem).note!!
+                                                )
+                                            }
+                                        },
+                                        placeClickListener = { position ->
+                                            toggleBottomSheet(searchBottomSheetBehavior)
+                                            selectedPosition = position
                                         }
-                                    },
-                                    placeClickListener = { position ->
-                                        toggleBottomSheet(searchBottomSheetBehavior)
-                                        selectedPosition = position
-                                    }
-                                )
-                                val expandableGroup = ExpandableGroup(parentPlanItem)
-                                parentGroupData.childItems?.forEach { childItem ->
-                                    expandableGroup.add(
-                                        ChildPlanItem(
-                                            item = childItem.placeResult,
-                                            itemClickListener = { placeResult ->
-                                                detailViewModel.fetchPlaceResult(placeResult)
-                                                appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
-                                            },
-                                            parentGroup = expandableGroup
-                                        )
                                     )
+                                    val expandableGroup = ExpandableGroup(parentPlanItem)
+                                    parentGroupData.childItems?.forEach { childItem ->
+                                        expandableGroup.add(
+                                            ChildPlanItem(
+                                                item = childItem.placeResult,
+                                                itemClickListener = { placeResult ->
+                                                    detailViewModel.fetchPlaceResult(placeResult)
+                                                    appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
+                                                },
+                                                parentGroup = expandableGroup,
+                                                adapter = groupAdapter
+                                            )
+                                        )
+                                    }
+                                    expandableGroup
                                 }
-                                expandableGroup
-                            }
                             Log.d("TAG", "parentGroup1: ${newParentGroups.size} ")
 
                             planViewModel.fetchParentGroups(newParentGroups)
@@ -201,6 +254,12 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         }
     }
 
+    override fun closePane() {
+        if (binding.splContainer.isOpen) {
+            binding.splContainer.closePane()
+        }
+    }
+
     private fun setAdapter() {
         bind {
             autoAdapter = AutoCompleteItemAdapter { selectedItem ->
@@ -214,7 +273,10 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                                 detailViewModel.fetchPlaceResult(placeResult)
                                 toggleLayout()
                             },
-                            parentGroup = parentGroups[selectedPosition]
+                            parentGroup = parentGroups[selectedPosition],
+                            adapter = groupAdapter
+
+
                         )
                     )
                     Log.d("TAG", "setupAdapter: ${parentGroups[selectedPosition]}")
@@ -296,7 +358,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             val canvas = Canvas(bitmap)
             rtView.draw(canvas)
 
-            val fileName = resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
+            val fileName =
+                resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
 
             val sendfile = saveImageIntoFileFromUri(
                 bitmap,
@@ -365,13 +428,11 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
                     bind {
                         if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state =
                             BottomSheetBehavior.STATE_HIDDEN
-                        else if(splContainer.isOpen) {
+                        else if (splContainer.isOpen) {
                             splContainer.closePane()
-                        }
-                        else appNavigator.navigateUp()
+                        } else appNavigator.navigateUp()
                     }
                 }
             })
     }
-
 }

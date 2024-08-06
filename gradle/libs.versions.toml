@@ -21,7 +21,7 @@ kotlinxCoroutinesCore = "1.7.1"
 loggingInterceptor = "4.12.0"
 lottie = "6.4.1"
 material = "1.12.0"
-activity = "1.9.0"
+activity = "1.9.1"
 constraintlayout = "2.1.4"
 navigationUiKtx = "2.7.7"
 oauth = "5.9.1"
@@ -30,6 +30,7 @@ retrofit = "2.11.0"
 rollingtext = "1.3.0"
 roomRuntime = "2.6.1"
 roomCompiler = "2.6.1"
+shimmer = "0.5.0"
 v2User = "2.12.1"
 view = "2.5.2"
 viewpager2 = "1.1.0"
@@ -41,10 +42,10 @@ firebaseAuth = "23.0.0"
 safeargs = "2.7.7"
 places = "3.5.0"
 googleDevtoolsKsp = "2.0.0-1.0.21"
-pagingCommonAndroid = "3.3.0"
+pagingCommonAndroid = "3.3.1"
 carUiLib = "2.6.0"
 firebaseCrashlyticsKtx = "19.0.3"
-firebaseCrashlytics = "2.9.9"
+firebaseCrashlytics = "3.0.2"
 
 [libraries]
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
@@ -86,6 +87,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGso" }
 rollingtext = { module = "com.github.YvesCheung.RollingText:RollingText", version.ref = "rollingtext" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 view = { module = "com.kizitonwose.calendar:view", version.ref = "view" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }

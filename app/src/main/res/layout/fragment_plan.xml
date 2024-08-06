@@ -164,8 +164,9 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <include
-            android:id="@+id/slide"
-            layout="@layout/fragment_place_detail"/>
+        <FrameLayout
+            android:id="@+id/place_detail_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </androidx.slidingpanelayout.widget.SlidingPaneLayout>
 </layout>

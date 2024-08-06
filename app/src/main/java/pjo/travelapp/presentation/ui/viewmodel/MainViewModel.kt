@@ -304,7 +304,7 @@ class MainViewModel @Inject constructor(
 
     fun fetchCurrentLocation(lt: LatLng) {
         _currentLocation.value = lt
-        /*fetchNearbyTouristAttractions()*/
+       /* fetchNearbyTouristAttractions()*/
     }
 
     /* fun fetchNearbyPlacesFlow(): Flow<PagingData<Pair<Place, Bitmap?>>> {
@@ -314,7 +314,7 @@ class MainViewModel @Inject constructor(
          }.flow.cachedIn(viewModelScope)
      }*/
 
-    fun fetchNearbyTouristAttractions() {
+    private fun fetchNearbyTouristAttractions() {
         Log.d("TAG", "fetchNearbyTouristAttractions: ")
         try {
             val placesWithPhotos = mutableListOf<PlaceDetail>()

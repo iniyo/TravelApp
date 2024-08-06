@@ -9,7 +9,7 @@
     <color name="light_blue">#78BDFB</color>
     <color name="white_blue">#EBF5FE</color>
     <color name="gray">#D0EFEFEF</color>
-    <color name="middle_gray">#A4EFEFEF</color>
+    <color name="middle_gray">#2FEFEFEF</color>
     <color name="dark_gray">#79141313</color>
     <color name="naver_green">#03C75A</color>
     <color name="light_green">#11D368</color>
@@ -18,7 +18,8 @@
     <color name="indigo">#F27136</color>
     <color name="dark_purple">#3A284C</color>
     <color name="color_primary_dark">#303F9F</color>
-    <color name="dark_light_gray">#474747</color>
+    <color name="dark_light_gray">@color/black</color>
+    <color name="middle_light_gray">#909090</color>
     <color name="continuous_selection">#0F000000</color>
     <color name="theme_green">#02BCA6</color>
     <color name="default_pink">#8A8860</color>

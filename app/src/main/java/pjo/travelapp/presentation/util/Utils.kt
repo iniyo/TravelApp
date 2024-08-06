@@ -178,3 +178,7 @@ fun showCustomSnackbar(view: View, message: String, context: Context) {
 fun makeItemId(): String {
     return UUID.randomUUID().toString()
 }
+
+interface SlidingPaneListener {
+    fun closePane()
+}

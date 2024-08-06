@@ -55,11 +55,11 @@ data class PlaceResult(
     @SerializedName("geometry") val geometry: Geometry,
     @SerializedName("name") val name: String,
     @SerializedName("opening_hours") val openingHours: OpeningHours?,
-    @SerializedName("photos") val photos: List<Photo>,
+    @SerializedName("photos") val photos: List<Photo>?,
     @SerializedName("place_id") val placeId: String,
     @SerializedName("rating") val rating: Double,
-    @SerializedName("types") val types: List<String>,
-    @SerializedName("reviews") val reviews: List<Review>,
+    @SerializedName("types") val types: List<String>?,
+    @SerializedName("reviews") val reviews: List<Review>?,
     @SerializedName("vicinity") val vicinity: String,
     @SerializedName("website") val website: String?
 ): Serializable
@@ -105,7 +105,7 @@ data class Viewport(
 )
 
 data class OpeningHours(
-    @SerializedName("open_now") val openNow: Boolean,
+    @SerializedName("open_now") val openNow: Boolean?,
     /*@SerializedName("periods") val periods: List<Period>,*/
     @SerializedName("weekday_text") val weekdayText: List<String>
 )

@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import pjo.travelapp.databinding.FragmentSignBinding
@@ -31,7 +32,7 @@ class SignFragment : BaseFragment<FragmentSignBinding>() {
                 kakaoSignManager.kakaoLogin(requireContext())
             }
             btnNaver.setOnClickListener {
-                naverSignManager.NaverLogin(requireContext())
+                naverSignManager.naverLogin(requireContext())
             }
         }
     }

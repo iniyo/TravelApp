@@ -35,17 +35,19 @@ import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.adapter.AiChatAdapter
+import pjo.travelapp.presentation.ui.fragment.PlanFragment
 import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.SlidingPaneListener
 import pjo.travelapp.presentation.util.extension.copyTextToClipboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity(), SlidingPaneListener {
 
     private lateinit var splashScreen: SplashScreen
     private lateinit var binding: ActivityMainBinding
@@ -154,6 +156,8 @@ open class MainActivity : AppCompatActivity() {
         val bottomSheet = binding.clBottomSheetContainer
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.isFitToContents = true
+        bottomSheetBehavior.halfExpandedRatio = 0.6f
 
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
@@ -235,7 +239,8 @@ open class MainActivity : AppCompatActivity() {
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
                 }
-                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment) {
+                // chip navigation 숨길 fragment 정의
+                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment || destinationId == R.id.placeDetailFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
                     cnbItem.visibility = View.VISIBLE
@@ -360,5 +365,9 @@ open class MainActivity : AppCompatActivity() {
         if (!isPermissionRequestInProgress) {
             checkPermissionsAndRequestIfNeeded()
         }
+    }
+
+    override fun closePane() {
+
     }
 }

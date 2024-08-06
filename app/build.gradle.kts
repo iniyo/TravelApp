@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "pjo.travelapp"
-        minSdk = 28
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -116,6 +116,8 @@ dependencies {
     // groupie
     implementation(libs.groupie)
     implementation(libs.groupie.viewbinding)
+    // skeleton
+    implementation(libs.shimmer)
     /**
      * open source end
      */

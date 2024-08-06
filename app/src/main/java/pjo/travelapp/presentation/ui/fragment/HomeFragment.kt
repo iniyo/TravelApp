@@ -48,9 +48,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 launch {
                     mainViewModel.shuffledHotPlaceList.collectLatest {
                         when (it) {
-                            is LatestUiState.Loading -> pbPopular.visibility = View.VISIBLE
+                            is LatestUiState.Loading -> { sflPopular.visibility = View.VISIBLE}
                             is LatestUiState.Success -> {
-                                pbPopular.visibility = View.GONE
+                                sflPopular.visibility = View.GONE
                                 it.data.forEach { res ->
                                     popularRecycleAdapter?.addPlace(res)
                                 }
@@ -62,9 +62,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 launch {
                     mainViewModel.shuffledHotPlaceList.collectLatest {
                         when (it) {
-                            is LatestUiState.Loading -> pbRecommended.visibility = View.VISIBLE
+                            is LatestUiState.Loading -> {sflRecommended.visibility = View.VISIBLE}
                             is LatestUiState.Success -> {
-                                pbRecommended.visibility = View.GONE
+                                sflRecommended.visibility = View.GONE
                                 it.data.forEach { res ->
                                     recommendedRecycleAdapter?.addPlace(res)
                                 }

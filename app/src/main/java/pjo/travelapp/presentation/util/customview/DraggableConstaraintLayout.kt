@@ -18,8 +18,8 @@ class DraggableConstraintLayout @JvmOverloads constructor(
     private var initialX = 0f
     private var initialY = 0f
     private var threshold = 16
-    private var maxMoveX = 1000f // X축 이동의 최대 허용 값
-    private var maxMoveY = 1000f // Y축 이동의 최대 허용 값
+    private var topThreshold = 300f // 상단 고정 기준점
+    private var bottomThreshold = 500f // 하단 고정 기준점
 
     init {
         setOnTouchListener { view, event ->
@@ -34,10 +34,8 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                 MotionEvent.ACTION_MOVE -> {
                     val newX = event.rawX + dX
                     val newY = event.rawY + dY
-                    if (abs(newX - initialX) < maxMoveX && abs(newY - initialY) < maxMoveY) {
-                        view.x = newX
-                        view.y = newY
-                    }
+                    view.x = newX
+                    view.y = newY
                 }
 
                 MotionEvent.ACTION_UP -> {
@@ -52,27 +50,24 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                         val parentWidth = (view.parent as View).width
                         val parentHeight = (view.parent as View).height
                         val viewCenterX = view.x + view.width / 2
-                        val viewCenterY = view.y + view.height / 2
 
-                        if (diffX > maxMoveX || diffY > maxMoveY) {
-                            // 최대 이동 범위를 초과하면 원래 위치로 돌아감
-                            view.animate().x(initialX).y(initialY).setDuration(200L).start()
+                        if (viewCenterX < parentWidth / 2) {
+                            // 왼쪽에 붙이기
+                            view.animate().x(30f).setDuration(200L).start()
                         } else {
-                            if (viewCenterX < parentWidth / 2) {
-                                // 왼쪽에 붙이기
-                                view.animate().x(30f).setDuration(200L).start()
-                            } else {
-                                // 오른쪽에 붙이기
-                                view.animate().x(parentWidth - view.width.toFloat() - 30f).setDuration(200L).start()
-                            }
+                            // 오른쪽에 붙이기
+                            view.animate().x(parentWidth - view.width.toFloat() - 30f)
+                                .setDuration(200L).start()
+                        }
 
-                            if (viewCenterY < parentHeight / 2) {
-                                // 상단에 붙이기
-                                view.animate().y(30f).setDuration(200L).start()
-                            } else {
-                                // 하단에 붙이기
-                                view.animate().y(parentHeight - view.height.toFloat() - 30f).setDuration(200L).start()
-                            }
+                        // 상단과 하단의 기준점에 따라 정렬
+                        if (view.y < topThreshold) {
+                            // 상단에 붙이기
+                            view.animate().y(topThreshold).setDuration(200L).start()
+                        } else if (view.y + view.height > parentHeight - bottomThreshold) {
+                            // 하단에 붙이기
+                            view.animate().y(parentHeight - bottomThreshold).setDuration(200L)
+                                .start()
                         }
                     }
                 }

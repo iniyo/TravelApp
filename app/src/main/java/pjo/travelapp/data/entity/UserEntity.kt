@@ -14,7 +14,6 @@ data class UserPlan(
     val title: String = "",
     val period: Int = 0,
     val forkDate: Date = Date(),
-    val placeResultList: List<PlaceResult> = emptyList(),
     val placeAndPhotoPaths: List<Pair<String, String>> = emptyList(),
     val datePeriod: String = "",
     val parentGroups: ParentGroups = ParentGroups(emptyList())

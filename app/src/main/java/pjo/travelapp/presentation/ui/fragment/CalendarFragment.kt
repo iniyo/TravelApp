@@ -19,14 +19,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
-import pjo.travelapp.data.entity.ParentGroupData
-import pjo.travelapp.data.entity.ParentGroups
-import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
 import pjo.travelapp.databinding.FragmentCalendarBinding
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
-import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.getSelection
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isInDateBetweenSelection
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isOutDateBetweenSelection
@@ -41,7 +37,6 @@ import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.extension.makeInVisible
 import pjo.travelapp.presentation.util.extension.makeVisible
 import pjo.travelapp.presentation.util.extension.setTextColorRes
-import pjo.travelapp.presentation.util.makeItemId
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.LocalDate

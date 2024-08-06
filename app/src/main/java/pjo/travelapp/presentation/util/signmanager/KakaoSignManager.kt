@@ -4,4 +4,5 @@ import android.content.Context
 
 interface KakaoSignManager {
     fun kakaoLogin(context: Context)
+    fun isLoggedIn(callback: (Boolean) -> Unit)
 }

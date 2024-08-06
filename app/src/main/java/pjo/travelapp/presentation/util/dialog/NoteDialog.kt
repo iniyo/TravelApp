@@ -16,7 +16,7 @@ class NoteDialog(private val context: Context) {
         dialog = AlertDialog.Builder(context)
             .setTitle("메모장")
             .setView(binding.root)
-            .setIcon(R.drawable.ic_map)
+            .setIcon(R.drawable.ic_note)
             .setPositiveButton("저장", null)
             .setNegativeButton("취소", null)
             .create()

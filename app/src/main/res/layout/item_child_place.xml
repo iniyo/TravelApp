@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
-    <TextView
-        android:id="@+id/tv_icon_position"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:importantForAccessibility="no"
-        android:background="@drawable/bg_theme_green_corner"
-        android:scaleType="fitXY"
-        app:layout_constraintEnd_toStartOf="@+id/siv_main_item"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/v_indicator_bar"
@@ -22,9 +10,23 @@
         android:layout_height="0dp"
         android:background="@drawable/bg_dark_gray_corner_15"
         app:layout_constraintBottom_toBottomOf="@+id/tv_reviews"
-        app:layout_constraintEnd_toEndOf="@+id/tv_icon_position"
-        app:layout_constraintStart_toStartOf="@+id/tv_icon_position"
-        app:layout_constraintTop_toBottomOf="@+id/tv_icon_position" />
+        app:layout_constraintEnd_toStartOf="@+id/siv_main_item"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_icon_position"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/bg_theme_green_corner"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/siv_main_item"
+        app:layout_constraintEnd_toEndOf="@+id/v_indicator_bar"
+        app:layout_constraintStart_toStartOf="@+id/v_indicator_bar"
+        app:layout_constraintTop_toTopOf="@+id/siv_main_item" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/siv_main_item"
@@ -37,18 +39,6 @@
         app:layout_constraintEnd_toStartOf="@+id/iv_delete"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.15" />
-
-    <ImageView
-        android:id="@+id/iv_delete"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:importantForAccessibility="no"
-        android:layout_marginHorizontal="10dp"
-        android:scaleX="0.7"
-        android:scaleY="0.7"
-        android:src="@drawable/car_ui_icon_delete"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_title"
@@ -87,12 +77,28 @@
 
     <TextView
         android:id="@+id/tv_reviews"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxEms="20"
-        android:maxLines="4"
         android:ellipsize="end"
+        android:gravity="start"
+        android:maxEms="20"
+        android:maxLines="1"
+        android:paddingBottom="5dp"
+        app:layout_constraintEnd_toEndOf="@+id/siv_main_item"
         app:layout_constraintStart_toStartOf="@+id/tv_rating_score"
         app:layout_constraintTop_toBottomOf="@+id/tv_rating_score" />
+
+    <ImageView
+        android:id="@+id/iv_delete"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginHorizontal="10dp"
+        android:importantForAccessibility="no"
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:src="@drawable/car_ui_icon_delete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

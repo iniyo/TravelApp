@@ -132,7 +132,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:paddingStart="10dp"
+                        android:paddingStart="15dp"
+                        android:paddingVertical="10dp"
                         android:text="@string/fukuoka"
                         android:textColor="#1d1d1d"
                         android:textSize="16sp"
@@ -232,18 +233,28 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:listitem="@layout/rv_schedule_item" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <ProgressBar
-                        android:id="@+id/pb_recommended"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/sfl_recommended"
+                        android:paddingHorizontal="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <include
+                                layout="@layout/item_home_place_data_shimmer"/>
+
+                            <include
+                                layout="@layout/item_home_place_data_shimmer"/>
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -289,20 +300,32 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:listitem="@layout/rv_schedule_item">
+                        app:layout_constraintTop_toTopOf="parent">
 
                     </androidx.recyclerview.widget.RecyclerView>
 
-                    <ProgressBar
-                        android:id="@+id/pb_popular"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/sfl_popular"
+                        android:paddingHorizontal="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <include
+                                layout="@layout/item_home_place_data_shimmer"/>
+
+                            <include
+                                layout="@layout/item_home_place_data_shimmer"/>
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
@@ -342,7 +365,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
 
             </LinearLayout>
 

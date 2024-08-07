@@ -58,30 +58,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_sign_container_detail">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btn_google"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:importantForAccessibility="no"
             android:scaleType="fitXY"
+            android:background="@drawable/btn_effect_user_detail_purple"
             app:srcCompat="@drawable/google_login_btn_long" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btn_kakao"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:importantForAccessibility="no"
             android:scaleType="fitXY"
-            app:srcCompat="@drawable/kakao_login_btn_long" />
+            android:background="@drawable/btn_effect_user_detail_purple"
+            android:src="@drawable/kakao_login_btn_long"
+            />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btn_naver"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:importantForAccessibility="no"
             android:scaleType="fitXY"
+            android:background="@drawable/btn_effect_user_detail_purple"
             app:srcCompat="@drawable/naver_login_btn_long" />
     </LinearLayout>
 

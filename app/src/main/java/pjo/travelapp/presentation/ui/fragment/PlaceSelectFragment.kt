@@ -1,6 +1,8 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.graphics.BitmapFactory
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -11,9 +13,11 @@ import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.databinding.FragmentPlaceSelectBinding
 import pjo.travelapp.presentation.adapter.PlaceSelectAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.FlexboxItemManager
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
+import pjo.travelapp.presentation.util.showCustomSnackbar
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -37,27 +41,29 @@ class PlaceSelectFragment : BaseFragment<FragmentPlaceSelectBinding>() {
 
             adapter = PlaceSelectAdapter { (place, imageResId) ->
                 title = place
-                imgResId = imageResId
+                val bitmaps = BitmapFactory.decodeResource(binding.root.context.resources, imageResId)
                 // 중복 아이템 체크
                 if (addedItems.contains(title)) {
-                    Log.d("ItemManager", "${title}은 이미 추가하셨습니다.")
-                } else if (addedItems.size >= 3) {
-                    Log.d("ItemManager", "3개까지만 선택해주세요")
+                    showCustomSnackbar(root, "ItemManager ${title}은 이미 추가하셨습니다.", requireContext())
+                } else if (addedItems.size > 2) {
+                    showCustomSnackbar(root, "3개만 선택해 주세요", requireContext())
                 } else {
                     itemManager.addDeletableItem(
                         imageResource = imageResId,
                         textResId = title!!
                     ) {
                         Log.d("TAG", "Deleting: $it")
-                        planViewModel.deletePlace(Pair(it, imageResId))
+                        planViewModel.deletePlace(Pair(it, bitmaps))
                         addedItems.remove(it)
                     }
                     addedItems.add(title!!)
-                    planViewModel.updateSelectedPlace(title!!, imgResId!!)
+
+                    planViewModel.updateSelectedPlace(title!!, bitmaps)
+                    planViewModel.saveBitmaps(requireContext())
                 }
             }
 
-            fblPlaceContainer.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            fblPlaceContainer.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                 btnSelectPlace.isEnabled = fblPlaceContainer.childCount > 0
             }
 

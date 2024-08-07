@@ -124,16 +124,16 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
         bind {
             when (placeState) {
                 is LatestUiState.Loading -> {
-                    pbPopularMore.visibility = View.VISIBLE
+                    sflMainPlaces.visibility = View.VISIBLE
                 }
 
                 is LatestUiState.Success -> {
-                    pbPopularMore.visibility = View.GONE
-                    adapter?.updatePlaces(placeState.data)
+                    sflMainPlaces.visibility = View.GONE
+                    adapter?.submitPlaces(placeState.data)
                 }
 
                 is LatestUiState.Error -> {
-                    pbPopularMore.visibility = View.GONE
+                    sflMainPlaces.visibility = View.GONE
                     Toast.makeText(
                         context,
                         "Error: ${placeState.exception.message}",
@@ -146,19 +146,16 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
             when (hotelState) {
                 is LatestUiState.Loading -> {
-                    pbPopularMore.visibility = View.VISIBLE
+                    sflMainPlaces.visibility = View.VISIBLE
                 }
 
                 is LatestUiState.Success -> {
-                    pbPopularMore.visibility = View.GONE
-                    hotelState.data.forEach {
-                        Log.d("TAG", "hotel handle: $it")
-                        adapter?.updateHotels(hotelState.data)
-                    }
+                    sflMainPlaces.visibility = View.GONE
+                    adapter?.submitHotels(hotelState.data)
                 }
 
                 is LatestUiState.Error -> {
-                    pbPopularMore.visibility = View.GONE
+                    sflMainPlaces.visibility = View.GONE
                     Log.d("TAG", "handleUiState: ${hotelState.exception.message}")
                     Toast.makeText(
                         context,

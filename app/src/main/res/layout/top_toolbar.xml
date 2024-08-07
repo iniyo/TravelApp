@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.Toolbar android:id="@+id/tb_sign_display_title"
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tb_sign_display_title"
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize"
     android:background="@color/white"
@@ -7,9 +9,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    app:titleTextColor="@color/white"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    app:titleTextColor="@color/white">
 
     <ImageView
         android:id="@+id/iv_sign_display_back_button"
@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|end"
-        android:textSize="20sp"
-        android:layout_marginEnd="5dp" />
+        android:layout_marginEnd="5dp"
+        android:textSize="20sp" />
 
 </androidx.appcompat.widget.Toolbar>

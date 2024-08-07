@@ -18,6 +18,8 @@ class DraggableConstraintLayout @JvmOverloads constructor(
     private var initialX = 0f
     private var initialY = 0f
     private var threshold = 16
+    private var topThreshold = 300f // 상단 고정 기준점
+    private var bottomThreshold = 500f // 하단 고정 기준점
 
     init {
         setOnTouchListener { view, event ->
@@ -25,18 +27,20 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     dX = view.x - event.rawX
                     dY = view.y - event.rawY
-                    initialX = event.rawX
-                    initialY = event.rawY
+                    initialX = view.x
+                    initialY = view.y
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    view.x = event.rawX + dX
-                    view.y = event.rawY + dY
+                    val newX = event.rawX + dX
+                    val newY = event.rawY + dY
+                    view.x = newX
+                    view.y = newY
                 }
 
                 MotionEvent.ACTION_UP -> {
-                    val diffX = abs(event.rawX - initialX)
-                    val diffY = abs(event.rawY - initialY)
+                    val diffX = abs(view.x - initialX)
+                    val diffY = abs(view.y - initialY)
 
                     if (diffX < threshold && diffY < threshold) {
                         // 이동 거리가 임계값 이하이면 클릭으로 간주
@@ -44,14 +48,26 @@ class DraggableConstraintLayout @JvmOverloads constructor(
                     } else {
                         // 중앙을 기준으로 정렬
                         val parentWidth = (view.parent as View).width
+                        val parentHeight = (view.parent as View).height
                         val viewCenterX = view.x + view.width / 2
 
                         if (viewCenterX < parentWidth / 2) {
                             // 왼쪽에 붙이기
-                            view.animate().x(30f).setDuration(200L)
+                            view.animate().x(30f).setDuration(200L).start()
                         } else {
                             // 오른쪽에 붙이기
-                            view.animate().x(parentWidth - view.width.toFloat() - 30f).setDuration(200L)
+                            view.animate().x(parentWidth - view.width.toFloat() - 30f)
+                                .setDuration(200L).start()
+                        }
+
+                        // 상단과 하단의 기준점에 따라 정렬
+                        if (view.y < topThreshold) {
+                            // 상단에 붙이기
+                            view.animate().y(topThreshold).setDuration(200L).start()
+                        } else if (view.y + view.height > parentHeight - bottomThreshold) {
+                            // 하단에 붙이기
+                            view.animate().y(parentHeight - bottomThreshold).setDuration(200L)
+                                .start()
                         }
                     }
                 }
@@ -64,7 +80,6 @@ class DraggableConstraintLayout @JvmOverloads constructor(
 
     override fun performClick(): Boolean {
         super.performClick()
-        // 여기서 클릭 이벤트를 처리할 수 있습니다.
         return true
     }
 }

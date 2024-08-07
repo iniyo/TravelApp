@@ -9,8 +9,9 @@ facebookLogin = "17.0.0"
 firebaseUiAuth = "7.2.0"
 flexbox = "3.0.0"
 glide = "4.16.0"
+groupie = "2.10.1"
 hilt = "2.51.1"
-kotlin = "1.9.0"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -20,7 +21,7 @@ kotlinxCoroutinesCore = "1.7.1"
 loggingInterceptor = "4.12.0"
 lottie = "6.4.1"
 material = "1.12.0"
-activity = "1.9.0"
+activity = "1.9.1"
 constraintlayout = "2.1.4"
 navigationUiKtx = "2.7.7"
 oauth = "5.9.1"
@@ -29,6 +30,7 @@ retrofit = "2.11.0"
 rollingtext = "1.3.0"
 roomRuntime = "2.6.1"
 roomCompiler = "2.6.1"
+shimmer = "0.5.0"
 v2User = "2.12.1"
 view = "2.5.2"
 viewpager2 = "1.1.0"
@@ -40,8 +42,10 @@ firebaseAuth = "23.0.0"
 safeargs = "2.7.7"
 places = "3.5.0"
 googleDevtoolsKsp = "2.0.0-1.0.21"
-pagingCommonAndroid = "3.3.0"
+pagingCommonAndroid = "3.3.1"
 carUiLib = "2.6.0"
+firebaseCrashlyticsKtx = "19.0.3"
+firebaseCrashlytics = "3.0.2"
 
 [libraries]
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
@@ -61,6 +65,8 @@ facebook-login = { module = "com.facebook.android:facebook-login", version.ref =
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+groupie = { module = "com.github.lisawray.groupie:groupie", version.ref = "groupie" }
+groupie-viewbinding = { module = "com.github.lisawray.groupie:groupie-viewbinding", version.ref = "groupie" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -81,10 +87,12 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGso" }
 rollingtext = { module = "com.github.YvesCheung.RollingText:RollingText", version.ref = "rollingtext" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 view = { module = "com.kizitonwose.calendar:view", version.ref = "view" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 car-ui-lib = { group = "com.android.car.ui", name = "car-ui-lib", version.ref = "carUiLib" }
+firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 
 
 [plugins]
@@ -95,3 +103,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 android-navigation-safrargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "safeargs"}
 google-dev-ksp = { id = "com.google.devtools.ksp", version.ref = "googleDevtoolsKsp" }
 google-android-libraries-mapsplatform-secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "googleAndroidLibrariesMapsplatformSecretsGradlePlugin" }
+firebase_crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }

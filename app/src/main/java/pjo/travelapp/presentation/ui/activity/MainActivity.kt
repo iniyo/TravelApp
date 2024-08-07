@@ -2,16 +2,21 @@ package pjo.travelapp.presentation.ui.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -22,8 +27,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,6 +42,7 @@ import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.extension.copyTextToClipboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
@@ -52,9 +56,9 @@ open class MainActivity : AppCompatActivity() {
     private val planViewModel: PlanViewModel by viewModels()
     private val aiChatViewModel: AiChatViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+
     @Inject
     lateinit var navigator: AppNavigator
-    private var isPermissionRequestInProgress = false
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -65,15 +69,21 @@ open class MainActivity : AppCompatActivity() {
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
+    private val settingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        checkPermissionsAndRequestIfNeeded()
+    }
+
     private val requestMultiplePermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions.all { it.value }) {
-            // 모든 권한이 허가된 경우
-            setCheckLocationPermission()
+        val deniedPermissions = permissions.filterValues { !it }
+        if (deniedPermissions.isNotEmpty()) {
+            showPermissionDeniedDialog()
         } else {
-            // 권한이 하나라도 허가되지 않은 경우
-            finish() // 앱 종료
+            setCheckLocationPermission()
+            setViewModel()
         }
     }
 
@@ -83,7 +93,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        // splash 및 화면 초기화
         startSplash()
         initContentView()
         setNavigationOnClick()
@@ -91,11 +100,10 @@ open class MainActivity : AppCompatActivity() {
         checkPermissionsAndRequestIfNeeded()
         observeDestinationChanges()
         setupOnBackPressedDispatcher()
-        setView()
+        setBottomSheet()
         setAdapter()
-        setViewModel()
         setViewModelListener()
-        setCLickListener()
+        setClickListener()
     }
 
     private fun startSplash() {
@@ -107,11 +115,8 @@ open class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
     }
 
-    private fun setCLickListener() {
+    private fun setClickListener() {
         binding.clAnimator.setOnClickListener {
-            /*Log.d("TAG", "setCLickListener: ")
-            val intent = Intent(this@MainActivity, TransparentActivity::class.java)
-            startActivity(intent)*/
             toggleBottomSheet()
         }
 
@@ -123,10 +128,8 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    // backstack control
     private fun handleBackStack() {
         val fragmentManager = supportFragmentManager
-        // back stack 2개 초과시 pop
         if (fragmentManager.backStackEntryCount > 1) {
             fragmentManager.popBackStack(
                 fragmentManager.getBackStackEntryAt(0).id,
@@ -135,7 +138,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    // chip nav bar 이동
     private fun setNavigationOnClick() {
         binding.apply {
             cnbItem.setOnItemSelectedListener { id ->
@@ -149,15 +151,16 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setView() {
+    private fun setBottomSheet() {
         val bottomSheet = binding.clBottomSheetContainer
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-
+        bottomSheetBehavior.isFitToContents = true
+        bottomSheetBehavior.halfExpandedRatio = 0.6f
 
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
-                (resources.displayMetrics.heightPixels * 0.7).toInt() // 최대 높이 설정
+                (resources.displayMetrics.heightPixels * 0.7).toInt()
             if (bottomSheet.height > maxHeight) {
                 val params = bottomSheet.layoutParams
                 params.height = maxHeight
@@ -174,18 +177,20 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setAdapter() {
+        binding.adapter = AiChatAdapter {
+            baseContext.copyTextToClipboard(it.message)
+        }
+        val layoutManager = LinearLayoutManager(this@MainActivity)
+        layoutManager.stackFromEnd = true
+        binding.rvAiChat.layoutManager = layoutManager
+    }
+
     private fun setViewModel() {
         mainViewModel.fetchData()
         mainViewModel.setDates()
         mainViewModel.searchHotels("tokyo")
         planViewModel.fetchUserSchedules()
-    }
-
-    private fun setAdapter() {
-        binding.adapter = AiChatAdapter()
-        val layoutManager = LinearLayoutManager(this@MainActivity)
-        layoutManager.stackFromEnd = true
-        binding.rvAiChat.layoutManager = layoutManager
     }
 
     private fun setViewModelListener() {
@@ -194,17 +199,27 @@ open class MainActivity : AppCompatActivity() {
                 aiChatViewModel.response.collectLatest { state ->
                     when (state) {
                         is LatestUiState.Success -> {
-                            Log.d("TAG", "setViewModelListener: Success ")
+                            Log.d("TAG", "setViewModelListener: Success")
                             binding.adapter?.addMessage(state.data)
+                            binding.adapter?.isLoading = false
+                            binding.etSubmitText.isEnabled = true
+                            binding.btnSend.isEnabled = true
                             binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
                         }
+
                         is LatestUiState.Error -> {
-                            Snackbar.make(binding.root, state.exception.message ?: "Error occurred", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(
+                                binding.root,
+                                state.exception.message ?: "Error occurred",
+                                Snackbar.LENGTH_LONG
+                            ).show()
                         }
+
                         is LatestUiState.Loading -> {
-                            // 로딩 상태를 어댑터에 전달
-                            Log.d("TAG", "setViewModelListener: loading ")
-                            binding.adapter?.setLoading(true)
+                            Log.d("TAG", "setViewModelListener: Loading")
+                            binding.adapter?.isLoading = true
+                            binding.etSubmitText.isEnabled = false
+                            binding.btnSend.isEnabled = false
                         }
                     }
                 }
@@ -212,8 +227,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    // 현재 프래그먼트 계산
     private fun observeDestinationChanges() {
         navigator.destinationChangedListener { destinationId ->
             handleBackStack()
@@ -233,7 +246,7 @@ open class MainActivity : AppCompatActivity() {
                     lavFloatingAiButton.visibility = View.VISIBLE
                     cnbItem.visibility = View.VISIBLE
                 }
-                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment) {
+                if (destinationId == R.id.calendarFragment || destinationId == R.id.mapsFragment || destinationId == R.id.signFragment || destinationId == R.id.voiceRecognitionFragment || destinationId == R.id.placeSelectFragment || destinationId == R.id.planFragment || destinationId == R.id.placeDetailFragment) {
                     cnbItem.visibility = View.GONE
                 } else {
                     cnbItem.visibility = View.VISIBLE
@@ -242,7 +255,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 뒤로가기 버튼
     private fun setupOnBackPressedDispatcher() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -250,7 +262,7 @@ open class MainActivity : AppCompatActivity() {
                 if (navController.currentDestination?.id == R.id.homeFragment) {
                     if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                    }else {
+                    } else {
                         if (backPressedOnce) {
                             finish()
                         } else {
@@ -260,7 +272,7 @@ open class MainActivity : AppCompatActivity() {
                                 getString(R.string.end_application),
                                 Snackbar.LENGTH_SHORT
                             ).show()
-                            handler.postDelayed({ backPressedOnce = false }, 2000) // 2초 안에 클릭 시 종료
+                            handler.postDelayed({ backPressedOnce = false }, 2000)
                         }
                     }
                 } else {
@@ -274,12 +286,41 @@ open class MainActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
+    private fun showPermissionDeniedDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(getString(R.string.need_permission))
+            .setMessage(getString(R.string.permission_checked))
+            .setPositiveButton(getString(R.string.go_to_setting)) { dialog, _ ->
+                dialog.dismiss()
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", packageName, null)
+                }
+                settingsLauncher.launch(intent)
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }
+            .setOnCancelListener {
+                finish()
+            }
+            .create()
+        dialog.show()
+    }
+
     private fun checkPermissionsAndRequestIfNeeded() {
         val missingPermissions = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
         if (missingPermissions.isNotEmpty()) {
-            requestMultiplePermissionsLauncher.launch(missingPermissions.toTypedArray())
+            val shouldShowRationale = missingPermissions.any {
+                ActivityCompat.shouldShowRequestPermissionRationale(this, it)
+            }
+            if (shouldShowRationale) {
+                requestMultiplePermissionsLauncher.launch(missingPermissions.toTypedArray())
+            } else {
+                showPermissionDeniedDialog()
+            }
         } else {
             setCheckLocationPermission()
         }
@@ -303,60 +344,8 @@ open class MainActivity : AppCompatActivity() {
                     mainViewModel.fetchCurrentLocation(currentLatLng)
                 }
             }
-            // 위치 요청 설정, PRIORITY_HIGH_ACCURACY - 정확도 상향
-            /* val locationRequest =
-                 LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).apply {
-                     setMinUpdateIntervalMillis(5000)
-                     setMaxUpdateDelayMillis(20000)
-                 }.build()*/
-
-            // 위치 콜백 설정
-            val locationCallback = object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    locationResult.lastLocation?.let { location ->
-                        val currentLatLng = LatLng(location.latitude, location.longitude)
-                        Log.d("TAG", "Location updated: $currentLatLng")
-                    }
-                }
-            }
-
-            // 위치 업데이트 요청
-            /*  fusedLocationClient.requestLocationUpdates(
-                  locationRequest,
-                  locationCallback,
-                  Looper.getMainLooper()
-              )*/
-        }
-    }
-
-    // 권한 요청 취소
-    private fun cancelPermissionRequest() {
-        if (isPermissionRequestInProgress) {
-            isPermissionRequestInProgress = false
-        }
-    }
-
-    // 앱이 백그라운드로 갈 때 호출
-    override fun onPause() {
-        super.onPause()
-        if (!isPermissionRequestInProgress) {
-            cancelPermissionRequest()
-        }
-    }
-
-    // 앱이 완전히 종료될 때 호출
-    override fun onStop() {
-        super.onStop()
-        if (!isPermissionRequestInProgress) {
-            cancelPermissionRequest()
-        }
-    }
-
-    // 포그라운드로 돌아올 때 호출
-    override fun onResume() {
-        super.onResume()
-        if (!isPermissionRequestInProgress) {
-            checkPermissionsAndRequestIfNeeded()
         }
     }
 }
+
+

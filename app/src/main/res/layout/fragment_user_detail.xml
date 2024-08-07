@@ -5,7 +5,7 @@
     <data>
         <variable
             name="adapter"
-            type="pjo.travelapp.presentation.adapter.UserScehduleAdapter" />
+            type="pjo.travelapp.presentation.adapter.UserScheduleAdapter" />
     </data>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

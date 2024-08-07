@@ -28,7 +28,7 @@
             android:id="@+id/action_homeFragment_to_recycleItemFragment"
             app:destination="@id/recycleItemFragment" />
         <action
-            android:id="@+id/action_homeFragment_to_scehduleFragment"
+            android:id="@+id/action_homeFragment_to_scheduleFragment"
             app:destination="@id/scehduleFragment" />
         <action
             android:id="@+id/action_homeFragment_to_placeSelectFragment"
@@ -89,7 +89,7 @@
     </fragment>
     <fragment
         android:id="@+id/scehduleFragment"
-        android:name="pjo.travelapp.presentation.ui.fragment.ScehduleFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.ScheduleFragment"
         android:label="fragment_scehdule"
         tools:layout="@layout/fragment_scehdule">
         <action
@@ -143,6 +143,11 @@
         <action
             android:id="@+id/action_planFragment_to_scehduleFragment"
             app:destination="@id/scehduleFragment" />
+        <action
+            android:id="@+id/action_planFragment_to_placeDetailFragment"
+            app:destination="@id/placeDetailFragment"
+            app:enterAnim="@anim/anim_slide_on_right"
+            app:popExitAnim="@anim/anim_slide_on_left" />
     </fragment>
 
 </navigation>

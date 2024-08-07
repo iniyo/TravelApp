@@ -1,27 +1,36 @@
 package pjo.travelapp.presentation.ui.viewmodel
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.xwray.groupie.ExpandableGroup
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import pjo.travelapp.data.datasource.UserScheduleDao
+import kotlinx.coroutines.withContext
+import pjo.travelapp.data.entity.ParentGroupData
+import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.TravelDestinationAbroad
 import pjo.travelapp.data.entity.TravelDestinationDomestic
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.UserNote
+import pjo.travelapp.data.entity.UserPlan
+import pjo.travelapp.data.repo.UserRepository
+import pjo.travelapp.presentation.util.BitmapUtil
+import pjo.travelapp.presentation.util.makeItemId
 import javax.inject.Inject
 
 @HiltViewModel
 class PlanViewModel @Inject constructor(
-    private val userScheduleDao: UserScheduleDao
+    private val userRepo: UserRepository
 ) : ViewModel() {
 
-    private var _tripPeriod = MutableStateFlow<Int>(0)
-    val tripPeriod: StateFlow<Int> get() = _tripPeriod
+    private var _tripPeriod = MutableStateFlow(0)
 
-    private var _selectedCalendarDatePeriod = MutableStateFlow<String>("")
+    private var _selectedCalendarDatePeriod = MutableStateFlow("")
     val selectedCalendarDatePeriod: StateFlow<String> get() = _selectedCalendarDatePeriod
 
     private val _domesticPlace = MutableStateFlow<TravelDestinationDomestic?>(null)
@@ -31,29 +40,97 @@ class PlanViewModel @Inject constructor(
     private var _title = MutableStateFlow(String())
     val title: StateFlow<String> get() = _title
 
-    private val _planAdapterList = MutableStateFlow<List<Pair<Int, Int>>>(emptyList())
-    val planAdapterList: StateFlow<List<Pair<Int, Int>>> get() = _planAdapterList
+    private val _planAdapterList = MutableStateFlow<ParentGroups?>(null)
+    val planAdapterList: StateFlow<ParentGroups?> get() = _planAdapterList
 
-    private val _userScheduleList = MutableStateFlow<List<UserSchduleEntity>>(emptyList())
-    val userScheduleList: StateFlow<List<UserSchduleEntity>> get() = _userScheduleList
+    private val _userScheduleList = MutableStateFlow<List<UserPlan>>(emptyList())
+    val userScheduleList: StateFlow<List<UserPlan>> get() = _userScheduleList
 
-    private val _selectedPlace = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
-    val selectedPlace: StateFlow<List<Pair<String, Int>>> get() = _selectedPlace
+    private val _selectedPlace = MutableStateFlow<List<Pair<String, Bitmap>>>(emptyList())
+    val selectedPlace: StateFlow<List<Pair<String, Bitmap>>> get() = _selectedPlace
+
+    /*private val _placeDetailList = MutableStateFlow<List<PlaceDetail>?>(null)*/
+
+    private val _parentGroups = MutableStateFlow<List<ExpandableGroup>>(emptyList())
+    val parentGroups: StateFlow<List<ExpandableGroup>> = _parentGroups
+
+    private val _userPlan = MutableStateFlow<UserPlan?>(null)
+    val userPlan: StateFlow<UserPlan?> get() = _userPlan
+
+    /*private val _toggleBottomSheetEvent = MutableSharedFlow<Int>()
+    val toggleBottomSheetEvent = _toggleBottomSheetEvent.asSharedFlow()
+
+    private val _showDialogEvent = MutableSharedFlow<Unit>()
+    val showDialogEvent = _showDialogEvent.asSharedFlow()*/
+
+    private var _placeAndPhotoList = MutableStateFlow<List<Pair<String, String>>?>(null)
+    val placeAndPhotoList: StateFlow<List<Pair<String, String>>?> get() = _placeAndPhotoList
+
+    private val _tempUserNotes = MutableStateFlow<Map<Int, UserNote>>(emptyMap())
+    val tempUserNotes: StateFlow<Map<Int, UserNote>> get() = _tempUserNotes
+
+    fun updateTempUserNote(note: UserNote) {
+        _tempUserNotes.value =
+            _tempUserNotes.value.toMutableMap().apply { put(note.position, note) }
+    }
+
+    fun getTempUserNote(position: Int): UserNote? {
+        return _tempUserNotes.value[position]
+    }
+
+    fun clearTempUserNote() {
+        _tempUserNotes.value = emptyMap()
+    }
 
     init {
         fetchDomesticPlace()
         fetchAbroadPlace()
     }
 
-    fun fetchUserSchedule(userEntity: UserSchduleEntity) {
-        viewModelScope.launch {
-            userScheduleDao.insertSchedule(userEntity)
+    /**
+     * public function
+     */
 
-            fetchTripPeriod(userEntity.period)
-            fetchSelectedCalendarDatePeriod(userEntity.datePeriod)
-            fetchTitle(userEntity.title)
-            fetchUserAdapter(userEntity.planListDate)
+    fun saveBitmaps(context: Context) {
+        viewModelScope.launch {
+            val bitmapUtil = BitmapUtil(context)
+            val placeAndPaths = withContext(Dispatchers.IO) {
+                selectedPlace.value.map { (place, bitmap) ->
+                    val path = bitmapUtil.saveBitmap(
+                        bitmap,
+                        "${System.currentTimeMillis()}_${place.hashCode()}.png"
+                    )
+                    place to path
+                }
+            }
+            _placeAndPhotoList.value = placeAndPaths
         }
+    }
+
+    fun fetchParentGroups(parentGroups: List<ExpandableGroup>) {
+        Log.d("TAG", "fetchParentGroups: ")
+        _parentGroups.value = parentGroups
+    }
+
+    fun fetchUserSchedule(userPlan: UserPlan) {
+        viewModelScope.launch {
+            userRepo.insertUserPlan(userPlan)
+            _userPlan.value = userPlan
+            fetchTripPeriod(userPlan.period)
+            fetchSelectedCalendarDatePeriod(userPlan.datePeriod)
+            fetchTitle(userPlan.title)
+        }
+    }
+
+    fun fetchUserPlan() {
+        _userPlan.value = UserPlan(
+            id = makeItemId(),
+            title = title.value,
+            period = _tripPeriod.value,
+            datePeriod = _selectedCalendarDatePeriod.value,
+            placeAndPhotoPaths = placeAndPhotoList.value!!,
+            parentGroups = planAdapterList.value!!
+        )
     }
 
     fun clearCurrentUserEntity() {
@@ -73,45 +150,155 @@ class PlanViewModel @Inject constructor(
         _selectedCalendarDatePeriod.value = date.toString()
     }
 
-    fun fetchTitle(title: String?) {
-        if (title != null) {
-            _title.value = title
-        }
-    }
-
     fun fetchUserSchedules() {
         viewModelScope.launch {
-            _userScheduleList.value = userScheduleDao.getAllSchedules()
+            _userScheduleList.value = userRepo.getAllUserPlans()
         }
     }
 
     fun fetchUserAdapter(selectedMonthsAndDays: List<Pair<Int, Int>>?) {
         if (!selectedMonthsAndDays.isNullOrEmpty()) {
-            _planAdapterList.value = selectedMonthsAndDays
-        }
-    }
+            val parentGroups = ParentGroups(
+                parentGroupDataList = selectedMonthsAndDays.map {
+                    ParentGroupData(
+                        parentItem = it,
+                        userNote = null,
+                        childItems = null
+                    )
+                }
+            )
 
-    fun fetchDomesticPlace() {
-        _domesticPlace.value = TravelDestinationDomestic()
+            _planAdapterList.value = parentGroups
+        }
     }
 
     fun fetchAbroadPlace() {
         _abroadPlace.value = TravelDestinationAbroad()
     }
 
-    fun updateSelectedPlace(placeName: String, imageResId: Int) {
-        Log.d("TAG", "updateSelectedPlace: $placeName, $imageResId")
+    /*fun fetchSelectedPlace(place: PlaceDetail) {
+        val currnetList = _placeDetailList.value?.toMutableList()
+        currnetList?.add(place)
+        _placeDetailList.value = currnetList
+    }*/
+
+    fun updateSelectedPlace(placeName: String, bitmap: Bitmap) {
+        Log.d("TAG", "updateSelectedPlace: $placeName, $bitmap")
         val currentList = _selectedPlace.value.toMutableList()
         if (currentList.size > 3) {
             currentList.removeAt(1)
         }
-        currentList.add(Pair(placeName, imageResId))
+        currentList.add(Pair(placeName, bitmap))
         _selectedPlace.value = currentList
         formatTitleList(currentList, _tripPeriod.value)
     }
 
+    fun deletePlace(removeItem: Pair<String, Bitmap>) {
+        val currentList = _selectedPlace.value.toMutableList()
+        if (currentList.contains(removeItem)) {
+            currentList.remove(removeItem)
+            _selectedPlace.value = currentList
+            formatTitleList(currentList, _tripPeriod.value)
+        }
+    }
+
+    fun deleteUserSchedule(userPlan: UserPlan) {
+        viewModelScope.launch {
+            userRepo.deleteUserPlan(userPlan)
+            _userScheduleList.value = userRepo.getAllUserPlans()
+        }
+    }
+
+    /*fun deleteAllUserSchedules() {
+        viewModelScope.launch {
+            userScheduleDao.deleteAllSchedules()
+            _userScheduleList.value = emptyList()
+        }
+    }*/
+
+    /**
+     * public function end
+     */
+
+    /**
+     * private fun
+     */
+    private fun fetchTitle(title: String?) {
+        if (title != null) {
+            _title.value = title
+        }
+    }
+
+    private fun fetchDomesticPlace() {
+        _domesticPlace.value = TravelDestinationDomestic()
+    }
+
+    // 중복된 아이템 여부를 확인하는 함수
+    private suspend fun isItemAlreadyAdded(itemId: String): Boolean {
+        return userRepo.getUserPlanById(itemId) != null
+    }
+
+    suspend fun saveOrUpdateUserPlan(userPlan: UserPlan): Boolean {
+        return if (isItemAlreadyAdded(userPlan.id)) {
+            userRepo.updateUserPlan(userPlan)
+            true // 업데이트 됨
+        } else {
+            userRepo.insertUserPlan(userPlan)
+            false // 새로 추가됨
+        }
+    }
+
+    /*private fun onPlaceClick(position: Int) {
+        viewModelScope.launch {
+            _toggleBottomSheetEvent.emit(position)
+        }
+    }
+
+    private fun onDialogClick() {
+        viewModelScope.launch {
+            _showDialogEvent.emit(Unit)
+        }
+    }*/
+
+    /*private fun fetchUserPlanList() {
+        viewModelScope.launch {
+            planAdapterList.collect { planListDate ->
+                // 빈 리스트가 아닌지 확인
+                if (planListDate.isNotEmpty()) {
+                    // parentGroups 초기화
+                    val newParentGroups = mutableListOf<ExpandableGroup>()
+
+                    // 각 날짜에 대해 ParentPlanItem 생성 및 ExpandableGroup 추가
+                    planListDate.mapIndexed { index, date ->
+                        val parentItem = ParentPlanItem(
+                            item = date,
+                            parentIndex = index,
+                            noteClickListener = { onDialogClick() },
+                            placeClickListener = { position ->
+                                Log.d("TAG", "dddd: $position")
+                                onPlaceClick(position)
+                            }
+                        )
+                        val expandableGroup = ExpandableGroup(parentItem)
+                        newParentGroups.add(expandableGroup)
+                    }
+                    // update
+                    _parentGroups.value = newParentGroups
+                }
+            }
+        }
+    }*/
+
+    private fun deletePlaceList() {
+        val currentList = _selectedPlace.value.toMutableList()
+        currentList.clear()
+        _selectedPlace.value = currentList
+        _tripPeriod.value = 0
+        formatTitleList()
+    }
+
     private fun formatTitleList(
-        placeList: List<Pair<String, Int>> = _selectedPlace.value,
+        placeList: List<Pair<String, Bitmap>> = _selectedPlace.value,
         period: Int = _tripPeriod.value
     ) {
         Log.d("TAG", "formatTitleList: $placeList, $period")
@@ -124,35 +311,8 @@ class PlanViewModel @Inject constructor(
             _title.value = ""
         }
     }
+    /**
+     * private fun end
+     */
 
-    fun deletePlace(removeItem: Pair<String, Int>) {
-        val currentList = _selectedPlace.value.toMutableList()
-        if (currentList.contains(removeItem)) {
-            currentList.remove(removeItem)
-            _selectedPlace.value = currentList
-            formatTitleList(currentList, _tripPeriod.value)
-        }
-    }
-
-    fun deletePlaceList() {
-        val currentList = _selectedPlace.value.toMutableList()
-        currentList.clear()
-        _selectedPlace.value = currentList
-        _tripPeriod.value = 0
-        formatTitleList()
-    }
-
-    fun deleteUserSchedule(userSchduleEntity: UserSchduleEntity) {
-        viewModelScope.launch {
-            userScheduleDao.deleteSchedule(userSchduleEntity)
-            _userScheduleList.value = userScheduleDao.getAllSchedules()
-        }
-    }
-
-    fun deleteAllUserSchedules() {
-        viewModelScope.launch {
-            userScheduleDao.deleteAllSchedules()
-            _userScheduleList.value = emptyList()
-        }
-    }
 }

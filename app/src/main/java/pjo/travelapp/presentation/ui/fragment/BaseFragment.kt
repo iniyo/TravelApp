@@ -95,5 +95,6 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
             }
         }
     }
+
 }
 

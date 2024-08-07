@@ -2,7 +2,6 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
@@ -18,6 +17,7 @@ import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
@@ -28,12 +28,12 @@ import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isInDa
 import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isOutDateBetweenSelection
 import pjo.travelapp.presentation.util.calendar.DateSelection
 import pjo.travelapp.presentation.util.calendar.dateRangeDisplayText
-import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
-import pjo.travelapp.presentation.util.extension.displayText
 import pjo.travelapp.presentation.util.calendar.formatDaysBetween
-import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.calendar.headerDateFormatDisplayText
 import pjo.travelapp.presentation.util.calendar.selectedMonthsAndDays
+import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
+import pjo.travelapp.presentation.util.extension.displayText
+import pjo.travelapp.presentation.util.extension.getDrawableCompat
 import pjo.travelapp.presentation.util.extension.makeInVisible
 import pjo.travelapp.presentation.util.extension.makeVisible
 import pjo.travelapp.presentation.util.extension.setTextColorRes
@@ -51,6 +51,7 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     private val viewModel: PlanViewModel by activityViewModels()
     private val today = LocalDate.now()
     private var selection = DateSelection() // data class
+    private lateinit var placeAndPhotoList: List<Pair<String, String>>
 
     override fun initView() {
         super.initView()
@@ -89,9 +90,13 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
-               viewModel.planAdapterList.collectLatest {
-
-               }
+                launch {
+                    viewModel.placeAndPhotoList.collectLatest {
+                        it?.let {
+                            placeAndPhotoList = it
+                        }
+                    }
+                }
             }
         }
     }
@@ -120,14 +125,25 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
             }
         }
 
-        if(selection.daysBetween != null){
+        if (selection.daysBetween != null) {
             val period = formatDaysBetween(selection.daysBetween)
             binding.tvTourDate.text = period
             viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
-            viewModel.fetchSelectedCalendarDatePeriod(dateRangeDisplayText(selection.startDate, selection.endDate))
+            viewModel.fetchSelectedCalendarDatePeriod(
+                dateRangeDisplayText(
+                    selection.startDate,
+                    selection.endDate
+                )
+            )
+            viewModel.fetchUserAdapter(
+                selectedMonthsAndDays(
+                    selection.startDate,
+                    selection.endDate
+                )
+            )
 
-            viewModel.fetchUserAdapter( selectedMonthsAndDays(selection.startDate, selection.endDate))
-        }else {
+            viewModel.fetchUserPlan()
+        } else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }
 

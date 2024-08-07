@@ -4,62 +4,159 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.slidingpanelayout.widget.SlidingPaneLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.xwray.groupie.ExpandableGroup
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.GroupieViewHolder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.ChildItemWithPosition
+import pjo.travelapp.data.entity.ParentGroupData
+import pjo.travelapp.data.entity.ParentGroups
+import pjo.travelapp.data.entity.PlaceResult
+import pjo.travelapp.data.entity.UserNote
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.FragmentPlanBinding
-import pjo.travelapp.presentation.adapter.PlanAdapter
+import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.adapter.ChildPlanItem
+import pjo.travelapp.presentation.adapter.ParentPlanItem
+import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
+import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.FlexboxItemManager
-import pjo.travelapp.presentation.util.extension.getExternalFilePath
-import pjo.travelapp.presentation.util.extension.saveImageIntoFileFromUri
+import pjo.travelapp.presentation.util.RecyclerViewAnimation
+import pjo.travelapp.presentation.util.SlidingPaneListener
+import pjo.travelapp.presentation.util.dialog.NoteDialog
+import pjo.travelapp.presentation.util.getExternalFilePath
+import pjo.travelapp.presentation.util.hideKeyboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
+import pjo.travelapp.presentation.util.saveImageIntoFileFromUri
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PlanFragment : BaseFragment<FragmentPlanBinding>() {
+class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
 
     @Inject
-    lateinit var navigator: AppNavigator
+    lateinit var appNavigator: AppNavigator
     private val planViewModel: PlanViewModel by activityViewModels()
+    private val mapsViewModel: MapsViewModel by viewModels()
+    private val detailViewModel: DetailViewModel by activityViewModels()
     private var period: Int = 0
-    private lateinit var placeList: List<Pair<String, Int>>
-    private lateinit var userName: String
-    private lateinit var userId: String
-    private lateinit var planListDate: List<Pair<Int, Int>>
+    lateinit var searchBottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var placeAndPhotoList: List<Pair<String, String>>
+    private lateinit var placeDetailList: List<PlaceResult>
+    private lateinit var id: String
     private lateinit var datePeriod: String
     private lateinit var title: String
+    private val groupAdapter = GroupAdapter<GroupieViewHolder>()
+    private var parentGroups = mutableListOf<ExpandableGroup>()
+    private var selectedPosition: Int = -1
 
     override fun initView() {
+        bind {
+            viewmodel = mapsViewModel
+            navigator = appNavigator
+            rvPlan.apply {
+                itemAnimator = RecyclerViewAnimation()
+            }
+            adapter = groupAdapter
+        }
         setupFlexboxItems()
-        setupAdapter()
-        userName = "test"
-        userId = "testId"
+        setBottomSheet()
+        setAdapter()
+        backPressed()
     }
 
     override fun initListener() {
         bind {
+            splContainer.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED
+            splContainer.addPanelSlideListener(object : SlidingPaneLayout.PanelSlideListener {
+                override fun onPanelSlide(panel: View, slideOffset: Float) {
+                    Log.d("TAG", "onPanelOpened: slide ")
+                }
+
+                override fun onPanelOpened(panel: View) {
+                    Log.d("TAG", "onPanelOpened: opened ")
+                    val fragment = childFragmentManager.findFragmentById(R.id.place_detail_fragment)
+                    if (fragment == null) {
+                        childFragmentManager.commit {
+                            add(R.id.place_detail_fragment, PlaceDetailFragment())
+                        }
+                    } else {
+                        childFragmentManager.commit {
+                            show(fragment)
+                        }
+                    }
+                    panel.isEnabled = true
+                }
+
+                override fun onPanelClosed(panel: View) {
+                    // 패널이 닫혔을 때 동작
+                    Log.d("TAG", "onPanelClosed: Panel closed")
+                    panel.isEnabled = false
+                }
+            })
+
             btnAddedSchedule.setOnClickListener {
-                val newSchedule = UserSchduleEntity(
-                    userId = userId,
-                    userName = userName,
-                    title = title,
-                    place = placeList,
-                    period = period,
-                    planListDate = planListDate,
-                    datePeriod = datePeriod
-                )
-                planViewModel.fetchUserSchedule(newSchedule)
-                navigator.navigateTo(Fragments.SCHEDULE_PAGE)
+                lifecycleScope.launch {
+                    val parentGroupDataList = parentGroups.mapIndexed { index, parentGroup ->
+                        val parentItem = (parentGroup.getGroup(0) as ParentPlanItem).item
+                        val userNote = (parentGroup.getGroup(0) as ParentPlanItem).note
+                        val childItems = (1 until parentGroup.groupCount).map { childIndex ->
+                            val placeResult =
+                                (parentGroup.getGroup(childIndex) as ChildPlanItem).item
+                            ChildItemWithPosition(placeResult, index)
+                        }
+                        ParentGroupData(parentItem, userNote, childItems)
+                    }
+
+                    val newPlan = UserPlan(
+                        id = id,
+                        title = title,
+                        period = period,
+                        placeAndPhotoPaths = placeAndPhotoList,
+                        datePeriod = datePeriod,
+                        parentGroups = ParentGroups(parentGroupDataList)
+                    )
+                    Log.d("TAG", "저장: $newPlan")
+
+                    val isUpdated = planViewModel.saveOrUpdateUserPlan(newPlan)
+                    if (isUpdated) {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.update_schedule), Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.new_schedule), Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+                    appNavigator.navigateTo(Fragments.SCHEDULE_PAGE)
+                }
             }
 
-            ivBack.setOnClickListener {
-                navigator.navigateUp()
+            searchBottomSheet.ivBack.setOnClickListener {
+                if (searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                } else {
+                    appNavigator.navigateUp()
+                }
             }
         }
     }
@@ -68,38 +165,174 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         bind {
             launchWhenStarted {
                 launch {
-                    planViewModel.selectedCalendarDatePeriod.collectLatest {
-                        datePeriod = it
-                        binding.tvTripDate.text = it
+                    planViewModel.userPlan.collectLatest { userPlan ->
+                        Log.d("TAG", "initViewModel: 이거임 ")
+                        if (userPlan != null) {
+                            title = userPlan.title
+                            binding.tvTripTitle.text = userPlan.title
+                            datePeriod = userPlan.datePeriod
+                            binding.tvTripDate.text = userPlan.datePeriod
+                            id = userPlan.id
+                            placeAndPhotoList = userPlan.placeAndPhotoPaths
+                            Log.d("TAG", "parentGroup: ${userPlan.title} ")
+                            Log.d(
+                                "TAG",
+                                "parentGroup: ${userPlan.parentGroups.parentGroupDataList.size} "
+                            )
+
+                            val newParentGroups =
+                                userPlan.parentGroups.parentGroupDataList.mapIndexed { index, parentGroupData ->
+                                    val parentPlanItem = ParentPlanItem(
+                                        item = parentGroupData.parentItem,
+                                        note = parentGroupData.userNote,
+                                        parentIndex = index,
+                                        noteClickListener = {
+                                            val tempNote = planViewModel.getTempUserNote(index)
+                                                ?: parentGroupData.userNote ?: UserNote("", index)
+                                            showNoteDialog(tempNote.text) { newNote ->
+                                                (parentGroups[index].getGroup(0) as ParentPlanItem).note =
+                                                    UserNote(
+                                                        text = newNote,
+                                                        position = index
+                                                    )
+                                                planViewModel.updateTempUserNote(
+                                                    (parentGroups[index].getGroup(
+                                                        0
+                                                    ) as ParentPlanItem).note!!
+                                                )
+                                            }
+                                        },
+                                        placeClickListener = { position ->
+                                            toggleBottomSheet(searchBottomSheetBehavior)
+                                            selectedPosition = position
+                                        }
+                                    )
+                                    val expandableGroup = ExpandableGroup(parentPlanItem)
+                                    parentGroupData.childItems?.forEach { childItem ->
+                                        expandableGroup.add(
+                                            ChildPlanItem(
+                                                item = childItem.placeResult,
+                                                itemClickListener = { placeResult ->
+                                                    detailViewModel.fetchPlaceResult(placeResult)
+                                                    appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
+                                                },
+                                                parentGroup = expandableGroup,
+                                                adapter = groupAdapter
+                                            )
+                                        )
+                                    }
+                                    expandableGroup
+                                }
+                            Log.d("TAG", "parentGroup1: ${newParentGroups.size} ")
+
+                            planViewModel.fetchParentGroups(newParentGroups)
+                        }
                     }
                 }
+
                 launch {
-                    planViewModel.title.collectLatest {
-                        title = it
-                        binding.tvTripTitle.text = it
+                    planViewModel.parentGroups.collectLatest { group ->
+                        group.map {
+                            it.onToggleExpanded()
+                        }
+                        parentGroups.clear()
+                        parentGroups.addAll(group)
+                        Log.d("TAG", "initViewModel: ${group.size}")
+                        Log.d("TAG", "initViewModel: ${parentGroups.size}")
+                        groupAdapter.update(parentGroups)
                     }
                 }
+
                 launch {
-                    planViewModel.selectedPlace.collectLatest {
-                        placeList = it
-                    }
-                }
-                launch {
-                    planViewModel.planAdapterList.collectLatest {
-                        planListDate = it
-                        Log.d("TAG", "dd: ")
-                        adapter?.submitList(it)
+                    mapsViewModel.placeDetailsList.collectLatest { placeDetails ->
+                        Log.d("TAG", "placeDetailsList: ")
+                        placeDetailList = placeDetails
+                        autoAdapter?.submitList(placeDetails.toMutableList())
                     }
                 }
             }
         }
     }
 
-    private fun setupAdapter() {
+    override fun closePane() {
+        if (binding.splContainer.isOpen) {
+            binding.splContainer.closePane()
+        }
+    }
+
+    private fun setAdapter() {
         bind {
-            adapter = PlanAdapter {
-                // 아이템 클릭 이벤트
+            autoAdapter = AutoCompleteItemAdapter { selectedItem ->
+                hideKeyboard(clPlanMainContainer)
+
+                if (selectedPosition != -1 && selectedPosition < parentGroups.size) {
+                    parentGroups[selectedPosition].add(
+                        ChildPlanItem(
+                            item = selectedItem.first,
+                            itemClickListener = { placeResult ->
+                                detailViewModel.fetchPlaceResult(placeResult)
+                                toggleLayout()
+                            },
+                            parentGroup = parentGroups[selectedPosition],
+                            adapter = groupAdapter
+
+
+                        )
+                    )
+                    Log.d("TAG", "setupAdapter: ${parentGroups[selectedPosition]}")
+                    if (!parentGroups[selectedPosition].isExpanded) {
+                        parentGroups[selectedPosition].onToggleExpanded()
+                    }
+                }
+                planViewModel.fetchParentGroups(parentGroups)
+                toggleBottomSheet(searchBottomSheetBehavior)
             }
+        }
+    }
+
+    private fun toggleLayout() {
+        bind {
+            if (splContainer.isOpen) {
+                splContainer.closePane()
+            } else {
+                splContainer.openPane()
+            }
+        }
+    }
+
+    private fun setBottomSheet() {
+        bind {
+            val bottomSheet = searchBottomSheet.clMainContainer
+            searchBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+            searchBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+            searchBottomSheetBehavior.addBottomSheetCallback(object :
+                BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    if (searchBottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                        hideKeyboard(clPlanMainContainer)
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    // 슬라이드 중
+                }
+            })
+        }
+    }
+
+    private fun toggleBottomSheet(currentBehavior: BottomSheetBehavior<View>) {
+        bind {
+            if (currentBehavior.state == BottomSheetBehavior.STATE_HIDDEN) currentBehavior.state =
+                BottomSheetBehavior.STATE_EXPANDED
+            else currentBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    private fun showNoteDialog(initialNote: String?, onSave: (String) -> Unit) {
+        val noteDialog = NoteDialog(requireContext())
+        noteDialog.show(initialNote) {
+            onSave(it)
+            Toast.makeText(requireContext(), "노트가 저장되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -111,7 +344,7 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             "tv_map",
             R.drawable.ic_map,
             R.string.map
-        ) { navigator.navigateTo(Fragments.MAPS_PAGE) }
+        ) { appNavigator.navigateTo(Fragments.MAPS_PAGE) }
 
         itemManager.addItem(
             "ll_fbl_item_2",
@@ -120,7 +353,6 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             R.drawable.ic_share,
             R.string.share
         ) { v ->
-            // 현재 화면 저장
             val rtView = v.rootView
             val bitmap = Bitmap.createBitmap(rtView.width, rtView.height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -129,14 +361,12 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             val fileName =
                 resources.getString(R.string.app_name) + System.currentTimeMillis() + ".png"
 
-            // 외부 저장소 이미지 파일 저장
             val sendfile = saveImageIntoFileFromUri(
                 bitmap,
                 fileName,
                 getExternalFilePath()
             )
 
-            // 공유 이동
             val intent = Intent(Intent.ACTION_SEND)
             val uri = FileProvider.getUriForFile(
                 requireContext(),
@@ -145,17 +375,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
             )
 
             intent.putExtra(Intent.EXTRA_STREAM, uri)
-            intent.type = "image/png" /* 이미지 "image/jpeg", "image/png", "image/gif" 등
-                                        오디오
-                                        "audio/mpeg", "audio/ogg" 등
-                                        비디오
-                                        "video/mp4", "video/3gpp" 등
-                                        웹 링크
-                                        "text/plain", "text/html"
-                                        PDF 문서
-                                        "application/pdf"*/
+            intent.type = "image/png"
             startActivity(Intent.createChooser(intent, resources.getText(R.string.share_to_friend)))
-
         }
 
         itemManager.addItem(
@@ -199,10 +420,19 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>() {
         ) { /* Handle click event for ll_fbl_item_7 */ }
     }
 
-    override fun onPause() {
-        super.onPause()
-
+    private fun backPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    bind {
+                        if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state =
+                            BottomSheetBehavior.STATE_HIDDEN
+                        else if (splContainer.isOpen) {
+                            splContainer.closePane()
+                        } else appNavigator.navigateUp()
+                    }
+                }
+            })
     }
-
-
 }

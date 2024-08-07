@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.PolyUtil
@@ -40,6 +40,7 @@ import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MapsViewModel
 import pjo.travelapp.presentation.ui.viewmodel.SpeechRecognitionViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.hideKeyboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.Instant
@@ -61,7 +62,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private var placeDetailsList = mutableListOf<PlaceResult>()
     private var searchMarker: Marker? = null
     private var currentAdapterStyle: AdapterStyle? = null
-    var isToolbarToggler = true
+    private var isToolbarToggler = true
+    private var currentPolyline: Polyline? = null
 
     @Inject
     lateinit var navigate: AppNavigator
@@ -238,7 +240,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
     private fun drawPolyline(encodedPolyline: String, distanceMeters: Int?, color: Int) {
         val decodedPath = PolyUtil.decode(encodedPolyline)
-        googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
+
+        currentPolyline?.remove()
+
+        currentPolyline = googleMap.addPolyline(PolylineOptions().addAll(decodedPath).color(color))
 
         // 경로의 중간지점에 거리 마커 추가
         distanceMeters?.let {
@@ -259,7 +264,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         // 경로가 모두 보이도록 카메라 이동
         val padding = 200 // 경계와 지도 사이의 여백 (픽셀 단위)
         googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-
     }
 
     private fun backPressed() {
@@ -283,7 +287,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     @SuppressLint("RestrictedApi")
     private fun setAdapter(st: AdapterStyle) {
         if (currentAdapterStyle == st) {
-            // 동일한 어댑터 스타일인 경우
             return
         }
         currentAdapterStyle = st
@@ -292,23 +295,23 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             when (st) {
                 AdapterStyle.SEARCH_STYLE_DIRECTION_START -> {
                     adapter = AutoCompleteItemAdapter {
-                        mapsViewModel.fetchPlaceDetails(it.placeId)
+                        mapsViewModel.fetchPlaceDetails(it.first.placeId)
                         startLocationMove(
                             LatLng(
-                                it.geometry.location.lat,
-                                it.geometry.location.lng
+                                it.first.geometry.location.lat,
+                                it.first.geometry.location.lng
                             )
                         )
                         toggleBottomSheet(searchBottomSheetBehavior)
-                        mapsViewModel.fetchStartQuery(it)
+                        mapsViewModel.fetchStartQuery(it.first)
                         hideKeyboard(searchBottomSheet.etDefaultSearch)
                     }
                 }
 
                 AdapterStyle.SEARCH_STYLE_DIRECTION_END -> {
                     adapter = AutoCompleteItemAdapter {
-                        mapsViewModel.fetchPlaceDetails(it.placeId)
-                        mapsViewModel.fetchEndQuery(it)
+                        mapsViewModel.fetchPlaceDetails(it.first.placeId)
+                        mapsViewModel.fetchEndQuery(it.first)
                         toggleBottomSheet(searchBottomSheetBehavior)
                         hideKeyboard(searchBottomSheet.etDefaultSearch)
                     }
@@ -316,14 +319,14 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
                 else -> {
                     adapter = AutoCompleteItemAdapter {
-                        mapsViewModel.fetchPlaceDetails(it.placeId)
+                        mapsViewModel.fetchPlaceDetails(it.first.placeId)
                         startLocationMove(
                             LatLng(
-                                it.geometry.location.lat,
-                                it.geometry.location.lng
+                                it.first.geometry.location.lat,
+                                it.first.geometry.location.lng
                             )
                         )
-                        tvSearch.text = it.name
+                        tvSearch.text = it.first.name
                         toggleBottomSheet(searchBottomSheetBehavior)
                         hideKeyboard(searchBottomSheet.etDefaultSearch)
                     }
@@ -423,6 +426,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
 
             searchBottomSheet.ivVoice.setOnClickListener {
                 navigate.navigateTo(Fragments.VOICE_PAGE)
+                toggleBottomSheet(searchBottomSheetBehavior)
             }
         }
     }
@@ -494,7 +498,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
         infoBottomSheetBehavior.halfExpandedRatio = 0.5f
 
         // 상태 변경 콜백 추가
-        infoBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        infoBottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 checkAndHideSheets()
             }
@@ -504,7 +509,8 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             }
         })
 
-        searchBottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        searchBottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 checkAndHideSheets()
             }
@@ -566,12 +572,6 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                 }
             }
         }
-    }
-
-    // 키보드를 숨기는 함수
-    private fun hideKeyboard(view: View) {
-        val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 

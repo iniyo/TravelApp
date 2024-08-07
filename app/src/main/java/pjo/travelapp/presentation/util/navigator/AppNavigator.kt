@@ -16,7 +16,8 @@ enum class Fragments {
     SCHEDULE_PAGE,
     PLACE_SELECT_PAGE,
     PLACE_DETAIL_PAGE,
-    PLACE_DETAIL_PAGE_ITEM
+    PLACE_DETAIL_PAGE_ITEM,
+    PLACE_DETAIL_PAGE_RE
 }
 
 /**
@@ -29,4 +30,5 @@ interface AppNavigator {
     fun retrieveNavController(): NavController
     fun destinationChangedListener(onDestinationChanged: (Int) -> Unit)
     fun navigateTo(screen: Fragments)
+    fun navigateTo()
 }

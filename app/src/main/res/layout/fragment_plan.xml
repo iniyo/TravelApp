@@ -6,127 +6,167 @@
     <data>
 
         <variable
-            name="adapter"
-            type="pjo.travelapp.presentation.adapter.PlanAdapter" />
-    </data>
+            name="viewmodel"
+            type="pjo.travelapp.presentation.ui.viewmodel.MapsViewModel" />
 
-    <androidx.core.widget.NestedScrollView
+        <variable
+            name="adapter"
+            type="com.xwray.groupie.GroupAdapter" />
+
+        <variable
+            name="auto_adapter"
+            type="pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter" />
+
+        <variable
+            name="navigator"
+            type="pjo.travelapp.presentation.util.navigator.AppNavigator" />
+
+        <variable
+            name="adapter_d"
+            type="pjo.travelapp.presentation.adapter.ImageViewPagerAdapter" />
+
+    </data>
+    <androidx.slidingpanelayout.widget.SlidingPaneLayout
+        android:id="@+id/spl_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/cl_plan_main_container"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            tools:context=".presentation.ui.fragment.PlanFragment">
-
+            android:layout_height="match_parent">
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_top"
+                android:id="@+id/cl_plan_main_container"
                 android:layout_width="match_parent"
-                android:layout_height="230dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                tools:context=".presentation.ui.fragment.PlanFragment">
 
-                <ImageView
-                    android:id="@+id/iv_top_bg"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cl_top"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:importantForAccessibility="no"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/intro_pic"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="230dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <View
-                    android:id="@+id/v_top_gradient"
+                    <ImageView
+                        android:id="@+id/iv_top_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/intro_pic"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <View
+                        android:id="@+id/v_top_gradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_gradation_black"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/iv_back"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/back_white"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_trip_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/plan_summary"
+                        android:textColor="@color/white"
+                        android:textSize="25sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@+id/tv_trip_date"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_trip_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/fotmat_date"
+                        android:textColor="@color/white_blue"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toTopOf="@+id/fbl_button_container"
+                        app:layout_constraintStart_toStartOf="@+id/tv_trip_title" />
+
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/fbl_button_container"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="5dp"
+                        android:paddingStart="7dp"
+                        app:flexWrap="wrap"
+                        app:justifyContent="flex_start"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        tools:ignore="RtlSymmetry" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_plan"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/bg_gradation_black"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:adapter="@{adapter}"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toTopOf="@+id/btn_added_schedule"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@+id/cl_top"
+                    tools:listitem="@layout/rv_plan_item" />
 
-                <ImageView
-                    android:id="@+id/iv_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:src="@drawable/back_white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tv_trip_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginBottom="5dp"
-                    android:text="@string/plan_summary"
-                    android:textColor="@color/white"
-                    android:textSize="25dp"
+                <Button
+                    android:id="@+id/btn_added_schedule"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginVertical="5dp"
+                    android:text="@string/plan_added"
+                    android:textColor="@color/dark_blue"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@+id/tv_trip_date"
+                    android:theme="@style/calendar_fragment_button_theme"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
-                <TextView
-                    android:id="@+id/tv_trip_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="yyyy.m.d ~ yyyy.m.d"
-                    android:textColor="@color/white_blue"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toTopOf="@+id/fbl_button_container"
-                    app:layout_constraintStart_toStartOf="@+id/tv_trip_title" />
-
-                <com.google.android.flexbox.FlexboxLayout
-                    android:id="@+id/fbl_button_container"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="5dp"
-                    android:paddingStart="7dp"
-                    app:flexWrap="wrap"
-                    app:justifyContent="flex_start"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="RtlSymmetry" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_plan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:adapter="@{adapter}"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toTopOf="@+id/btn_added_schedule"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cl_top"
-                tools:listitem="@layout/rv_plan_item" />
+        <include
+            android:id="@+id/search_bottom_sheet"
+            layout="@layout/fragment_default_search"
+            app:navigator="@{navigator}"
+            app:adapter="@{auto_adapter}"
+            app:viewmodel="@{viewmodel}" />
 
-            <Button
-                android:id="@+id/btn_added_schedule"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginVertical="5dp"
-                android:text="@string/plan_added"
-                android:textColor="@color/dark_blue"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:theme="@style/calendar_fragment_button_theme"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+        <FrameLayout
+            android:id="@+id/place_detail_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.slidingpanelayout.widget.SlidingPaneLayout>
 </layout>

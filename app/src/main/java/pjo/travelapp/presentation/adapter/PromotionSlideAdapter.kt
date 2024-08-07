@@ -53,7 +53,6 @@ class PromotionSlideAdapter: RecyclerView.Adapter<PromotionSlideAdapter.ViewHold
 
     fun addAd(item: Int) {
         imgList.add(item)
-        Log.d("TAG", "addAd")
         notifyItemInserted(imgList.size - 1)
     }
 }

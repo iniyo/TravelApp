@@ -10,19 +10,20 @@ import com.bumptech.glide.Glide
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.RvMapsSearchListBinding
+import pjo.travelapp.presentation.ui.consts.ZERO_NUMBER
 
 class AutoCompleteItemAdapter(
-    private val itemClickListener: (PlaceResult) -> Unit
+    private val itemClickListener: (Pair<PlaceResult, Int>) -> Unit
 ) : ListAdapter<PlaceResult, AutoCompleteItemAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: RvMapsSearchListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: PlaceResult?) {
+        fun bind(item: PlaceResult?, position: Int) {
             try {
                 binding.apply {
                     if (item != null) {
-                        Log.d("TAG", "AutoCompleteItemAdapter bind: $item")
+                        Log.d("TAG", "AutoCompleteItemAdapter bind:")
                         tvSearchListItemTitle.text = item.name
                         tvRating.text = item.rating.toString()
                         rbScore.rating = item.rating.toFloat()
@@ -38,13 +39,14 @@ class AutoCompleteItemAdapter(
                         } else {
                             sivSearchListItem.setImageResource(R.drawable.img_bg_title)
                         }
-                        itemView.setOnClickListener { itemClickListener(item) }
+                        val pair = Pair(item, position)
+                        itemView.setOnClickListener { itemClickListener(pair) }
                     } else {
                         // 아이템이 null일 경우 기본값 설정
-                        tvSearchListItemTitle.text = "정보 없음"
-                        tvRating.text = "-"
-                        rbScore.rating = 0f
-                        tvSearchListItemInfo.text = "정보 없음"
+                        tvSearchListItemTitle.text = root.context.getString(R.string.not_info)
+                        tvRating.text = root.context.getString(R.string.pipe)
+                        rbScore.rating = ZERO_NUMBER.toFloat()
+                        tvSearchListItemInfo.text = root.context.getString(R.string.not_info)
                         sivSearchListItem.setImageResource(R.drawable.ic_launcher_foreground) // 기본 이미지 설정
                         itemView.setOnClickListener(null) // 클릭 이벤트 제거
                     }
@@ -62,7 +64,7 @@ class AutoCompleteItemAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     // DiffUtil.ItemCallback 구현

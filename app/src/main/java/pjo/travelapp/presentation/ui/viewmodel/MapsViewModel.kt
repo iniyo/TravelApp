@@ -1,4 +1,3 @@
-// MapsViewModel.kt
 package pjo.travelapp.presentation.ui.viewmodel
 
 import android.location.Geocoder
@@ -32,7 +31,6 @@ import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
-import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
@@ -100,6 +98,13 @@ class MapsViewModel @Inject constructor(
                     clearPlaceList()
                     performSearch(it)
                 }
+        }
+        viewModelScope.launch {
+            predictionList.collectLatest { predictions ->
+                predictions.forEach { prediction ->
+                    fetchPlaceDetails(prediction.placeId)
+                }
+            }
         }
     }
 
@@ -215,11 +220,10 @@ class MapsViewModel @Inject constructor(
             }
         }
     }
+
     /**
      * public fetch 끝
      */
-
-
 
 
     // 검색 요청을 실행하고 이전 작업을 취소하는 메서드

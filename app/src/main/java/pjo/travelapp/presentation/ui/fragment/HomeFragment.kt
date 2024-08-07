@@ -48,13 +48,25 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 launch {
                     mainViewModel.shuffledHotPlaceList.collectLatest {
                         when (it) {
-                            is LatestUiState.Loading -> pbPopular.visibility = View.VISIBLE
+                            is LatestUiState.Loading -> { sflPopular.visibility = View.VISIBLE}
                             is LatestUiState.Success -> {
-                                pbPopular.visibility = View.GONE
-                                pbRecommended.visibility = View.GONE
+                                sflPopular.visibility = View.GONE
+                                it.data.forEach { res ->
+                                    popularRecycleAdapter?.addPlace(res)
+                                }
+                            }
+                            is LatestUiState.Error -> it.exception.printStackTrace()
+                        }
+                    }
+                }
+                launch {
+                    mainViewModel.shuffledHotPlaceList.collectLatest {
+                        when (it) {
+                            is LatestUiState.Loading -> {sflRecommended.visibility = View.VISIBLE}
+                            is LatestUiState.Success -> {
+                                sflRecommended.visibility = View.GONE
                                 it.data.forEach { res ->
                                     recommendedRecycleAdapter?.addPlace(res)
-                                    popularRecycleAdapter?.addPlace(res)
                                 }
                             }
                             is LatestUiState.Error -> it.exception.printStackTrace()
@@ -64,11 +76,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
                 launch {
                     mainViewModel.promotionData.collectLatest {
-                        Log.d("TAG", "promotionData: ")
                         when (it) {
                             is LatestUiState.Loading -> pbBanner.visibility = View.VISIBLE
                             is LatestUiState.Success -> {
-                                Log.d("TAG", "initViewModel: ")
                                 pbBanner.visibility = View.GONE
                                 it.data.forEach { res ->
                                     topPromotionViewpagerAdapter?.addAd(res)
@@ -109,7 +119,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     // 필요한 경우 추가적인 처리를 여기에 작성
                 }
             })
-
         }
     }
 
@@ -145,7 +154,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 }
                 offscreenPageLimit = 2
             }
-            rvRecommended.setHasFixedSize(true)
             rvCategory.setHasFixedSize(true)
             vpTabItemsShow.offscreenPageLimit = 2
 

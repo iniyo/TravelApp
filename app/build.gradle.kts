@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     alias(libs.plugins.android.navigation.safrargs)
     alias(libs.plugins.google.dev.ksp)
+    alias(libs.plugins.firebase.crashlytics)
     id("kotlin-kapt")
 }
 
@@ -21,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "pjo.travelapp"
-        minSdk = 30
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -112,6 +113,11 @@ dependencies {
     implementation(libs.logging.interceptor)
     // viewpager circle indicator
     implementation(libs.dotsindicator)
+    // groupie
+    implementation(libs.groupie)
+    implementation(libs.groupie.viewbinding)
+    // skeleton
+    implementation(libs.shimmer)
     /**
      * open source end
      */
@@ -125,6 +131,7 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     implementation(libs.car.ui.lib)
+    implementation(libs.firebase.crashlytics.ktx)
     kapt(libs.hilt.compiler)
 
     // paging

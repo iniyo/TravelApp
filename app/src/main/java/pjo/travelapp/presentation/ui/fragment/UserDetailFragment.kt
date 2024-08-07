@@ -5,12 +5,11 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import pjo.travelapp.R
-import pjo.travelapp.data.entity.UserSchduleEntity
+import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.databinding.FragmentUserDetailBinding
-import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
-import pjo.travelapp.presentation.adapter.UserScehduleAdapter
+import pjo.travelapp.presentation.adapter.UserScheduleAdapter
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.ui.viewmodel.SignViewModel
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -22,6 +21,7 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
     @Inject
     lateinit var navigator: AppNavigator
     private val planViewModel: PlanViewModel by activityViewModels()
+    private val signViewModel: SignViewModel by activityViewModels()
 
     override fun initCreate() {
         planViewModel.fetchUserSchedules()
@@ -31,19 +31,30 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
         super.initView()
         setClickListner()
         setAdapter()
+        signViewModel.checkLoginStatus()
     }
 
     override fun initViewModel() {
         bind {
             launchWhenStarted {
                 planViewModel.userScheduleList.collectLatest {
-                    if(it.isEmpty()) {
+                    if (it.isEmpty()) {
                         vpSchedules.visibility = View.GONE
                         tvNoSchedule.visibility = View.VISIBLE
-                    }else {
+                    } else {
                         vpSchedules.visibility = View.VISIBLE
                         tvNoSchedule.visibility = View.GONE
                         adapter?.submitList(it)
+                    }
+                }
+
+                signViewModel.isLoggedIn.collect { isLoggedIn ->
+                    if (isLoggedIn) {
+                        btnLoginAndSignup.visibility = View.GONE
+                        tvLoginDetail.visibility = View.GONE
+                    } else {
+                        btnLoginAndSignup.visibility = View.VISIBLE
+                        tvLoginDetail.visibility = View.VISIBLE
                     }
                 }
             }
@@ -63,7 +74,7 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
         val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
 
         bind {
-            adapter = UserScehduleAdapter(
+            adapter = UserScheduleAdapter(
                 itemClickList = {
                     navigator.navigateTo(Fragments.PLAN_PAGE)
                     planViewModel.fetchUserSchedule(it)
@@ -99,7 +110,8 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
             btnScheduleCalendar.layoutParams.width = (screenWidth * 0.4).toInt()*/
         }
     }
-    private fun showDeleteConfirmationDialog(userSchedule: UserSchduleEntity) {
+
+    private fun showDeleteConfirmationDialog(userSchedule: UserPlan) {
         AlertDialog.Builder(requireContext())
             .setTitle("삭제 확인")
             .setMessage("정말로 이 항목을 삭제하시겠습니까?")

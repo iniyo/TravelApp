@@ -11,7 +11,6 @@
         android:id="@+id/tv_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1일차 m월 d일"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,35 +21,25 @@
         android:layout_height="35dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/btn_effect_user_detail_white"
-        android:text="장소 선택"
+        android:text="@string/select_place"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/btn_memory"
+        app:layout_constraintEnd_toStartOf="@+id/btn_note"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_date" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_memory"
+        android:id="@+id/btn_note"
         android:layout_width="150dp"
         android:layout_height="35dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/btn_effect_user_detail_white"
-        android:text="메모 추가"
+        android:text="@string/note"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btn_select_place"
         app:layout_constraintTop_toBottomOf="@+id/tv_date" />
-
-    <ImageView
-        android:id="@+id/iv_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:importantForAccessibility="no"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_date"
-        app:srcCompat="@drawable/ic_delete" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

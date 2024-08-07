@@ -35,7 +35,7 @@ jobs:
       # Create local.properties
       - name: Create local.properties
         run: |
-          echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
+          echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" >> local.properties
           echo "TRAVEL_KEYSTORE_BASE64=keystore.jks" >> local.properties
 
       # Debug local.properties

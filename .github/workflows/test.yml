@@ -25,7 +25,11 @@ jobs:
       # Gradlew 권한 설정
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
-
+      
+      # TLS 인증 비활성화
+      - name: Set Node.js TLS settings
+        run: echo "NODE_TLS_REJECT_UNAUTHORIZED=0" >> $GITHUB_ENV
+      
       # JAVA_HOME 설정
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
@@ -42,12 +46,12 @@ jobs:
       # google-services.json 생성
       - name: Create google-services.json
         run: |
-          echo "${{ secrets.TRAVEL_GOOGLE_JSON }}" | base64 --decode > app/google-services.json
+          echo "${{ secrets.TRAVEL_GOOGLE_JSON }}" | base64 --decode >> app/google-services.json
 
       # Keystore Base64 디코딩 및 저장
       - name: Decode And Save Keystore Base64
         run: |
-          echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+          echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode >> app/keystore.jks
 
       # 디버그 APK 빌드
       - name: Build debug

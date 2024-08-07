@@ -49,6 +49,17 @@ android {
                 ))
             }
         }*/
+
+        // kakao, google등 로그인 진행 시 해당 디벨로퍼 콘솔 내에 서명된 키 등록이 필요
+        // -> keysotre등록 없이 진행 시 디버그용 앱에서 로그인 안 됨. - 깃허브 저장 시 base64로 인코딩 필요
+        signingConfigs {
+            getByName("debug") {
+                keyAlias = properties["SIGNED_KEY_ALIAS"] as String?
+                keyPassword = properties["SIGNED_KEY_PASSWORD"] as String?
+                storeFile = properties["SIGNED_STORE_FILE"]?.let { file(it) }
+                storePassword = properties["SIGNED_STORE_PASSWORD"] as String?
+            }
+        }
     }
 
     buildTypes {

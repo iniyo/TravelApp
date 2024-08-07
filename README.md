@@ -83,6 +83,9 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 > network
 - coroutine 통신(t-story): ([seokzoo](https://seokzoo.tistory.com/4))
 
+> release
+- app git 연동 및 자동화 업데이트([for github, firestore distrubtion](https://velog.io/@cksgodl/Android-Github-Action%ED%99%9C%EC%9A%A9%ED%95%B4-Firebase-App-Distribution-CICD-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-%EC%95%B1-%EC%9E%90%EB%8F%99-%EB%B0%B0%ED%8F%AC))
+
 ```
 구글 api 사용시 
 특정 장소 선택 [google documents](https://developers.google.com/maps/documentation/places/android-sdk/supported_types?hl=ko&_gl=1*1co9b5h*_up*MQ..*_ga*MTMwODQ5OTYzNi4xNzIwNjc1ODU2*_ga_NRWSTWS78N*MTcyMDY3NTg1NS4xLjAuMTcyMDY3NTg1NS4wLjAuMA..)

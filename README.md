@@ -106,7 +106,7 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 - Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0. ([기계공학하던 안드로이드 개발자](https://android-developer.tistory.com/entry/%ED%95%B4%EA%B2%B0-Deprecated-Gradle-features-were-used-in-this-build-making-it-incompatible-with-Gradle-80-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4))
 
 
-====
+=========
 - Splash Screen: ([pachuho.log](https://velog.io/@pachuho/Android-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-12-Splash-Screen-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0))
 
 > 각종 이슈 대응:

@@ -25,15 +25,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-        
+        ## android setting
+        # set local properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+        # set firebasae json 
+      - name: Create google-services.json # 환경변수(GOOGLE_SERVICES_JSON) 값의 내용을 기반으로 `app/google-services.json`를 만든다.
+        run: echo "$TRAVEL_GOOGLE_JSON" > app/google-services.json
+        # set key store value
+      - name: Decode And Save Keystore Base64
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+        # build apk (debug)
+      - name: Build debug # APK를 빌드한다. (디버그용)
+        run: ./gradlew assembleDebug
+      
+     

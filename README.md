@@ -92,9 +92,6 @@ SkyScanner, Trip.com 어플리케이션 UI를 참고하여 만들어 졌습니�
 장소 유형 (https://developers.google.com/maps/documentation/places/web-service/place-types?hl=ko&_gl=1*1lkz160*_up*MQ..*_ga*MjAyMTYzODE4LjE3MjEzNDgwNzE.*_ga_NRWSTWS78N*MTcyMTM0ODA3MC4xLjAuMTcyMTM0ODA3MC4wLjAuMA..#entertainment-and-recreation)
 ```
 
-
-
-
 > Manifest 설정 관련
 - Android Development[permission 종류](https://developer.android.com/reference/android/Manifest.permission)
 - // 권한 종류 중 Protection level: dangerous 가 되어있는 경우 사용자에게 권한 허용을 받아야 함.

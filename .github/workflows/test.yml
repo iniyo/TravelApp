@@ -36,7 +36,10 @@ jobs:
       # Set Gradlew Permissions
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
-
+        
+      - name: Print environment variables
+        run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT"
+        
       # Create local.properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties

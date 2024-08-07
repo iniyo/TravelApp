@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import pjo.travelapp.data.entity.ChildItemWithPosition
 import pjo.travelapp.data.entity.ParentGroupData
 import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.TravelDestinationAbroad
@@ -20,8 +19,6 @@ import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.data.entity.UserNote
 import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.data.repo.UserRepository
-import pjo.travelapp.presentation.adapter.ChildPlanItem
-import pjo.travelapp.presentation.adapter.ParentPlanItem
 import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.makeItemId
 import javax.inject.Inject
@@ -88,7 +85,6 @@ class PlanViewModel @Inject constructor(
     init {
         fetchDomesticPlace()
         fetchAbroadPlace()
-        /*fetchUserPlanList()*/
     }
 
     /**

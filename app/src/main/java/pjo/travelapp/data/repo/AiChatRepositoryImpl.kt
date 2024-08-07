@@ -44,7 +44,7 @@ class AiChatRepositoryImpl @Inject constructor(
                 instructions = userInstruction,
                 name = "custom assistant",
                 tools = listOf(Tool(type = "code_interpreter")),
-                model = "gpt-4o"
+                model = "gpt-3.5-turbo"
             )
             val response = apiService.createAssistant(assistantRequest)
             if (response.isSuccessful) {

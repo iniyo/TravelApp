@@ -20,7 +20,7 @@ class AiChatViewModel @Inject constructor(
     val response: StateFlow<LatestUiState<IsMessage>> get() = _response
 
     init {
-        initializeAssistantAndThread()
+       /* initializeAssistantAndThread()*/
     }
 
     private fun setUserInstructions(userInstructions: String) {

@@ -129,9 +129,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
                 is LatestUiState.Success -> {
                     sflMainPlaces.visibility = View.GONE
-                    placeState.data.forEach {
-                        adapter?.addPlace(it)
-                    }
+                    adapter?.submitPlaces(placeState.data)
                 }
 
                 is LatestUiState.Error -> {
@@ -153,9 +151,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
                 is LatestUiState.Success -> {
                     sflMainPlaces.visibility = View.GONE
-                    hotelState.data.forEach {
-                        adapter?.addHotel(it)
-                    }
+                    adapter?.submitHotels(hotelState.data)
                 }
 
                 is LatestUiState.Error -> {

@@ -1,8 +1,11 @@
 package pjo.travelapp.presentation.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import pjo.travelapp.R
@@ -14,15 +17,13 @@ import pjo.travelapp.databinding.RvMorePlacesItemBinding
 class MorePlaceRecyclerAdapter(
     private val placeItemClickListener: (PlaceDetail) -> Unit,
     private val hotelItemClickListener: (HotelCard) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private val placesWithPhotos = mutableListOf<PlaceDetail>()
-    private val hotels = mutableListOf<HotelCard>()
-    private var currentDataType: DataType = DataType.PLACE
+) : ListAdapter<Any, RecyclerView.ViewHolder>(DiffCallback()) {
 
     enum class DataType {
         PLACE, HOTEL
     }
+
+    private var currentDataType: DataType = DataType.PLACE
 
     inner class PlaceViewHolder(private val binding: RvMorePlacesItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -77,8 +78,7 @@ class MorePlaceRecyclerAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val binding =
-            RvMorePlacesItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = RvMorePlacesItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return when (currentDataType) {
             DataType.PLACE -> PlaceViewHolder(binding)
             DataType.HOTEL -> HotelViewHolder(binding)
@@ -87,28 +87,34 @@ class MorePlaceRecyclerAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is PlaceViewHolder -> holder.bind(placesWithPhotos[position])
-            is HotelViewHolder -> holder.bind(hotels[position])
+            is PlaceViewHolder -> holder.bind(getItem(position) as PlaceDetail)
+            is HotelViewHolder -> holder.bind(getItem(position) as HotelCard)
         }
     }
 
-    override fun getItemCount(): Int {
-        return when (currentDataType) {
-            DataType.PLACE -> placesWithPhotos.size
-            DataType.HOTEL -> hotels.size
-        }
-    }
-
-    fun addPlace(placeWithPhoto: PlaceDetail) {
+    fun submitPlaces(places: List<PlaceDetail>) {
         currentDataType = DataType.PLACE
-        placesWithPhotos.add(placeWithPhoto)
-        notifyItemInserted(placesWithPhotos.size - 1)
+        submitList(places)
     }
 
-    fun addHotel(hotel: HotelCard) {
+    fun submitHotels(hotels: List<HotelCard>) {
         currentDataType = DataType.HOTEL
-        hotels.add(hotel)
-        notifyItemInserted(hotels.size - 1)
+        submitList(hotels)
+    }
+}
+class DiffCallback : DiffUtil.ItemCallback<Any>() {
+    override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
+        return if (oldItem is PlaceDetail && newItem is PlaceDetail) {
+            oldItem.place.id == newItem.place.id
+        } else if (oldItem is HotelCard && newItem is HotelCard) {
+            oldItem.id == newItem.id
+        } else {
+            false
+        }
     }
 
+    @SuppressLint("DiffUtilEquals")
+    override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
+        return oldItem == newItem
+    }
 }

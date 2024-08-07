@@ -3,19 +3,28 @@ package pjo.travelapp.presentation.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
-import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.databinding.AiChatItemBinding
 import pjo.travelapp.databinding.ItemLoadingBinding
 
 class AiChatAdapter(
     private val itemClickListener: (IsMessage) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : ListAdapter<IsMessage, RecyclerView.ViewHolder>(MessageDiffCallback()) {
 
-    private val messages = mutableListOf<IsMessage>()
-    private var isLoading = false
+    var isLoading = false
+        set(value) {
+            field = value
+            // notify the adapter to update when loading state changes
+            if (value) {
+                notifyItemInserted(itemCount)
+            } else {
+                notifyItemRemoved(itemCount)
+            }
+        }
 
     companion object {
         const val VIEW_TYPE_MESSAGE = 0
@@ -34,39 +43,24 @@ class AiChatAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is MessageViewHolder) {
-            holder.bind(messages[position])
+            holder.bind(getItem(position))
         } else if (holder is LoadingViewHolder) {
             holder.bind()
         }
     }
 
     override fun getItemViewType(position: Int): Int {
-        // messages 리스트 끝에 로딩 항목을 추가
-        return if (isLoading && position == messages.size) VIEW_TYPE_LOADING else VIEW_TYPE_MESSAGE
+        return if (isLoading && position == itemCount - 1) VIEW_TYPE_LOADING else VIEW_TYPE_MESSAGE
     }
 
-
     override fun getItemCount(): Int {
-        return messages.size + if (isLoading) 1 else 0
+        return super.getItemCount() + if (isLoading) 1 else 0
     }
 
     fun addMessage(message: IsMessage) {
-        messages.add(message)
-        setLoading(false)  // 메시지 추가 후 로딩 상태를 false로 설정하고 전체 갱신
-    }
-
-    fun setLoading(loading: Boolean) {
-        if (loading) {
-            if (!isLoading) {
-                isLoading = true
-                notifyItemInserted(messages.size) // 로딩 항목 추가
-            }
-        } else {
-            if (isLoading) {
-                isLoading = false
-                notifyItemRemoved(messages.size) // 로딩 항목 제거
-            }
-        }
+        val currentList = currentList.toMutableList()
+        currentList.add(message)
+        submitList(currentList)
     }
 
     inner class MessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -93,5 +87,15 @@ class AiChatAdapter(
         fun bind() {
             binding.ltvLoading.playAnimation()
         }
+    }
+}
+
+class MessageDiffCallback : DiffUtil.ItemCallback<IsMessage>() {
+    override fun areItemsTheSame(oldItem: IsMessage, newItem: IsMessage): Boolean {
+        return oldItem.message == newItem.message
+    }
+
+    override fun areContentsTheSame(oldItem: IsMessage, newItem: IsMessage): Boolean {
+        return oldItem == newItem
     }
 }

@@ -4,6 +4,8 @@ import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
@@ -218,9 +220,17 @@ object ObjectSingletonModule {
             AppDatabase::class.java,
             "app_database"
         ).fallbackToDestructiveMigration() // 이전 데이터베이스 스키마를 삭제하고 새로 생성
+            /*.addMigrations(MIGRATION_1_2)*/
             .build()
     }
 
+    /*// 기존 데이터 유지할 경우
+    val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // 데이터베이스 스키마 변경 작업 기재
+            database.execSQL("ALTER TABLE User ADD COLUMN age INTEGER")
+        }
+    }*/
 
     @Provides
     fun provideUserScheduleDao(database: AppDatabase): UserPlanDao {

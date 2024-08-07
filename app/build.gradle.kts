@@ -43,7 +43,6 @@ android {
 
         // kakao, google등 로그인 진행 시 해당 디벨로퍼 콘솔 내에 서명된 키 등록이 필요
         // -> keysotre등록 없이 진행 시 디버그용 앱에서 로그인 안 됨. - 깃허브 저장 시 base64로 인코딩 필요
-
     }
 
     buildTypes {
@@ -55,15 +54,18 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
         dataBinding = true
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }

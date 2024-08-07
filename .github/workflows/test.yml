@@ -26,10 +26,6 @@ jobs:
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
       
-      # TLS 인증 비활성화
-      - name: Set Node.js TLS settings
-        run: echo "NODE_TLS_REJECT_UNAUTHORIZED=0" > $GITHUB_ENV
-      
       # JAVA_HOME 설정
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV

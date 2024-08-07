@@ -16,50 +16,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      ## android setting
-      # Set up JDK 17
+      ## 안드로이드 설정
+      # JDK 17 설정
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # Set Gradlew Permissions
+      # Gradlew 권한 설정
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
 
-      # Print TRAVEL_LOCAL_PROPERTIES_CONTENT (디버깅을 위해 추가)
+      # TRAVEL_LOCAL_PROPERTIES_CONTENT 출력 (디버깅을 위해 추가)
       - name: Print TRAVEL_LOCAL_PROPERTIES_CONTENT
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT"
 
-      # Create local.properties
+      # local.properties 생성
       - name: Create local.properties
         run: |
-          echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" >> local.properties
+          echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
           echo "TRAVEL_KEYSTORE_BASE64=keystore.jks" >> local.properties
 
-      # Debug local.properties
+      # local.properties 디버깅
       - name: Debug local.properties
         run: cat local.properties
 
-      # Set JAVA_HOME
+      # JAVA_HOME 설정
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 
-      # Create google-services.json
+      # google-services.json 생성
       - name: Create google-services.json
         run: echo "$TRAVEL_GOOGLE_JSON" > app/google-services.json
 
-      # Decode And Save Keystore Base64
+      # Keystore Base64 디코딩 및 저장
       - name: Decode And Save Keystore Base64
         run: |
           echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
-      # Build debug APK
+      # 디버그 APK 빌드
       - name: Build debug
         run: ./gradlew assembleDebug
 
-      # Upload to Firebase App Distribution
+      # Firebase App Distribution에 업로드
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
@@ -67,4 +67,5 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk
+
 

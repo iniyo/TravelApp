@@ -40,7 +40,10 @@ jobs:
         # set local properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
-
+   
+      - name: Debug local.properties
+        run: cat local.properties
+        
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 

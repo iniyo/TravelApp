@@ -9,7 +9,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+  
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -25,42 +25,44 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-        ## android setting
-        #set min version
+      ## android setting
+      # Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '17'
-          
-        # set permission
+
+      # Set Gradlew Permissions
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
-        
-        # set local properties
+
+      # Create local.properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
-   
+
+      # Debug local.properties
       - name: Debug local.properties
         run: cat local.properties
-        
+
+      # Set JAVA_HOME
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 
-        # set firebasae json 
+      # Create google-services.json
       - name: Create google-services.json # 환경변수(GOOGLE_SERVICES_JSON) 값의 내용을 기반으로 `app/google-services.json`를 만든다.
         run: echo "$TRAVEL_GOOGLE_JSON" > app/google-services.json
-        
-        # set key store value
+
+      # Decode And Save Keystore Base64
       - name: Decode And Save Keystore Base64
         run: |
           echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
-        
-        # build apk (debug)
+
+      # Build debug APK
       - name: Build debug # APK를 빌드한다. (디버그용)
         run: ./gradlew assembleDebug
-        
-        # set firebase app distrubtion 
+
+      # Upload to Firebase App Distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
@@ -68,4 +70,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_CREDENTIALS }} # 설정해야 하는 부분
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk
-     
+

@@ -41,11 +41,8 @@ jobs:
 
       # google-services.json 생성
       - name: Create google-services.json
-        run: echo "${{ secrets.TRAVEL_GOOGLE_JSON }}" | jq . > app/google-services.json
-
-      # google-services.json 디버깅
-      - name: Debug google-services.json
-        run: cat app/google-services.json
+        run: |
+          echo "${{ secrets.TRAVEL_GOOGLE_JSON }}" | base64 --decode > app/google-services.jks
 
       # Keystore Base64 디코딩 및 저장
       - name: Decode And Save Keystore Base64

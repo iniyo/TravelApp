@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "pjo.travelapp"
-        minSdk = 34
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -35,22 +35,11 @@ android {
         manifestPlaceholders["kakaoApiKey"] = properties.getProperty("kakao_native_api_key")
         /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
 
-
         buildConfigField("String", "maps_api_url", properties.getProperty("maps_api_url"))
         buildConfigField("String", "maps_api_key", properties.getProperty("maps_api_key"))
         buildConfigField("String", "place_base_url", properties.getProperty("place_base_url"))
         buildConfigField("String", "route_base_url", properties.getProperty("route_base_url"))
         buildConfigField("String", "skyscanner_base_url", properties.getProperty("skyscanner_base_url"))
-
-        /*javaCompileOptions {
-            annotationProcessorOptions {
-                arguments.putAll(mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                ))
-            }
-        }*/
 
         // kakao, google등 로그인 진행 시 해당 디벨로퍼 콘솔 내에 서명된 키 등록이 필요
         // -> keysotre등록 없이 진행 시 디버그용 앱에서 로그인 안 됨. - 깃허브 저장 시 base64로 인코딩 필요

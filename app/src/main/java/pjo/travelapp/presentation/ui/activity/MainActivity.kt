@@ -98,12 +98,12 @@ open class MainActivity : AppCompatActivity() {
         setNavigationOnClick()
         setFusedLocation()
         checkPermissionsAndRequestIfNeeded()
-        observeDestinationChanges()
         setupOnBackPressedDispatcher()
         setBottomSheet()
         setAdapter()
         setViewModelListener()
         setClickListener()
+        observeDestinationChanges()
     }
 
     private fun startSplash() {
@@ -251,6 +251,10 @@ open class MainActivity : AppCompatActivity() {
                 } else {
                     cnbItem.visibility = View.VISIBLE
                 }
+            }
+            // 프래그먼트 변경 시 BottomSheet 숨기기
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             }
         }
     }

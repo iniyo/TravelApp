@@ -58,6 +58,6 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.TRAVEL_FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: echo "${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}"
+          serviceCredentialsFileContent: ${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk

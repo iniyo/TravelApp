@@ -34,7 +34,7 @@ jobs:
       - name: Create local.properties
         run: |
           echo "${{ secrets.TRAVEL_LOCAL_PROPERTIES_CONTENT }}" > local.properties
-
+ 
       # local.properties 디버깅
       - name: Debug local.properties
         run: cat local.properties

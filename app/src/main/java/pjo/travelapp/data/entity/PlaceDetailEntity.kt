@@ -1,9 +1,10 @@
 package pjo.travelapp.data.entity
 
+import android.graphics.Bitmap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
 import com.google.gson.annotations.SerializedName
 import pjo.travelapp.BuildConfig
-import retrofit2.http.Query
 
 data class PlaceDetailRequest(
     @SerializedName("place_id") val placeId: String,
@@ -11,48 +12,49 @@ data class PlaceDetailRequest(
     @SerializedName("language") val language: String = "ko"
 )
 
+data class PlacesResponse(
+    val results: List<PlaceResult>
+)
+
 data class PlaceDetailsResponse(
-    @SerializedName("html_attributions") val htmlAttributions: List<String>,
+    /*    @SerializedName("html_attributions") val htmlAttributions: List<String>,*/
     @SerializedName("result") val result: PlaceResult,
     @SerializedName("status") val status: String
 )
 
 data class PlaceResult(
-    @SerializedName("address_components") val addressComponents: List<AddressComponent>,
-    @SerializedName("adr_address") val adrAddress: String,
-    @SerializedName("business_status") val businessStatus: String,
-    @SerializedName("current_opening_hours") val currentOpeningHours: CurrentOpeningHours?,
-    @SerializedName("dine_in") val dineIn: Boolean,
+    /* @SerializedName("address_components") val addressComponents: List<AddressComponent>,
+     @SerializedName("adr_address") val adrAddress: String,
+     @SerializedName("business_status") val businessStatus: String,
+     @SerializedName("dine_in") val dineIn: Boolean,
+     @SerializedName("icon") val icon: String,
+     @SerializedName("icon_background_color") val iconBackgroundColor: String,
+     @SerializedName("icon_mask_base_uri") val iconMaskBaseUri: String,
+     @SerializedName("international_phone_number") val internationalPhoneNumber: String?,
+     @SerializedName("plus_code") val plusCode: PlusCode,
+     @SerializedName("reference") val reference: String,
+     @SerializedName("reservable") val reservable: Boolean,
+     @SerializedName("takeout") val takeout: Boolean,
+     @SerializedName("utc_offset") val utcOffset: Int,
+     @SerializedName("url") val url: String,
+     @SerializedName("current_opening_hours") val currentOpeningHours: CurrentOpeningHours?,
+     @SerializedName("user_ratings_total") val userRatingsTotal: Int,
+     @SerializedName("serves_dinner") val servesDinner: Boolean,
+     @SerializedName("serves_lunch") val servesLunch: Boolean,*/
+
     @SerializedName("formatted_address") val formattedAddress: String,
     @SerializedName("formatted_phone_number") val formattedPhoneNumber: String?,
     @SerializedName("geometry") val geometry: Geometry,
-    @SerializedName("icon") val icon: String,
-    @SerializedName("icon_background_color") val iconBackgroundColor: String,
-    @SerializedName("icon_mask_base_uri") val iconMaskBaseUri: String,
-    @SerializedName("international_phone_number") val internationalPhoneNumber: String?,
     @SerializedName("name") val name: String,
     @SerializedName("opening_hours") val openingHours: OpeningHours?,
     @SerializedName("photos") val photos: List<Photo>,
     @SerializedName("place_id") val placeId: String,
-    @SerializedName("plus_code") val plusCode: PlusCode,
     @SerializedName("rating") val rating: Double,
-    @SerializedName("reference") val reference: String,
-    @SerializedName("reservable") val reservable: Boolean,
-    @SerializedName("reviews") val reviews: List<Review>,
-    @SerializedName("serves_dinner") val servesDinner: Boolean,
-    @SerializedName("serves_lunch") val servesLunch: Boolean,
-    @SerializedName("takeout") val takeout: Boolean,
     @SerializedName("types") val types: List<String>,
-    @SerializedName("url") val url: String,
-    @SerializedName("user_ratings_total") val userRatingsTotal: Int,
-    @SerializedName("utc_offset") val utcOffset: Int,
+    @SerializedName("reviews") val reviews: List<Review>,
     @SerializedName("vicinity") val vicinity: String,
     @SerializedName("website") val website: String?
-) {
-    fun getRatingToStr(): String {
-        return rating.toString()
-    }
-}
+)
 
 data class AddressComponent(
     @SerializedName("long_name") val longName: String,
@@ -63,7 +65,7 @@ data class AddressComponent(
 // 현재 시간에 따른 운영 상태를 포함한 운영 시간 정보
 data class CurrentOpeningHours(
     @SerializedName("open_now") val openNow: Boolean,
-    @SerializedName("periods") val periods: List<Period>,
+ /*   @SerializedName("periods") val periods: List<Period>,*/
     @SerializedName("weekday_text") val weekdayText: List<String>
 )
 
@@ -81,7 +83,7 @@ data class TimeDetail(
 
 data class Geometry(
     @SerializedName("location") val location: Location,
-    @SerializedName("viewport") val viewport: Viewport? = null
+    /*@SerializedName("viewport") val viewport: Viewport? = null*/
 )
 
 data class Location(
@@ -96,13 +98,13 @@ data class Viewport(
 
 data class OpeningHours(
     @SerializedName("open_now") val openNow: Boolean,
-    @SerializedName("periods") val periods: List<Period>,
+    /*@SerializedName("periods") val periods: List<Period>,*/
     @SerializedName("weekday_text") val weekdayText: List<String>
 )
 
 data class Photo(
     @SerializedName("height") val height: Int,
-    @SerializedName("html_attributions") val htmlAttributions: List<String>,
+  /*  @SerializedName("html_attributions") val htmlAttributions: List<String>,*/
     @SerializedName("photo_reference") val photoReference: String,
     @SerializedName("width") val width: Int
 ) {
@@ -127,4 +129,9 @@ data class Review(
     @SerializedName("text") val text: String,
     @SerializedName("time") val time: Long,
     @SerializedName("translated") val translated: Boolean
+)
+
+data class PlaceDetail(
+    val place: Place,
+    val bitmap: List<Bitmap?>?
 )

@@ -2,10 +2,13 @@ package pjo.travelapp.presentation.ui.fragment
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.core.view.children
+import androidx.fragment.app.activityViewModels
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
@@ -13,26 +16,41 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import pjo.travelapp.R
 import pjo.travelapp.databinding.CalendarDayBinding
 import pjo.travelapp.databinding.CalendarHeaderBinding
 import pjo.travelapp.databinding.FragmentCalendarBinding
-import pjo.travelapp.presentation.util.ContinuousSelectionHelper.getSelection
-import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isInDateBetweenSelection
-import pjo.travelapp.presentation.util.ContinuousSelectionHelper.isOutDateBetweenSelection
-import pjo.travelapp.presentation.util.DateSelection
+import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
+import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.getSelection
+import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isInDateBetweenSelection
+import pjo.travelapp.presentation.util.calendar.ContinuousSelectionHelper.isOutDateBetweenSelection
+import pjo.travelapp.presentation.util.calendar.DateSelection
+import pjo.travelapp.presentation.util.calendar.dateRangeDisplayText
 import pjo.travelapp.presentation.util.extension.addStatusBarColorUpdate
 import pjo.travelapp.presentation.util.extension.displayText
-import pjo.travelapp.presentation.util.formatDaysBetween
+import pjo.travelapp.presentation.util.calendar.formatDaysBetween
 import pjo.travelapp.presentation.util.extension.getDrawableCompat
-import pjo.travelapp.presentation.util.headerDateFormatDisplayText
+import pjo.travelapp.presentation.util.calendar.headerDateFormatDisplayText
+import pjo.travelapp.presentation.util.calendar.selectedMonthsAndDays
 import pjo.travelapp.presentation.util.extension.makeInVisible
 import pjo.travelapp.presentation.util.extension.makeVisible
 import pjo.travelapp.presentation.util.extension.setTextColorRes
+import pjo.travelapp.presentation.util.navigator.AppNavigator
+import pjo.travelapp.presentation.util.navigator.Fragments
 import java.time.LocalDate
 import java.time.YearMonth
+import javax.inject.Inject
 
-class CalendarFragment : BaseFragment<FragmentCalendarBinding>(R.layout.fragment_calendar) {
+@AndroidEntryPoint
+class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
+
+    @Inject
+    lateinit var navigator: AppNavigator
+    private val viewModel: PlanViewModel by activityViewModels()
+    private val today = LocalDate.now()
+    private var selection = DateSelection() // data class
 
     override fun initView() {
         super.initView()
@@ -58,19 +76,31 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>(R.layout.fragment
 
             // save button
             binding.btnSave.setOnClickListener {
-
+                navigator.navigateTo(Fragments.PLAN_PAGE)
+            }
+            // 뒤로
+            binding.toolbar.ivSignDisplayBackButton.setOnClickListener {
+                navigator.navigateUp()
             }
             bindSummaryViews()
         }
     }
 
-    private val today = LocalDate.now()
-    private var selection = DateSelection() // data class
+    override fun initViewModel() {
+        bind {
+            launchWhenStarted {
+               viewModel.planAdapterList.collectLatest {
+
+               }
+            }
+        }
+    }
 
     // 선택 text 설정 및 버튼 활성화
     private fun bindSummaryViews() {
         binding.tvStartDate.apply {
             if (selection.startDate != null) {
+                Log.d("TAG", "bindSummaryViews: ${selection.startDate}")
                 text = headerDateFormatDisplayText(selection, true)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
@@ -81,6 +111,7 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>(R.layout.fragment
 
         binding.tvEndDate.apply {
             if (selection.endDate != null) {
+                Log.d("TAG", "bindSummaryViews: ${selection.endDate}")
                 text = headerDateFormatDisplayText(selection, false)
                 setTextColorRes(R.color.dark_light_gray)
             } else {
@@ -90,13 +121,17 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>(R.layout.fragment
         }
 
         if(selection.daysBetween != null){
-            binding.tvTourDate.text = formatDaysBetween(selection.daysBetween)
+            val period = formatDaysBetween(selection.daysBetween)
+            binding.tvTourDate.text = period
+            viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
+            viewModel.fetchSelectedCalendarDatePeriod(dateRangeDisplayText(selection.startDate, selection.endDate))
+
+            viewModel.fetchUserAdapter( selectedMonthsAndDays(selection.startDate, selection.endDate))
         }else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }
 
         binding.btnSave.isEnabled = selection.daysBetween != null
-
     }
 
     private fun configureBinders() {

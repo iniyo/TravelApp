@@ -3,37 +3,25 @@ package pjo.travelapp.presentation.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import pjo.travelapp.data.entity.Category
 import pjo.travelapp.databinding.RvCategoryItemBinding
 
 class CategoryRecyclerAdapter(
-    private val imgList: List<Int>
+    private val itemClickListener: (String) -> Unit
 ) : RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder>() {
 
-    private var selectedItem: Int = -1
+    private val category = Category()
+    private val imgList: List<Int> = category.getImgList()
+    private val titleList: List<String> = category.getTitleList()
 
-    class ViewHolder(private val binding: RvCategoryItemBinding) :
+    inner class ViewHolder(private val binding: RvCategoryItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int, position: Int, selectedItem: Int) {
+        fun bind(imgUrl: Int, title: String) {
 
             binding.apply {
-
-                sivPic.setImageResource(imgUrl)
-                /*Glide.with(root.context)
-                    .load(imgUrl)
-                    .skipMemoryCache(false)
-                    .placeholder(R.drawable.intro_pic)
-                    .into(ivPic)
-
-                // 선택된 아이템인 경우 배경 변경
-                if (position == selectedItem) {
-                    llCategoryMainContainer.isSelected = true
-                    ivPic.setImageResource(0)
-                    tvTitle.visibility = View.VISIBLE
-                } else {
-                    llCategoryMainContainer.isSelected = false
-                    ivPic.setImageResource(R.drawable.bg_gray_corner)
-                    tvTitle.visibility = View.GONE
-                }*/
+                ivPic.setImageResource(imgUrl)
+                tvTitle.text = title
+                itemView.setOnClickListener { itemClickListener(title) }
             }
         }
     }
@@ -45,7 +33,7 @@ class CategoryRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(imgList[position % imgList.size], position, selectedItem)
+        holder.bind(imgList[position % imgList.size], titleList[position % titleList.size])
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

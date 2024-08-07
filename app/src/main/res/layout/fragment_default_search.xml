@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="pjo.travelapp.presentation.util.bindadapter.MapsBindAdapter"/>
+        <import type="pjo.travelapp.presentation.util.bindadapter.MapsBindAdapter" />
 
         <variable
             name="adapter"
@@ -20,8 +20,8 @@
         android:id="@+id/cl_main_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         android:background="@color/white"
+        android:fitsSystemWindows="true"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -44,13 +44,13 @@
             android:layout_margin="10dp"
             android:background="@drawable/bg_search_view"
             android:hint="@string/search"
-            android:padding="10dp"
-            app:query="@={viewmodel.query}"
             android:imeOptions="actionDone"
+            android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="@+id/iv_back"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_back"
-            app:layout_constraintTop_toTopOf="@+id/iv_back" />
+            app:layout_constraintTop_toTopOf="@+id/iv_back"
+            app:query="@={viewmodel.query}" />
 
         <ImageView
             android:id="@+id/iv_voice"
@@ -82,9 +82,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
+            android:onClick="@{() -> viewmodel.clearPlaceList()}"
             android:text="전체 삭제"
             android:textColor="@color/blue"
-            android:onClick="@{() -> viewmodel.clearPlaceList()}"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/tv_recent_search"
             app:layout_constraintEnd_toEndOf="parent"

@@ -3,53 +3,63 @@ package pjo.travelapp.presentation.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import pjo.travelapp.databinding.RvRecommendedItemBinding
+import pjo.travelapp.R
+import pjo.travelapp.data.entity.PlaceDetail
+import pjo.travelapp.databinding.RvScheduleItemBinding
+import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter.ViewHolder
 
 class RecommendedRecyclerAdapter(
-    private val imgList: List<Int>
+    private val itemClickListener: (PlaceDetail) -> Unit
 ) : RecyclerView.Adapter<RecommendedRecyclerAdapter.ViewHolder>() {
 
-    class ViewHolder(private val binding: RvRecommendedItemBinding) :
+    private val placesWithPhotos = mutableListOf<PlaceDetail>()
+
+    inner class ViewHolder(private val binding: RvScheduleItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int) {
-
+        fun bind(item: PlaceDetail) {
             binding.apply {
+                try {
+                    item.bitmap?.let {
+                        ivMainContent.setImageBitmap(it.first())
+                    } ?: ivMainContent.setImageResource(R.drawable.intro_pic)
 
-                sivRecommendedItemMainImg.setImageResource(imgUrl)
-                /*Glide.with(root.context)
-                    .load(imgUrl)
-                    .skipMemoryCache(false)
-                    .placeholder(R.drawable.intro_pic)
-                    .into(ivPic)
+                    tvTitle.text = item.place.name ?: "Unknown Place"
+                    tvRating.text = item.place.rating?.toString() ?: "No Rating"
+                    rbScore.rating = item.place.rating?.toFloat() ?: 0f
+                    val reviews = item.place.reviews
+                    if (reviews != null && reviews.isNotEmpty()) {
+                        // 첫 번째 리뷰의 텍스트를 가져옴
+                        tvReviews.text = reviews[0].text ?: "No Reviews"
+                    } else {
+                        tvReviews.text = "No Reviews"
+                    }
 
-                // 선택된 아이템인 경우 배경 변경
-                if (position == selectedItem) {
-                    llCategoryMainContainer.isSelected = true
-                    ivPic.setImageResource(0)
-                    tvTitle.visibility = View.VISIBLE
-                } else {
-                    llCategoryMainContainer.isSelected = false
-                    ivPic.setImageResource(R.drawable.bg_gray_corner)
-                    tvTitle.visibility = View.GONE
-                }*/
+                    itemView.setOnClickListener {
+                        itemClickListener(item)
+                    }
+
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding =
-            RvRecommendedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            RvScheduleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(imgList[position % imgList.size])
+        holder.bind(placesWithPhotos[position])
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
+    override fun getItemCount(): Int = placesWithPhotos.size
+
+    fun addPlace(placeWithPhoto: PlaceDetail) {
+        placesWithPhotos.add(placeWithPhoto)
+
+        notifyItemInserted(placesWithPhotos.size - 1)
     }
-
-    override fun getItemCount(): Int = imgList.size
-
 }

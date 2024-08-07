@@ -14,6 +14,7 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -29,19 +30,18 @@ import pjo.travelapp.data.entity.PlaceResult
 import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
-import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
 import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
 import pjo.travelapp.presentation.util.LatestUiState
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class MapsViewModel @Inject constructor(
     private val getDirectionsUseCase: GetDirectionsUseCase,
     private val getPlaceIdUseCase: GetPlaceIdUseCase,
     private val getPlaceDetailUseCase: GetPlaceDetailUseCase,
-    private val getNearbyPlaceUseCase: GetNearbyPlaceUseCase,
     private val geocoder: Geocoder,
     private var placeClient: PlacesClient
 ) : ViewModel() {
@@ -51,8 +51,12 @@ class MapsViewModel @Inject constructor(
      * @param: direction: 출발지 목적지로 얻어오는 경로
      * @param: placeDetails: 장소 세부정보에 대한 상태, 결과값, 주소, 데이터 출처 저장
      * @param: placeDetailResult: 장소 세부정보 결과
+     * @param: placeDetailResult: 장소 세부정보 결과 리스트
      * @param: predictionList: 검색 결과 리스트
-     * @param: _placeId: 검색, 선택으로 받아오는 place의 고유값
+     * @param: query: 검색결과 저장되는 변수 - 양방향 데이터 바인딩에 사용
+     * @param: placeId: 검색, 선택으로 받아오는 place의 고유값
+     * @param: startQuery: direction 출발지점
+     * @param: endQuery: direction 도착지점
      */
     private val _directions =
         MutableStateFlow<LatestUiState<Pair<RoutesResponse?, Int>>>(LatestUiState.Loading)
@@ -81,29 +85,39 @@ class MapsViewModel @Inject constructor(
     private var _endQuery = MutableStateFlow<PlaceResult?>(null)
     val endQuery: StateFlow<PlaceResult?> get() = _endQuery
 
-    private lateinit var autoCompleteAdapter: AutoCompleteItemAdapter
     /**
-     * 변수 선언
+     * 변수 선언 끝
      */
 
     init {
         fetchPlaceDetailsList()
+        // query 값 변경 시 300 millis이후에 검색 실행
+        viewModelScope.launch {
+            query
+                .debounce(300)
+                .distinctUntilChanged()
+                .collect {
+                    clearPlaceList()
+                    performSearch(it)
+                }
+        }
     }
 
+    /**
+     * public fetch
+     */
+
+    // 출발지점
     fun fetchStartQuery(start: PlaceResult) {
         _startQuery.value = start
     }
+
+    // 도착지점
     fun fetchEndQuery(end: PlaceResult) {
         _endQuery.value = end
     }
 
-    private fun setAdatper() {
-        autoCompleteAdapter = AutoCompleteItemAdapter {
-            Log.d("TAG", "initView: ")
-            fetchPlaceResult(it)
-        }
-    }
-
+    // 거리 계산 결과
     fun fetchDirections(directionsRequest: RoutesRequest, color: Int) {
         viewModelScope.launch {
             getDirectionsUseCase(directionsRequest)
@@ -120,20 +134,96 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    init {
+    // 장소 세부정보 변수 및 리스트 변수 초기화
+    fun fetchPlaceDetails(placeId: String) {
+        Log.d("TAG", "fetchPlaceDetails: ")
         viewModelScope.launch {
-            query
-                .debounce(300)
-                .distinctUntilChanged()
+            getPlaceDetailUseCase(placeId)
+                .onStart {
+                    _placeDetails.value = LatestUiState.Loading
+                }
+                .catch { e ->
+                    e.printStackTrace()
+                    _placeDetails.value = LatestUiState.Error(e)
+                }
                 .collectLatest {
-                    clearPlaceList()
-                    performSearch(it)
+                    _placeDetails.value = LatestUiState.Success(it)
+                    _placeDetailsResult.value = it.result
+                }
+        }
+    }
+
+    // 리스트 클리어
+    fun clearPlaceList() {
+        _placeDetailsList.value = emptyList()
+        _predictionList.value = emptyList()
+    }
+
+    // 시작지점, 출발지점 placeId 초기화
+    fun getStartAndEndPlaceId(
+        start: String?,
+        end: String?,
+        callback: (Pair<LatLng?, LatLng?>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val startDeferred = CompletableDeferred<LatLng?>()
+            val endDeferred = CompletableDeferred<LatLng?>()
+
+            if (start.isNullOrEmpty() || end.isNullOrEmpty()) {
+                Log.d("TAG", "getStartAndEndPlaceId: null or empty")
+            } else {
+                searchLocation(start) { result ->
+                    startDeferred.complete(result)
+                }
+
+                searchLocation(end) { result ->
+                    endDeferred.complete(result)
+                }
+            }
+
+            val startLocation = startDeferred.await()
+            val endLocation = endDeferred.await()
+
+            callback(Pair(startLocation, endLocation))
+        }
+    }
+
+    // location 정보로 placeid 초기화
+    fun fetchLatLngToPlaceId(latLng: LatLng) {
+        viewModelScope.launch {
+            val latLngString = "${latLng.latitude},${latLng.longitude}"
+            getPlaceIdUseCase(latLngString).collect {
+                val placeId = it.results.firstOrNull()?.placeId
+                if (placeId != null) {
+                    Log.d("TAG", "fetchLatLngToPlaceId: latLng")
+                    _placeId.value = placeId
+                    fetchPlaceDetails(placeId)
+                }
             }
         }
     }
 
+    // placeid로 placeid 초기화
+    fun fetchPlaceId(getPlaceId: String) {
+        viewModelScope.launch {
+            if (getPlaceId.isNotEmpty()) {
+                Log.d("TAG", "fetchLatLngToPlaceId: placeid")
+                _placeId.value = getPlaceId
+                fetchPlaceDetails(getPlaceId)
+            } else {
+                Log.d("TAG", "fetchLatLngToPlaceId: empty placeId")
+            }
+        }
+    }
+    /**
+     * public fetch 끝
+     */
+
+
+
+
     // 검색 요청을 실행하고 이전 작업을 취소하는 메서드
-    fun performSearch(query: String, currentLatLng: LatLng? = null) {
+    private fun performSearch(query: String, currentLatLng: LatLng? = null) {
         viewModelScope.launch {
             _predictionList.value = emptyList() // 새로운 검색 시작 시 리스트 초기화
             val token = AutocompleteSessionToken.newInstance()
@@ -199,83 +289,14 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun fetchPlaceResult(res: PlaceResult) {
+    private fun fetchPlaceResult(res: PlaceResult) {
         viewModelScope.launch {
             _placeDetailsResult.value = res
         }
     }
 
-    fun fetchPlaceDetails(placeId: String) {
-        Log.d("TAG", "fetchPlaceDetails: ")
-        viewModelScope.launch {
-            getPlaceDetailUseCase(placeId)
-                .onStart {
-                    _placeDetails.value = LatestUiState.Loading
-                }
-                .catch { e ->
-                    e.printStackTrace()
-                    _placeDetails.value = LatestUiState.Error(e)
-                }
-                .collectLatest {
-                    _placeDetails.value = LatestUiState.Success(it)
-                    _placeDetailsResult.value = it.result
-                }
-        }
-    }
-
-    // 리스트 클리어
-    fun clearPlaceList() {
-        _placeDetailsList.value = emptyList()
-        _predictionList.value = emptyList()
-    }
-
-    fun getStartAndEndPlaceId(start: String?, end: String?, callback: (Pair<LatLng?, LatLng?>) -> Unit) {
-        viewModelScope.launch {
-            val startDeferred = CompletableDeferred<LatLng?>()
-            val endDeferred = CompletableDeferred<LatLng?>()
-
-            if(start.isNullOrEmpty() || end.isNullOrEmpty()){
-                Log.d("TAG", "getStartAndEndPlaceId: null or empty")
-            }else {
-                searchLocation(start) { result ->
-                    startDeferred.complete(result)
-                }
-
-                searchLocation(end) { result ->
-                    endDeferred.complete(result)
-                }
-            }
-
-            val startLocation = startDeferred.await()
-            val endLocation = endDeferred.await()
-
-            callback(Pair(startLocation, endLocation))
-        }
-    }
-
-    fun fetchLatLngToPlaceId(latLng: LatLng? = null, getPlaceId: String = "") {
-        viewModelScope.launch {
-            if (latLng != null) {
-                val latLngString = "${latLng.latitude},${latLng.longitude}"
-                getPlaceIdUseCase(latLngString).collect {
-                    val placeId = it.results.firstOrNull()?.placeId
-                    if (placeId != null) {
-                        Log.d("TAG", "fetchLatLngToPlaceId: latLng")
-                        _placeId.value = placeId
-                        fetchPlaceDetails(placeId)
-                    }
-                }
-            } else if (getPlaceId.isNotEmpty()) {
-                Log.d("TAG", "fetchLatLngToPlaceId: placeid")
-                _placeId.value = getPlaceId
-                fetchPlaceDetails(getPlaceId)
-            } else {
-                Log.d("TAG", "fetchLatLngToPlaceId: empty twice ")
-            }
-        }
-    }
-
-    fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
+    @Suppress("DEPRECATION")
+    private fun searchLocation(location: String, callback: (LatLng?) -> Unit) {
         viewModelScope.launch {
             try {
                 val addressList = geocoder.getFromLocationName(location, 1)

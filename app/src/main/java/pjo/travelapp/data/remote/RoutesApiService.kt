@@ -1,11 +1,9 @@
 package pjo.travelapp.data.remote
 
 import pjo.travelapp.BuildConfig
-import pjo.travelapp.data.entity.DirectionsResponse
 import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query

@@ -14,7 +14,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.findViewTreeLifecycleOwner
-import pjo.travelapp.presentation.util.StatusBarColorLifecycleObserver
+import pjo.travelapp.presentation.util.calendar.StatusBarColorLifecycleObserver
 
 /**
  * View 확장 함수

@@ -14,8 +14,14 @@
         <item name="colorControlNormal">@color/dark_gray</item>
     </style>
 
-    <style name="CheckFragmentButtonTheme" parent="ThemeOverlay.MaterialComponents.Light">
+    <!-- button -->
+    <style name="calendar_fragment_button_theme" parent="ThemeOverlay.MaterialComponents.Light">
         <item name="colorPrimary">@color/light_blue</item>
+    </style>
+
+    <style name="default_button_theme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorPrimary">@color/light_blue</item>
+        <item name="background">@drawable/bg_blue_solid_corner</item>
     </style>
 
     <!-- rolling textview attr -->

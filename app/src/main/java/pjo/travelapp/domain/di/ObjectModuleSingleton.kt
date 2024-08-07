@@ -1,10 +1,9 @@
 package pjo.travelapp.domain.di
 
-
 import MapsRepositoryImpl
 import android.content.Context
 import android.location.Geocoder
-import android.util.Log
+import androidx.room.Room
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
@@ -16,9 +15,17 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
+import pjo.travelapp.data.datasource.AppDatabase
+import pjo.travelapp.data.datasource.UserScheduleDao
+import pjo.travelapp.data.remote.AiChatService
 import pjo.travelapp.data.remote.MapsApiService
 import pjo.travelapp.data.remote.RoutesApiService
+import pjo.travelapp.data.remote.SkyScannerApiService
+import pjo.travelapp.data.repo.HotelRepository
+import pjo.travelapp.data.repo.HotelRepositoryImpl
 import pjo.travelapp.data.repo.MapsRepository
+import pjo.travelapp.data.repo.PlaceRepository
+import pjo.travelapp.data.repo.PlaceRepositoryImpl
 import pjo.travelapp.domain.model.UseCases
 import pjo.travelapp.domain.usecase.GetDirectionsUseCase
 import pjo.travelapp.domain.usecase.GetNearbyPlaceUseCase
@@ -26,8 +33,8 @@ import pjo.travelapp.domain.usecase.GetPlaceDetailUseCase
 import pjo.travelapp.domain.usecase.GetPlaceIdUseCase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import java.io.File
+import java.util.Locale
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -35,15 +42,15 @@ import javax.inject.Singleton
 object ObjectModuleSingleton {
 
     /**
-     * set loggin interceptor - okhttp
+     * 공통 HTTP 설정
      */
     @Provides
     @Singleton
     fun provideCache(@ApplicationContext context: Context): Cache {
-        // HTTP 캐시 사용
         val cacheSize = 10 * 1024 * 1024 // 10 MB
-        return Cache(File(context.cacheDir, "http"), cacheSize.toLong()) // 캐시 객체 생성 시
+        return Cache(File(context.cacheDir, "http"), cacheSize.toLong())
     }
+
     @Provides
     @Singleton
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
@@ -51,55 +58,62 @@ object ObjectModuleSingleton {
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         return logging
     }
-    // HTTP 캐시 설정
+
     @Singleton
     @Provides
-    fun provideOkHttpClient(cache: Cache, loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
-        // Cache-Control - HTTP 헤더에 캐시 제어를 할 수 있는 지시문을 담는 필드
+    fun provideOkHttpClient(
+        cache: Cache,
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient {
         val maxAge = Integer.MAX_VALUE
         return OkHttpClient.Builder()
             .cache(cache)
             .addInterceptor(loggingInterceptor)
-            // 요청이 서버로 보내지기 전에 가로채서 요청을 수정.
             .addInterceptor { chain ->
                 var request = chain.request()
-                // 해당 요청 지정한 만큼 캐싱하겠다는 것을 서버측에 알림. -> 앱 수준
                 request = request.newBuilder()
                     .header("Cache-Control", "public, max-age=$maxAge")
                     .build()
-                chain.proceed(request) // interceptor를 2개 사용하므로, 순차적으로 인터셉터 호출을 위해 사용.
+                chain.proceed(request)
             }
-            // 서버로부터 받은 응답의 헤더를 수정하여 클라이언트 캐시 제어 -> 네트워크 수준
-            // 별도 제어 없이 자동으로 캐시제어 가능.
             .addNetworkInterceptor { chain ->
                 val response = chain.proceed(chain.request())
-                // Customize or return the response
                 response.newBuilder()
-                    .removeHeader("Pragma") // Pragma -> HTTP/1.0 에서 사용되는 캐시 제어 헤더, request, response 캐싱을 하지 않게 만듦.
+                    .removeHeader("Pragma")
                     .header("Cache-Control", "public, max-age=$maxAge")
                     .build()
             }
             .build()
     }
-
     /**
-     * set loggin interceptor end - okhttp
+     * 공통 HTTP 설정
      */
 
     /**
-     * map service api
+     * maps api 설정
      */
+    @Provides
+    fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
+        return Geocoder(context)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
+        if (!Places.isInitialized()) {
+            Places.initialize(context, BuildConfig.maps_api_key, Locale.KOREAN)
+        }
+        return Places.createClient(context)
+    }
+
     @Provides
     @Singleton
     fun provideGoogleMapDirectionRetrofit(okHttpClient: OkHttpClient): Retrofit {
-
         val retro = Retrofit.Builder()
             .baseUrl(BuildConfig.maps_api_url)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
-        Log.d("TAG", "provideGoogleMapDirectionRetrofit: ${BuildConfig.maps_api_url}")
         return retro
     }
 
@@ -113,29 +127,44 @@ object ObjectModuleSingleton {
     @Singleton
     fun provideGoogleMapRoute(okHttpClient: OkHttpClient): RoutesApiService {
         val retro = Retrofit.Builder()
-            .baseUrl("https://routes.googleapis.com/")
+            .baseUrl(BuildConfig.route_base_url)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         return retro.create(RoutesApiService::class.java)
     }
-
+    /**
+     * maps api 설정 끝
+     */
+    /**
+     * skyscanner api 설정
+     */
     @Provides
     @Singleton
-    fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
-        if (!Places.isInitialized()) {
-            Places.initialize(context, BuildConfig.maps_api_key)
-        }
-        return Places.createClient(context)
+    fun provideHotelsDetail(okHttpClient: OkHttpClient): SkyScannerApiService {
+        val retro = Retrofit.Builder()
+            .baseUrl(BuildConfig.skyscanner_base_url)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retro.create(SkyScannerApiService::class.java)
     }
 
     /**
-     * map service api end
+     * skyscanner api 설정 끝
      */
+    @Provides
+    @Singleton
+    fun provideAiChat(): AiChatService {
+        val retro = Retrofit.Builder()
+            .baseUrl(BuildConfig.open_api_base_url)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retro.create(AiChatService::class.java)
+    }
 
     /**
-     * use case
+     * repository, 유스케이스 설정 끝
      */
     @Provides
     @Singleton
@@ -144,6 +173,15 @@ object ObjectModuleSingleton {
     ): MapsRepository {
         return MapsRepositoryImpl(service)
     }
+
+    @Provides
+    @Singleton
+    fun provideHotelRepository(
+        service: SkyScannerApiService
+    ): HotelRepository {
+        return HotelRepositoryImpl(service)
+    }
+
     @Provides
     @Singleton
     fun provideUseCases(
@@ -157,12 +195,55 @@ object ObjectModuleSingleton {
             getNearbyPlaces = GetNearbyPlaceUseCase(repo)
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideRepo(
+        placesClient: PlacesClient,
+        types: List<String>
+    ): PlaceRepository {
+        return PlaceRepositoryImpl(placesClient, types)
+    }
     /**
-     * use case end
+     * repository 설정 끝
+     */
+    /**
+     * room database
      */
     @Provides
-    fun provideGeocoder(@ApplicationContext context: Context): Geocoder {
-        return Geocoder(context)
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        ).fallbackToDestructiveMigration() // 이전 데이터베이스 스키마를 삭제하고 새로 생성
+            .build()
     }
 
+
+    @Provides
+    fun provideUserScheduleDao(database: AppDatabase): UserScheduleDao {
+        return database.userScheduleDao()
+    }
+    /**
+     * room database 끝
+     */
+    /**
+     * 기타 설정
+     */
+
+    @Provides
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
+    }
+
+
+    @Provides
+    fun provideTypes(): List<String> {
+        return listOf("restaurant", "museum", "park", "cafe")
+    }
+    /**
+     * 기타 설정 끝
+     */
 }

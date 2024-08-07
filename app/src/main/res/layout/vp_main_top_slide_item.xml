@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:importantForAccessibility="no"
     android:minHeight="160dp"
+    android:src="@drawable/banner1"
     app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.circleImageView.15">
 
 </com.google.android.material.imageview.ShapeableImageView>

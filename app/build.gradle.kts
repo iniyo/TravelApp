@@ -35,9 +35,11 @@ android {
         /*manifestPlaceholders["metaClientToken"] = properties.getProperty("meta_client_token")*/
 
         buildConfigField("String", "maps_api_url", properties.getProperty("maps_api_url"))
+        buildConfigField("String", "place_base_url", properties.getProperty("place_base_url"))
+        buildConfigField("String", "route_base_url", properties.getProperty("route_base_url"))
+        buildConfigField("String", "skyscanner_base_url", properties.getProperty("skyscanner_base_url"))
 
-
-        javaCompileOptions {
+        /*javaCompileOptions {
             annotationProcessorOptions {
                 arguments.putAll(mapOf(
                     "room.schemaLocation" to "$projectDir/schemas",
@@ -45,7 +47,7 @@ android {
                     "room.expandProjection" to "true"
                 ))
             }
-        }
+        }*/
     }
 
     buildTypes {
@@ -108,6 +110,8 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     // okhttp loggin interceptor
     implementation(libs.logging.interceptor)
+    // viewpager circle indicator
+    implementation(libs.dotsindicator)
     /**
      * open source end
      */
@@ -120,7 +124,11 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
+    implementation(libs.car.ui.lib)
     kapt(libs.hilt.compiler)
+
+    // paging
+    implementation(libs.androidx.paging.runtime.ktx)
 
     // coroutine
     implementation(libs.kotlinx.coroutines.core)
@@ -135,6 +143,7 @@ dependencies {
 
     // room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
 

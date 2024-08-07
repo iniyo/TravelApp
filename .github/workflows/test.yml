@@ -26,6 +26,17 @@ jobs:
       - uses: actions/checkout@v4
 
         ## android setting
+        #set min version
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+        # set permission
+      - name: Set Gradlew Permissions
+        run: chmod +x ./gradlew
+        
         # set local properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
@@ -38,10 +49,6 @@ jobs:
       - name: Decode And Save Keystore Base64
         run: |
           echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
-          
-        # set permission
-      - name: Set Gradlew Permissions
-        run: chmod +x ./gradlew
         
         # build apk (debug)
       - name: Build debug # APK를 빌드한다. (디버그용)

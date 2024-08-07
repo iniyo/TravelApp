@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 on:
@@ -28,27 +26,31 @@ jobs:
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
 
-      # TRAVEL_LOCAL_PROPERTIES_CONTENT 출력 (디버깅을 위해 추가)
-      - name: Print TRAVEL_LOCAL_PROPERTIES_CONTENT
-        run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT"
-
-      # local.properties 생성
-      - name: Create local.properties
+      # 시크릿 값 디버깅 (환경 변수 출력)
+      - name: Debug Secrets
         run: |
-          echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
-          echo "TRAVEL_KEYSTORE_BASE64=keystore.jks" >> local.properties
-
-      # local.properties 디버깅
-      - name: Debug local.properties
-        run: cat local.properties
+          echo "TRAVEL_LOCAL_PROPERTIES_CONTENT: ${{ secrets.TRAVEL_LOCAL_PROPERTIES_CONTENT }}"
+          echo "TRAVEL_GOOGLE_JSON: ${{ secrets.TRAVEL_GOOGLE_JSON }}"
+          echo "TRAVEL_KEYSTORE_BASE64: ${{ secrets.TRAVEL_KEYSTORE_BASE64 }}"
+          echo "TRAVEL_FIREBASE_APP_ID: ${{ secrets.TRAVEL_FIREBASE_APP_ID }}"
+          echo "TRAVEL_FIREBASE_SERVICE_CREDENTIALS: ${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}"
 
       # JAVA_HOME 설정
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 
+      # local.properties 생성
+      - name: Create local.properties
+        run: |
+          echo "${{ secrets.TRAVEL_LOCAL_PROPERTIES_CONTENT }}" > local.properties
+
+      # local.properties 디버깅
+      - name: Debug local.properties
+        run: cat local.properties
+
       # google-services.json 생성
       - name: Create google-services.json
-        run: echo "$TRAVEL_GOOGLE_JSON" > app/google-services.json
+        run: echo "${{ secrets.TRAVEL_GOOGLE_JSON }}" > app/google-services.json
 
       # Keystore Base64 디코딩 및 저장
       - name: Decode And Save Keystore Base64
@@ -67,5 +69,3 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk
-
-

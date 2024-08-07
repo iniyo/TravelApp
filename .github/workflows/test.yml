@@ -2,27 +2,18 @@
 
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
       ## android setting
@@ -36,10 +27,11 @@ jobs:
       # Set Gradlew Permissions
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
-        
-      - name: Print environment variables
+
+      # Print TRAVEL_LOCAL_PROPERTIES_CONTENT (디버깅을 위해 추가)
+      - name: Print TRAVEL_LOCAL_PROPERTIES_CONTENT
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT"
-        
+
       # Create local.properties
       - name: Create local.properties
         run: echo "$TRAVEL_LOCAL_PROPERTIES_CONTENT" > local.properties
@@ -53,7 +45,7 @@ jobs:
         run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 
       # Create google-services.json
-      - name: Create google-services.json # 환경변수(GOOGLE_SERVICES_JSON) 값의 내용을 기반으로 `app/google-services.json`를 만든다.
+      - name: Create google-services.json
         run: echo "$TRAVEL_GOOGLE_JSON" > app/google-services.json
 
       # Decode And Save Keystore Base64
@@ -62,15 +54,15 @@ jobs:
           echo "${{ secrets.TRAVEL_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
       # Build debug APK
-      - name: Build debug # APK를 빌드한다. (디버그용)
+      - name: Build debug
         run: ./gradlew assembleDebug
 
       # Upload to Firebase App Distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID }} # 설정해야 하는 부분
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_CREDENTIALS }} # 설정해야 하는 부분
+          appId: ${{ secrets.TRAVEL_FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.TRAVEL_FIREBASE_SERVICE_CREDENTIALS }}
           groups: testers
           file: app/build/outputs/apk/debug/app-debug.apk
 

@@ -7,6 +7,8 @@ import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.components.SingletonComponent
 import pjo.travelapp.data.repo.AiChatRepository
 import pjo.travelapp.data.repo.AiChatRepositoryImpl
+import pjo.travelapp.data.repo.NoticeRepository
+import pjo.travelapp.data.repo.NoticeRepositoryImpl
 import pjo.travelapp.data.repo.UserRepository
 import pjo.travelapp.data.repo.UserRepositoryImpl
 import pjo.travelapp.presentation.util.navigator.AppNavigator
@@ -36,4 +38,9 @@ abstract class SingletonModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNoticeRepository(impl: NoticeRepositoryImpl): NoticeRepository
+
 }

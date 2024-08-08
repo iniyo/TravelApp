@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
+import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.kakao.sdk.common.KakaoSdk
 import com.navercorp.nid.NaverIdLoginSDK
@@ -24,12 +25,16 @@ class TravelApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        setFirebaseInitialize()
         setKakaoSdk()
         setNaverSdk()
         setupGlobalExceptionHandler()
         setupGlobalLoggingHandler()
     }
 
+    private fun setFirebaseInitialize() {
+        FirebaseApp.initializeApp(this)
+    }
 
     private fun setupGlobalExceptionHandler() {
         // 기존 UncaughtExceptionHandler 저장

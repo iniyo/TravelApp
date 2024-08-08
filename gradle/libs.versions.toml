@@ -46,6 +46,7 @@ pagingCommonAndroid = "3.3.1"
 carUiLib = "2.6.0"
 firebaseCrashlyticsKtx = "19.0.3"
 firebaseCrashlytics = "3.0.2"
+firebaseFirestoreKtx = "25.0.0"
 
 [libraries]
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
@@ -62,7 +63,7 @@ androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref =
 chip-navigation-bar = { module = "com.github.ismaeldivita:chip-navigation-bar", version.ref = "chipNavigationBar" }
 dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
 facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
-firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 groupie = { module = "com.github.lisawray.groupie:groupie", version.ref = "groupie" }
@@ -86,13 +87,13 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGso" }
 rollingtext = { module = "com.github.YvesCheung.RollingText:RollingText", version.ref = "rollingtext" }
-firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 view = { module = "com.kizitonwose.calendar:view", version.ref = "view" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 car-ui-lib = { group = "com.android.car.ui", name = "car-ui-lib", version.ref = "carUiLib" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 
 [plugins]

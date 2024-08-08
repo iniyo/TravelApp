@@ -41,44 +41,66 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/iv_store_title"
+                <FrameLayout
+                    android:id="@+id/fl_viewpager_container"
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
-                    android:importantForAccessibility="no"
-                    android:scaleType="centerCrop"
-                    app:imageUrl="@{place.photos[0]}"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <LinearLayout
-                    android:id="@+id/ll_focus"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@color/dark_gray"
-                    android:gravity="center_vertical"
-                    app:layout_constraintBottom_toBottomOf="@+id/iv_store_title"
-                    app:layout_constraintEnd_toEndOf="@+id/iv_store_title">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="5dp"
-                        android:importantForAccessibility="no"
-                        app:imageUrl="@{place.photos[0]}" />
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/vp_image_slider"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+                    <View
+                        android:id="@+id/v_top_gradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_gradient_white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:layout_width="30dp"
+                        android:id="@+id/tv_images_size"
+                        android:layout_width="wrap_content"
                         android:layout_height="30dp"
+                        android:layout_gravity="end|bottom"
                         android:layout_marginStart="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/bg_dark_gray_corner_7"
                         android:gravity="center_vertical"
+                        android:padding="5dp"
                         android:textColor="@color/white"
-                        android:textSize="14sp"
-                        app:getPhotosSize="@{place.photos}" />
+                        android:textSize="14sp" />
 
-                </LinearLayout>
+                    <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+                        android:id="@+id/di_vp_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_gravity="center_horizontal|bottom"
+                        app:dotsCornerRadius="8dp"
+                        app:dotsSize="8dp"
+                        app:dotsSpacing="4dp"
+                        app:dotsWidthFactor="2.5"
+                        app:layout_constraintBottom_toBottomOf="@+id/fl_viewpager_container"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:progressMode="true"
+                        app:dotsColor="@color/blue"
+                        app:dotsStrokeColor="@color/dark_gray" />
+
+                </FrameLayout>
 
                 <LinearLayout
                     android:id="@+id/ll_maps_bottom_sheet_main_container"
@@ -88,7 +110,7 @@
                     android:paddingBottom="50dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/iv_store_title">
+                    app:layout_constraintTop_toBottomOf="@+id/fl_viewpager_container">
 
                     <TextView
                         android:id="@+id/tv_store_title"

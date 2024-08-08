@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import pjo.travelapp.BuildConfig
 import pjo.travelapp.data.datasource.AppDatabase
+import pjo.travelapp.data.datasource.NoticeDao
 import pjo.travelapp.data.datasource.UserPlanDao
 import pjo.travelapp.data.remote.AiChatService
 import pjo.travelapp.data.remote.MapsApiService
@@ -236,6 +238,11 @@ object ObjectSingletonModule {
     fun provideUserScheduleDao(database: AppDatabase): UserPlanDao {
         return database.userPlanDao()
     }
+
+    @Provides
+    fun provideNoticeDao(database: AppDatabase): NoticeDao {
+        return database.noticeDao()
+    }
     /**
      * room database 끝
      */
@@ -254,6 +261,11 @@ object ObjectSingletonModule {
         return listOf("restaurant", "museum", "park", "cafe")
     }
 
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
     /**
      * 기타 설정 끝
      */

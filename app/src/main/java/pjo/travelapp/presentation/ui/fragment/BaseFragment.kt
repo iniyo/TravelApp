@@ -80,8 +80,9 @@ abstract class BaseFragment<T : ViewBinding> : Fragment() {
     protected open fun initListener() {}
     protected open fun afterViewCreated() {}
     protected open fun initAdapter() {}
-
-
+    open fun handleBackPressed(): Boolean {
+        return true
+    }
     // ViewBinding 객체에 대해 블록 코드를 실행하는 메서드
     protected inline fun bind(crossinline block: T.() -> Unit) {
         _binding?.apply(block)

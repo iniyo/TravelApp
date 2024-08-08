@@ -2,17 +2,16 @@ package pjo.travelapp.presentation.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.databinding.RvScheduleItemBinding
 
 class ScheduleDefaultAdapter(
-    private val itemClickListener: (PlaceDetail) -> Unit
-) :
-    RecyclerView.Adapter<ScheduleDefaultAdapter.ViewHolder>() {
-
-    private val placesWithPhotos = mutableListOf<PlaceDetail>()
+    private val itemClickListener: (PlaceDetail) -> Unit,
+) : ListAdapter<PlaceDetail, ScheduleDefaultAdapter.ViewHolder>(PlaceDetailDiffCallback()) {
 
     inner class ViewHolder(private val binding: RvScheduleItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -52,14 +51,18 @@ class ScheduleDefaultAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(placesWithPhotos[position])
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount(): Int = placesWithPhotos.size
+    // DiffUtil.Callback을 사용하여 데이터 변경을 효율적으로 처리
+    class PlaceDetailDiffCallback : DiffUtil.ItemCallback<PlaceDetail>() {
+        override fun areItemsTheSame(oldItem: PlaceDetail, newItem: PlaceDetail): Boolean {
+            return oldItem.place.id == newItem.place.id // 고유 식별자 비교
+        }
 
-    fun addPlace(placeWithPhoto: PlaceDetail) {
-        placesWithPhotos.add(placeWithPhoto)
-
-        notifyItemInserted(placesWithPhotos.size - 1)
+        override fun areContentsTheSame(oldItem: PlaceDetail, newItem: PlaceDetail): Boolean {
+            return oldItem == newItem // 데이터 클래스의 equals 메서드 사용
+        }
     }
 }
+

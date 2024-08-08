@@ -76,15 +76,11 @@ class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 is LatestUiState.Success -> {
                     when (choose) {
                         true -> {
-                            state.data.forEach {
-                                defaultAdapter1?.addPlace(it)
-                            }
+                            defaultAdapter1?.submitList(state.data)
                         }
 
                         else -> {
-                            state.data.forEach {
-                                defaultAdapter2?.addPlace(it)
-                            }
+                            defaultAdapter2?.submitList(state.data)
                         }
                     }
                 }
@@ -120,7 +116,12 @@ class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
             defaultAdapter2 = scheduleAdapter
 
             vpTrips.apply {
-                val (pageTransX, decoration) = MyGraphicMapper.getDecoration()
+                val itemMargin = (MyGraphicMapper.getScreenWidth(requireContext()) * 0.02)
+                val previewWidth = (MyGraphicMapper.getScreenWidth(requireContext()) * 0.02)
+                val (pageTransX, decoration) = MyGraphicMapper.getDecoration(
+                    itemMargin.toInt(),
+                    previewWidth.toInt()
+                )
 
                 addItemDecoration(decoration)
                 setPageTransformer { page, position ->

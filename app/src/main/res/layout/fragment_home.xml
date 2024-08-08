@@ -52,10 +52,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp"
                 android:background="@color/white"
-                android:elevation="3dp">
+                android:elevation="3dp"
+                android:paddingBottom="5dp">
 
                 <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/lav_bell"
+                    android:id="@+id/lav_notice_bell"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginTop="20dp"
@@ -63,6 +64,7 @@
                     android:importantForAccessibility="no"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:lottie_autoPlay="false"
                     app:lottie_rawRes="@raw/animation_bell" />
 
                 <com.google.android.material.tabs.TabLayout
@@ -71,10 +73,9 @@
                     android:layout_height="60dp"
                     android:layout_marginVertical="10dp"
                     android:background="@color/white"
-                    android:paddingBottom="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/lav_bell"
+                    app:layout_constraintTop_toBottomOf="@+id/lav_notice_bell"
                     app:tabBackground="@drawable/selector_bg_search_pic_btn"
                     app:tabIconTint="@null"
                     app:tabIndicatorGravity="top"
@@ -132,8 +133,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:paddingStart="15dp"
                         android:paddingVertical="10dp"
+                        android:paddingStart="15dp"
                         android:text="@string/fukuoka"
                         android:textColor="#1d1d1d"
                         android:textSize="16sp"
@@ -237,22 +238,22 @@
 
                     <com.facebook.shimmer.ShimmerFrameLayout
                         android:id="@+id/sfl_recommended"
-                        android:paddingHorizontal="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:paddingHorizontal="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="horizontal">
-                            <include
-                                layout="@layout/item_home_place_data_shimmer"/>
 
-                            <include
-                                layout="@layout/item_home_place_data_shimmer"/>
+                            <include layout="@layout/item_home_place_data_shimmer" />
+
+                            <include layout="@layout/item_home_place_data_shimmer" />
                         </LinearLayout>
                     </com.facebook.shimmer.ShimmerFrameLayout>
 
@@ -306,9 +307,9 @@
 
                     <com.facebook.shimmer.ShimmerFrameLayout
                         android:id="@+id/sfl_popular"
-                        android:paddingHorizontal="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:paddingHorizontal="16dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -318,11 +319,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="horizontal">
-                            <include
-                                layout="@layout/item_home_place_data_shimmer"/>
 
-                            <include
-                                layout="@layout/item_home_place_data_shimmer"/>
+                            <include layout="@layout/item_home_place_data_shimmer" />
+
+                            <include layout="@layout/item_home_place_data_shimmer" />
                         </LinearLayout>
                     </com.facebook.shimmer.ShimmerFrameLayout>
 

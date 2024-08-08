@@ -38,6 +38,9 @@
             app:destination="@id/placeDetailFragment"
             app:enterAnim="@anim/anim_slide_on_right"
             app:popExitAnim="@anim/anim_slide_on_left" />
+        <action
+            android:id="@+id/action_homeFragment_to_noticeFragment"
+            app:destination="@id/noticeFragment" />
     </fragment>
     <fragment
         android:id="@+id/accommodationDetailFragment"
@@ -82,7 +85,7 @@
             android:id="@+id/action_userDetailFragment_to_signFragment"
             app:destination="@id/signFragment"
             app:enterAnim="@anim/anim_slide_on_top"
-            app:exitAnim="@anim/anim_slide_on_bottom" />
+            app:popExitAnim="@anim/anim_slide_on_bottom" />
         <action
             android:id="@+id/action_userDetailFragment_to_scehduleFragment"
             app:destination="@id/scehduleFragment" />
@@ -149,5 +152,9 @@
             app:enterAnim="@anim/anim_slide_on_right"
             app:popExitAnim="@anim/anim_slide_on_left" />
     </fragment>
+    <fragment
+        android:id="@+id/noticeFragment"
+        android:name="pjo.travelapp.presentation.ui.fragment.NoticeFragment"
+        android:label="NoticeFragment" />
 
 </navigation>

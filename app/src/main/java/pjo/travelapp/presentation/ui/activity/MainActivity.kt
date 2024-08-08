@@ -31,6 +31,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -38,6 +40,7 @@ import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.adapter.AiChatAdapter
+import pjo.travelapp.presentation.ui.fragment.BaseFragment
 import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
@@ -56,26 +59,28 @@ open class MainActivity : AppCompatActivity() {
     private val planViewModel: PlanViewModel by viewModels()
     private val aiChatViewModel: AiChatViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-
-    @Inject
-    lateinit var navigator: AppNavigator
+    @Inject lateinit var navigator: AppNavigator
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var checkPermissionState: Boolean = false
+    private lateinit var db: FirebaseFirestore
 
+    // check permision array
     private val requiredPermissions = arrayOf(
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
+    // other activity intent callback
     private val settingsLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         checkPermissionsAndRequestIfNeeded()
     }
 
+    // permission check state input -> output: permission Allowed check callback
     private val requestMultiplePermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -108,6 +113,7 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun startSplash() {
+        // splach screen 이후에 inflate 설정
         splashScreen = installSplashScreen()
     }
 
@@ -116,19 +122,25 @@ open class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
     }
 
-    private fun setClickListener() {
-        binding.clAnimator.setOnClickListener {
-            toggleBottomSheet()
-        }
+    private fun firebaseDbController() {
+        db = FirebaseFirestore.getInstance()
+    }
 
-        binding.btnSend.setOnClickListener {
-            aiChatViewModel.sendMessage(binding.etSubmitText.text.toString())
-            binding.adapter?.addMessage(IsMessage(binding.etSubmitText.text.toString(), true))
-            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
-            binding.etSubmitText.text.clear()
+    private fun setClickListener() {
+        binding.apply {
+            clAnimator.setOnClickListener {
+                toggleBottomSheet()
+            }
+            btnSend.setOnClickListener {
+                aiChatViewModel.sendMessage(etSubmitText.text.toString())
+                aiAdapter?.addMessage(IsMessage(etSubmitText.text.toString(), true))
+                rvAiChat.scrollToPosition(aiAdapter?.itemCount!! - 1)
+                etSubmitText.text.clear()
+            }
         }
     }
 
+    // back stack 관리
     private fun handleBackStack() {
         val fragmentManager = supportFragmentManager
         if (fragmentManager.backStackEntryCount > 1) {
@@ -139,6 +151,7 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    // chip navigation click listener
     private fun setNavigationOnClick() {
         binding.apply {
             cnbItem.setOnItemSelectedListener { id ->
@@ -152,12 +165,11 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    // bottom sheet
     private fun setBottomSheet() {
         val bottomSheet = binding.clBottomSheetContainer
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetBehavior.isFitToContents = true
-        bottomSheetBehavior.halfExpandedRatio = 0.6f
 
         bottomSheet.viewTreeObserver.addOnGlobalLayoutListener {
             val maxHeight =
@@ -179,48 +191,51 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setAdapter() {
-        binding.adapter = AiChatAdapter {
+        binding.aiAdapter = AiChatAdapter {
             baseContext.copyTextToClipboard(it.message)
         }
         val layoutManager = LinearLayoutManager(this@MainActivity)
         layoutManager.stackFromEnd = true
         binding.rvAiChat.layoutManager = layoutManager
+
     }
 
     private fun setViewModel() {
-        mainViewModel.fetchData()
+        /*mainViewModel.fetchData()
         mainViewModel.setDates()
-        mainViewModel.searchHotels("tokyo")
+        mainViewModel.searchHotels("tokyo")*/
         planViewModel.fetchUserSchedules()
     }
 
     private fun setViewModelListener() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                aiChatViewModel.response.collectLatest { state ->
-                    when (state) {
-                        is LatestUiState.Success -> {
-                            Log.d("TAG", "setViewModelListener: Success")
-                            binding.adapter?.addMessage(state.data)
-                            binding.adapter?.isLoading = false
-                            binding.etSubmitText.isEnabled = true
-                            binding.btnSend.isEnabled = true
-                            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
-                        }
+        binding.apply {
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    aiChatViewModel.response.collectLatest { state ->
+                        when (state) {
+                            is LatestUiState.Success -> {
+                                Log.d("TAG", "setViewModelListener: Success")
+                                aiAdapter?.addMessage(state.data)
+                                aiAdapter?.isLoading = false
+                                etSubmitText.isEnabled = true
+                                btnSend.isEnabled = true
+                                rvAiChat.scrollToPosition(aiAdapter?.itemCount!! - 1)
+                            }
 
-                        is LatestUiState.Error -> {
-                            Snackbar.make(
-                                binding.root,
-                                state.exception.message ?: "Error occurred",
-                                Snackbar.LENGTH_LONG
-                            ).show()
-                        }
+                            is LatestUiState.Error -> {
+                                Snackbar.make(
+                                    root,
+                                    state.exception.message ?: "Error occurred",
+                                    Snackbar.LENGTH_LONG
+                                ).show()
+                            }
 
-                        is LatestUiState.Loading -> {
-                            Log.d("TAG", "setViewModelListener: Loading")
-                            binding.adapter?.isLoading = true
-                            binding.etSubmitText.isEnabled = false
-                            binding.btnSend.isEnabled = false
+                            is LatestUiState.Loading -> {
+                                Log.d("TAG", "setViewModelListener: Loading")
+                                aiAdapter?.isLoading = true
+                                etSubmitText.isEnabled = false
+                                btnSend.isEnabled = false
+                            }
                         }
                     }
                 }
@@ -260,25 +275,26 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ai chat and app finish control
     private fun setupOnBackPressedDispatcher() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val navController = navigator.retrieveNavController()
-                if (navController.currentDestination?.id == R.id.homeFragment) {
-                    if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                val currentDestination = navController.currentDestination
+
+                if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                } else if (currentDestination?.id == R.id.homeFragment) {
+                    if (backPressedOnce) {
+                        finish()
                     } else {
-                        if (backPressedOnce) {
-                            finish()
-                        } else {
-                            backPressedOnce = true
-                            Snackbar.make(
-                                binding.root,
-                                getString(R.string.end_application),
-                                Snackbar.LENGTH_SHORT
-                            ).show()
-                            handler.postDelayed({ backPressedOnce = false }, 2000)
-                        }
+                        backPressedOnce = true
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.end_application),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        handler.postDelayed({ backPressedOnce = false }, 2000)
                     }
                 } else {
                     navController.navigateUp()
@@ -313,6 +329,7 @@ open class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    // user has not checked the how permissions
     private fun checkPermissionsAndRequestIfNeeded() {
         val missingPermissions = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -334,21 +351,11 @@ open class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun setCheckLocationPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
-                    Log.d("TAG", "enableMyLocation: $currentLatLng")
-                    mainViewModel.fetchCurrentLocation(currentLatLng)
-                }
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                Log.d("TAG", "enableMyLocation: $currentLatLng")
+                mainViewModel.fetchCurrentLocation(currentLatLng)
             }
         }
     }

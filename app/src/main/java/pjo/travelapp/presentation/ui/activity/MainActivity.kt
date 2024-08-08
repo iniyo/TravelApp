@@ -122,10 +122,6 @@ open class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
     }
 
-    private fun firebaseDbController() {
-        db = FirebaseFirestore.getInstance()
-    }
-
     private fun setClickListener() {
         binding.apply {
             clAnimator.setOnClickListener {

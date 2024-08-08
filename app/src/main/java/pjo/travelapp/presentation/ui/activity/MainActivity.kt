@@ -62,6 +62,7 @@ open class MainActivity : AppCompatActivity() {
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var checkPermissionState: Boolean = false
 
     private val requiredPermissions = arrayOf(
         Manifest.permission.RECORD_AUDIO,
@@ -317,12 +318,13 @@ open class MainActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
         if (missingPermissions.isNotEmpty()) {
-            val shouldShowRationale = missingPermissions.any {
-                ActivityCompat.shouldShowRequestPermissionRationale(this, it)
-            }
-            if (shouldShowRationale) {
+            if(!checkPermissionState){
                 requestMultiplePermissionsLauncher.launch(missingPermissions.toTypedArray())
-            } else {
+                checkPermissionState = true
+            }else {
+               /* missingPermissions.any {
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, it)
+                }*/
                 showPermissionDeniedDialog()
             }
         } else {

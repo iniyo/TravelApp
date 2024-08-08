@@ -6,7 +6,7 @@
     <data>
 
         <variable
-            name="adapter"
+            name="ai_adapter"
             type="pjo.travelapp.presentation.adapter.AiChatAdapter" />
     </data>
 
@@ -100,7 +100,7 @@
                 android:id="@+id/rv_ai_chat"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
-                android:adapter="@{adapter}"
+                android:adapter="@{ai_adapter}"
                 android:background="@color/gray"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toTopOf="@id/et_submit_text"

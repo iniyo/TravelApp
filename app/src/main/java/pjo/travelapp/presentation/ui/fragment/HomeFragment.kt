@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.activityViewModels
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -17,7 +16,6 @@ import pjo.travelapp.presentation.adapter.MorePlacesViewPagerAdapter
 import pjo.travelapp.presentation.adapter.PromotionSlideAdapter
 import pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
-import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.LatestUiState
@@ -37,24 +35,26 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     override fun initView() {
         super.initView()
         startRollingTextAnimation()
-        setLottieAnimation()
         setTabLayout()
     }
 
     override fun initViewModel() {
         super.initViewModel()
         bind {
+            mainViewModel.fetchNoticeData() // 여기서 notice 요청
             launchWhenStarted {
                 launch {
                     mainViewModel.shuffledHotPlaceList.collectLatest {
                         when (it) {
-                            is LatestUiState.Loading -> { sflPopular.visibility = View.VISIBLE}
+                            is LatestUiState.Loading -> {
+                                sflPopular.visibility = View.VISIBLE
+                            }
+
                             is LatestUiState.Success -> {
                                 sflPopular.visibility = View.GONE
-                                it.data.forEach { res ->
-                                    popularRecycleAdapter?.addPlace(res)
-                                }
+                                popularRecycleAdapter?.submitList(it.data)
                             }
+
                             is LatestUiState.Error -> it.exception.printStackTrace()
                         }
                     }
@@ -62,13 +62,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 launch {
                     mainViewModel.shuffledHotPlaceList.collectLatest {
                         when (it) {
-                            is LatestUiState.Loading -> {sflRecommended.visibility = View.VISIBLE}
+                            is LatestUiState.Loading -> {
+                                sflRecommended.visibility = View.VISIBLE
+                            }
+
                             is LatestUiState.Success -> {
                                 sflRecommended.visibility = View.GONE
                                 it.data.forEach { res ->
                                     recommendedRecycleAdapter?.addPlace(res)
                                 }
                             }
+
                             is LatestUiState.Error -> it.exception.printStackTrace()
                         }
                     }
@@ -84,8 +88,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                                     topPromotionViewpagerAdapter?.addAd(res)
                                 }
                             }
+
                             is LatestUiState.Error -> it.exception.printStackTrace()
                         }
+                    }
+                }
+
+                launch {
+                    mainViewModel.noticeData.collectLatest { notices ->
+                        val hasNewNotice = notices.any { it.isNew }
+                        setLottieAnimation(hasNewNotice)
                     }
                 }
             }
@@ -93,15 +105,19 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     }
 
     private fun setTabLayout() {
-        val marginSize = resources.getDimensionPixelSize(R.dimen.tab_item_margin)
+        val marginSize = (MyGraphicMapper.getScreenWidth(requireContext()) * 0.08).toInt()
         bind {
             setTabItemMargin(tlTop, marginSize, marginSize)
+
+            morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)
+            vpTabItemsShow.adapter = morePlaceViewpagerAdapter
 
             tlTop.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     tab?.let {
                         // ViewPager의 어댑터를 탭의 위치에 따라 다시 설정
-                        morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), it.position)
+                        morePlaceViewpagerAdapter =
+                            MorePlacesViewPagerAdapter(requireActivity(), it.position)
                         vpTabItemsShow.adapter = morePlaceViewpagerAdapter
 
                         // ViewPager의 현재 페이지를 0으로 설정 (첫 페이지)
@@ -122,12 +138,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
     }
 
-
-    /* override fun onPause() {
-         super.onPause()
-         binding.morePlaceViewpagerAdapter = null
-     }*/
-
     // TabLayout Tab 사이 간격 부여
     private fun setTabItemMargin(tabLayout: TabLayout, marginStart: Int, marginEnd: Int) {
         val tabs = tabLayout.getChildAt(0) as ViewGroup
@@ -137,7 +147,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             lp.marginStart = marginStart
             lp.marginEnd = marginEnd
             tab.layoutParams = lp
-
 
             tabLayout.requestLayout()
         }
@@ -157,7 +166,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             rvCategory.setHasFixedSize(true)
             vpTabItemsShow.offscreenPageLimit = 2
 
-            val scehduleAdapter = ScheduleDefaultAdapter{
+            val scehduleAdapter = ScheduleDefaultAdapter {
                 detailViewModel.fetchPlaceDetails(it)
                 navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
             }
@@ -165,25 +174,48 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             topPromotionViewpagerAdapter = PromotionSlideAdapter()
 
             categoryRecycleAdapter = CategoryRecyclerAdapter {
-                when(it) {
-                    "항공" -> {}
-                    "호텔" -> {}
-                    "관광지" -> {}
-                    "내 여행 계획" -> { navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)}
-                    "근처 맛집" -> {}
+                when (it) {
+                    getString(R.string.airline) -> {}
+                    getString(R.string.hotel) -> {}
+                    getString(R.string.tourist_attraction) -> {}
+                    getString(R.string.my_travel_schedule) -> {
+                        navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)
+                    }
+
+                    getString(R.string.restaurants_nearby) -> {}
                 }
             }
-            recommendedRecycleAdapter = RecommendedRecyclerAdapter{
+
+            recommendedRecycleAdapter = RecommendedRecyclerAdapter {
                 detailViewModel.fetchPlaceDetails(it)
                 navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
             }
+
             popularRecycleAdapter = scehduleAdapter
             morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)
         }
     }
 
-    private fun setLottieAnimation() {
-        binding.lavBell.playAnimation()
+    override fun initListener() {
+        bind {
+            rtvSearch.setOnClickListener {
+                navigator.navigateTo(Fragments.SEARCH_PAGE)
+            }
+            lavNoticeBell.setOnClickListener {
+                navigator.navigateTo(Fragments.NOTICE_PAGE)
+            }
+        }
+    }
+
+    private fun setLottieAnimation(hasNewNotice: Boolean) {
+       bind {
+           if (hasNewNotice) {
+               lavNoticeBell.playAnimation()
+           } else {
+               lavNoticeBell.cancelAnimation()
+               lavNoticeBell.progress = 0f  // 애니메이션 초기화
+           }
+       }
     }
 
     private fun startRollingTextAnimation() {
@@ -213,10 +245,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             setTextArray(rollingText)
             setDuration(3000L) // 2 seconds duration
 
-
-            setOnClickListener {
-                navigator.navigateTo(Fragments.SEARCH_PAGE)
-            }
         }
     }
 }

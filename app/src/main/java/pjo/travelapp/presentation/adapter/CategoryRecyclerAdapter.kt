@@ -2,26 +2,33 @@ package pjo.travelapp.presentation.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import pjo.travelapp.data.entity.Category
 import pjo.travelapp.databinding.RvCategoryItemBinding
 
 class CategoryRecyclerAdapter(
     private val itemClickListener: (String) -> Unit
-) : RecyclerView.Adapter<CategoryRecyclerAdapter.ViewHolder>() {
+) : ListAdapter<CategoryRecyclerAdapter.CategoryItem, CategoryRecyclerAdapter.ViewHolder>(CategoryDiffCallback()) {
 
     private val category = Category()
     private val imgList: List<Int> = category.getImgList()
     private val titleList: List<String> = category.getTitleList()
 
-    inner class ViewHolder(private val binding: RvCategoryItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(imgUrl: Int, title: String) {
+    init {
+        val categoryItems = imgList.mapIndexed { index, imgResId ->
+            CategoryItem(imgResId, titleList[index % titleList.size])
+        }
+        submitList(categoryItems)
+    }
 
+    inner class ViewHolder(private val binding: RvCategoryItemBinding) :
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: CategoryItem) {
             binding.apply {
-                ivPic.setImageResource(imgUrl)
-                tvTitle.text = title
-                itemView.setOnClickListener { itemClickListener(title) }
+                ivPic.setImageResource(item.imgResId)
+                tvTitle.text = item.title
+                itemView.setOnClickListener { itemClickListener(item.title) }
             }
         }
     }
@@ -33,13 +40,21 @@ class CategoryRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(imgList[position % imgList.size], titleList[position % titleList.size])
+        val item = getItem(position)
+        holder.bind(item)
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
+    data class CategoryItem(val imgResId: Int, val title: String)
+
+    class CategoryDiffCallback : DiffUtil.ItemCallback<CategoryItem>() {
+        override fun areItemsTheSame(oldItem: CategoryItem, newItem: CategoryItem): Boolean {
+            // 각각의 아이템들이 같은지 여부를 비교
+            return oldItem.title == newItem.title
+        }
+
+        override fun areContentsTheSame(oldItem: CategoryItem, newItem: CategoryItem): Boolean {
+            // 아이템의 내용이 같은지 여부를 비교
+            return oldItem == newItem
+        }
     }
-
-    override fun getItemCount(): Int = imgList.size
-
 }

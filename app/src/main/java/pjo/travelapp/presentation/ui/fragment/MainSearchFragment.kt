@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.SearchView
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.databinding.FragmentMainSearchBinding
@@ -77,6 +78,11 @@ class MainSearchFragment : BaseFragment<FragmentMainSearchBinding>() {
                 launch {
                     mainViewModel.placeDetailsList.collectLatest {
                         adapter?.submitList(it)
+                    }
+                }
+                launch {
+                    mainViewModel.noticeData.collect{
+
                     }
                 }
             }

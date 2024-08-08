@@ -38,7 +38,8 @@ class AppNavigatorImpl @Inject constructor(private val activity: FragmentActivit
         Fragments.PLACE_SELECT_PAGE to R.id.placeSelectFragment,
         Fragments.PLACE_DETAIL_PAGE to HomeFragmentDirections.actionHomeFragmentToPlaceDetailFragment3(),
         Fragments.PLACE_DETAIL_PAGE_ITEM to ScheduleFragmentDirections.actionScehduleFragmentToPlaceDetailFragment(),
-        Fragments.PLACE_DETAIL_PAGE_RE to PlanFragmentDirections.actionPlanFragmentToPlaceDetailFragment()
+        Fragments.PLACE_DETAIL_PAGE_RE to PlanFragmentDirections.actionPlanFragmentToPlaceDetailFragment(),
+        Fragments.NOTICE_PAGE to R.id.noticeFragment
     )
 
     override fun navigateTo() {

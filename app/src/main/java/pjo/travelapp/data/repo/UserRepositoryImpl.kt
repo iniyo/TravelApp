@@ -1,12 +1,11 @@
 package pjo.travelapp.data.repo
 
-import androidx.room.Insert
 import pjo.travelapp.data.datasource.UserPlanDao
 import pjo.travelapp.data.entity.UserPlan
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
-    private val userPlanDao: UserPlanDao
+    private val userPlanDao: UserPlanDao,
 ) : UserRepository {
 
     override suspend fun insertUserPlan(userPlan: UserPlan): Long {

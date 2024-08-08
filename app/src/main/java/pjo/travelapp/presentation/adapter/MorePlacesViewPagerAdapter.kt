@@ -18,10 +18,6 @@ class MorePlacesViewPagerAdapter(
         return RecycleItemFragment.newInstance(fragmentName)
     }
 
-    override fun containsItem(itemId: Long): Boolean {
-        return super.containsItem(itemId)
-    }
-
     private fun getFragmentSetLists(choose: Int): List<String> {
         return when (choose) {
             0 -> listOf("도쿄", "후쿠오카", "파리")

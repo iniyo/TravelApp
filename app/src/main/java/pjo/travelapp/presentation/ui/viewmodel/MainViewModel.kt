@@ -25,9 +25,12 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.AutocompletePredictionItem
+import pjo.travelapp.data.entity.FireStoreNotice
 import pjo.travelapp.data.entity.HotelCard
 import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.data.repo.HotelRepository
+import pjo.travelapp.data.repo.NoticeRepository
+import pjo.travelapp.data.repo.NoticeRepositoryImpl
 import pjo.travelapp.presentation.util.LatestUiState
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,14 +45,13 @@ private fun <T> List<T>.shuffled(): List<T> {
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private var placesClient: PlacesClient,
-    private val hotelRepo: HotelRepository
+    private val hotelRepo: HotelRepository,
+    private val noticeRepository: NoticeRepository,
 ) : ViewModel() {
 
     /**
      * 변수 선언
      */
-    private val types = listOf("tourist_attraction", "restaurant", "park", "cafe")
-
     private val _tokyoHotPlaceList =
         MutableStateFlow<LatestUiState<List<PlaceDetail>>>(LatestUiState.Loading)
     val tokyoHotPlaceList: StateFlow<LatestUiState<List<PlaceDetail>>> get() = _tokyoHotPlaceList
@@ -89,6 +91,9 @@ class MainViewModel @Inject constructor(
         MutableStateFlow<LatestUiState<List<PlaceDetail>>>(LatestUiState.Loading)
     val shuffledHotPlaceList: StateFlow<LatestUiState<List<PlaceDetail>>> get() = _shuffledHotPlaceList
 
+    private val _noticeData = MutableStateFlow<List<FireStoreNotice>>(emptyList())
+    val noticeData: StateFlow<List<FireStoreNotice>> get() = _noticeData
+
     // 공통 placeFields
     private val placeFields = listOf(
         Place.Field.ID,
@@ -111,6 +116,24 @@ class MainViewModel @Inject constructor(
         fetchQueryTextSearch()
         observeHotPlaceLists()
         fetchPromotion()
+    }
+
+    fun fetchNoticeData() {
+        viewModelScope.launch {
+            try {
+                (noticeRepository as NoticeRepositoryImpl).fetchAndSaveNotices()
+                _noticeData.value = noticeRepository.getNotices()
+            } catch (e: Exception) {
+                Log.e("TAG", "fetchNoticeData: ", e)
+            }
+        }
+    }
+
+    fun updateNotice(notice: FireStoreNotice) {
+        viewModelScope.launch {
+            noticeRepository.updateNotice(notice)
+            _noticeData.value = noticeRepository.getNotices() // 데이터 업데이트 후 다시 가져오기
+        }
     }
 
     fun setDates() {
@@ -144,7 +167,6 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-
 
     private fun getCheckinCheckoutDates(): Pair<String, String> {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -181,7 +203,7 @@ class MainViewModel @Inject constructor(
 
     private fun observeHotPlaceList(
         hotPlaceList: StateFlow<LatestUiState<List<PlaceDetail>>>,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
     ) {
         viewModelScope.launch {
             hotPlaceList.collect { state ->
@@ -280,7 +302,7 @@ class MainViewModel @Inject constructor(
     private suspend fun fetchAndCachePlaceDetails(
         placeId: String,
         placeFields: List<Place.Field>,
-        placesWithPhotos: MutableList<PlaceDetail>
+        placesWithPhotos: MutableList<PlaceDetail>,
     ) {
         val req = FetchPlaceRequest.builder(placeId, placeFields).build()
         val placeDetails = placesClient.fetchPlace(req).await().place
@@ -291,7 +313,7 @@ class MainViewModel @Inject constructor(
 
     private fun addPlaceToResults(
         place: Place,
-        placesWithPhotos: MutableList<PlaceDetail>
+        placesWithPhotos: MutableList<PlaceDetail>,
     ) {
         viewModelScope.launch {
             val photoMetadatas = place.photoMetadatas
@@ -304,7 +326,7 @@ class MainViewModel @Inject constructor(
 
     fun fetchCurrentLocation(lt: LatLng) {
         _currentLocation.value = lt
-       /* fetchNearbyTouristAttractions()*/
+        /* fetchNearbyTouristAttractions()*/
     }
 
     /* fun fetchNearbyPlacesFlow(): Flow<PagingData<Pair<Place, Bitmap?>>> {
@@ -391,38 +413,37 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val placesWithPhotos = mutableListOf<PlaceDetail>()
             val placeIds = mutableSetOf<String>() // Place ID를 저장할 Set 추가
-            types.forEach { type ->
-                val query = "tourist attractions in $city"
-                val searchByTextRequest = SearchByTextRequest.builder(query, placeFields)
-                    .setMaxResultCount(2)
-                    .setMinRating(3.5)
-                    .setIncludedType(type)
-                    .setRankPreference(SearchByTextRequest.RankPreference.DISTANCE)
-                    .build()
-                try {
-                    val response = placesClient.searchByText(searchByTextRequest).await()
+            val query = "tourist attractions in $city"
+            val searchByTextRequest = SearchByTextRequest.builder(query, placeFields)
+                .setMaxResultCount(2)
+                .setMinRating(3.5)
+                .setStrictTypeFiltering(true) // type에 설정된 타입에 일치하는 경우에만
+                .setIncludedType("tourist_attraction")
+                .setRankPreference(SearchByTextRequest.RankPreference.DISTANCE)
+                .build()
+            try {
+                val response = placesClient.searchByText(searchByTextRequest).await()
 
-                    response.places.forEach { place ->
-                        if (place.id!! !in placeIds) { // 중복 여부 확인
-                            val photoMetadatas = place.photoMetadatas
-                            if (!photoMetadatas.isNullOrEmpty()) {
-                                placesWithPhotos.add(
-                                    PlaceDetail(
-                                        place,
-                                        fetchPhotos(photoMetadatas)
-                                    )
+                response.places.forEach { place ->
+                    if (place.id!! !in placeIds) { // 중복 여부 확인
+                        val photoMetadatas = place.photoMetadatas
+                        if (!photoMetadatas.isNullOrEmpty()) {
+                            placesWithPhotos.add(
+                                PlaceDetail(
+                                    place,
+                                    fetchPhotos(photoMetadatas)
                                 )
-                            } else {
-                                placesWithPhotos.add(PlaceDetail(place, null))
-                            }
-                            place.id?.let { placeIds.add(it) } // Set에 Place ID 추가
+                            )
+                        } else {
+                            placesWithPhotos.add(PlaceDetail(place, null))
                         }
+                        place.id?.let { placeIds.add(it) } // Set에 Place ID 추가
                     }
-                    updatePlaceList(city, placesWithPhotos)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    updateUiState(city, LatestUiState.Error(e))
                 }
+                updatePlaceList(city, placesWithPhotos)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                updateUiState(city, LatestUiState.Error(e))
             }
         }
     }
@@ -473,9 +494,7 @@ class MainViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("TAG", "fetchPhoto: $e")
             }
-
             bitmaps
         }
     }
-
 }

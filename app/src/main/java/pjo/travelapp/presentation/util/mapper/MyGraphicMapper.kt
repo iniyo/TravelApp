@@ -30,6 +30,7 @@ object MyGraphicMapper {
     fun dp2px(dp: Int): Int = convertDensity(dp.toFloat(), false).toInt()
     fun dp2px(dp: Float): Float = convertDensity(dp, false)
 
+
     // pageDecoration 반환
     fun getDecoration(itemMargin: Int = 24, previewWidth: Int = 30): Pair<Int, PageDecoration> {
         val decoMargin = previewWidth + itemMargin

@@ -86,13 +86,15 @@ class UserDetailFragment : BaseFragment<FragmentUserDetailBinding>() {
 
 
             vpSchedules.apply {
-                addItemDecoration(decoration)
+                val itemMargin = (MyGraphicMapper.getScreenWidth(requireContext()) * 0.02)
+                val previewWidth = (MyGraphicMapper.getScreenWidth(requireContext()) * 0.02)
+                val (pageTransX, decoration) = MyGraphicMapper.getDecoration(itemMargin.toInt(), previewWidth.toInt())
 
+                addItemDecoration(decoration)
                 setPageTransformer { page, position ->
                     page.translationX = position * -pageTransX
                 }
-
-                offscreenPageLimit = 2
+                offscreenPageLimit = 1
             }
         }
     }

@@ -86,12 +86,12 @@ dependencies {
     implementation(libs.v2.user)
     // naver login
     implementation(libs.oauth)
+    // facebook login
+    implementation(libs.facebook.login)
     // glide
     implementation(libs.glide)
     // firebase
-    implementation(libs.firebase.ui.auth)
-    implementation(libs.facebook.login)
-    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     // google maps service
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
@@ -129,6 +129,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.car.ui.lib)
     implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.firestore.ktx)
     kapt(libs.hilt.compiler)
 
     // paging

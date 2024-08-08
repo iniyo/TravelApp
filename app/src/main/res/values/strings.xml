@@ -37,6 +37,7 @@
     <string name="budget_plan">예산계획</string>
     <string name="check_list">체크리스트</string>
     <string name="airline_ticket">항공권</string>
+    <string name="airline">항공</string>
     <string name="accommodation">숙소</string>
     <string name="social_login_info_naver_client_id">ID_KEY</string>
     <string name="social_login_info_naver_client_secret">SECREY_KEY</string>
@@ -138,4 +139,9 @@
     <string name="permission_checked">앱을 사용하려면 권한이 필요합니다. 권한을 허용해 주세요.</string>
     <string name="need_permission">권한 필요</string>
     <string name="go_to_setting">설정으로 이동</string>
+    <string name="notice">공지사항</string>
+    <string name="hotel">호텔</string>
+    <string name="tourist_attraction">관광지</string>
+    <string name="my_travel_schedule">내 여행 계획</string>
+    <string name="restaurants_nearby">근처 맛집</string>
 </resources>

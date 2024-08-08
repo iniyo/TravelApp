@@ -116,15 +116,17 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setClickListener() {
-        binding.clAnimator.setOnClickListener {
-            toggleBottomSheet()
-        }
+        binding.apply {
+            clAnimator.setOnClickListener {
+                toggleBottomSheet()
+            }
 
-        binding.btnSend.setOnClickListener {
-            aiChatViewModel.sendMessage(binding.etSubmitText.text.toString())
-            binding.adapter?.addMessage(IsMessage(binding.etSubmitText.text.toString(), true))
-            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
-            binding.etSubmitText.text.clear()
+            btnSend.setOnClickListener {
+                aiChatViewModel.sendMessage(etSubmitText.text.toString())
+                adapter?.addMessage(IsMessage(etSubmitText.text.toString(), true))
+                rvAiChat.scrollToPosition(adapter?.itemCount!! - 1)
+                etSubmitText.text.clear()
+            }
         }
     }
 
@@ -194,37 +196,40 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModelListener() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                aiChatViewModel.response.collectLatest { state ->
-                    when (state) {
-                        is LatestUiState.Success -> {
-                            Log.d("TAG", "setViewModelListener: Success")
-                            binding.adapter?.addMessage(state.data)
-                            binding.adapter?.isLoading = false
-                            binding.etSubmitText.isEnabled = true
-                            binding.btnSend.isEnabled = true
-                            binding.rvAiChat.scrollToPosition(binding.adapter?.itemCount!! - 1)
-                        }
+        binding.apply {
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    aiChatViewModel.response.collectLatest { state ->
+                        when (state) {
+                            is LatestUiState.Success -> {
+                                Log.d("TAG", "setViewModelListener: Success")
+                                adapter?.addMessage(state.data)
+                                adapter?.isLoading = false
+                                etSubmitText.isEnabled = true
+                                btnSend.isEnabled = true
+                                rvAiChat.scrollToPosition(adapter?.itemCount!! - 1)
+                            }
 
-                        is LatestUiState.Error -> {
-                            Snackbar.make(
-                                binding.root,
-                                state.exception.message ?: "Error occurred",
-                                Snackbar.LENGTH_LONG
-                            ).show()
-                        }
+                            is LatestUiState.Error -> {
+                                Snackbar.make(
+                                    root,
+                                    state.exception.message ?: "Error occurred",
+                                    Snackbar.LENGTH_LONG
+                                ).show()
+                            }
 
-                        is LatestUiState.Loading -> {
-                            Log.d("TAG", "setViewModelListener: Loading")
-                            binding.adapter?.isLoading = true
-                            binding.etSubmitText.isEnabled = false
-                            binding.btnSend.isEnabled = false
+                            is LatestUiState.Loading -> {
+                                Log.d("TAG", "setViewModelListener: Loading")
+                                adapter?.isLoading = true
+                                etSubmitText.isEnabled = false
+                                btnSend.isEnabled = false
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 
     private fun observeDestinationChanges() {

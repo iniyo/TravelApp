@@ -128,7 +128,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
         setClickListener()
         setListener()
         observeDestinationChanges()
-        firebaseMessaging() // new! token set
+
     }
 
     private fun startSplash() {
@@ -449,7 +449,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
         }
     }
 
-    private fun firebaseMessaging() {
+    /*private fun firebaseMessaging() {
         // FirebaseMessaging 인스턴스를 통해 FCM 등록 토큰을 비동기적으로 가져옴
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             // 토큰을 가져오는데 실패한 경우
@@ -466,7 +466,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
             Log.d("TAG", msg)
             Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
         })
-    }
+    }*/
 }
 
 

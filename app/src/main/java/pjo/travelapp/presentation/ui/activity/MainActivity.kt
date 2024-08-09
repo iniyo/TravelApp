@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.provider.Settings.Global
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -20,7 +19,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -38,17 +36,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
+import pjo.travelapp.data.repo.FirebaseMessaging
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.adapter.AiChatAdapter
-import pjo.travelapp.presentation.ui.fragment.BaseFragment
 import pjo.travelapp.presentation.ui.fragment.PlaceDetailFragment
 import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
@@ -71,6 +66,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
     private val aiChatViewModel: AiChatViewModel by viewModels()
     private val detailViewModel: DetailViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+
     @Inject
     lateinit var navigator: AppNavigator
     private var backPressedOnce = false
@@ -145,25 +141,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
         binding.lifecycleOwner = this
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    private fun setClickListener() {
-        binding.apply {
-            clAnimator.setOnClickListener {
-                toggleBottomSheet()
-            }
-
-            btnSend.setOnClickListener {
-                aiChatViewModel.sendMessage(etSubmitText.text.toString())
-                adapter?.addMessage(IsMessage(etSubmitText.text.toString(), true))
-                rvAiChat.scrollToPosition(adapter?.itemCount!! - 1)
-=======
-    private fun firebaseDbController() {
-        db = FirebaseFirestore.getInstance()
-    }
-
-=======
->>>>>>> fd5abb8dafe04893058c234f0f4aee5599c5d7ab
     private fun setClickListener() {
         binding.apply {
             clAnimator.setOnClickListener {
@@ -173,7 +150,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
                 aiChatViewModel.sendMessage(etSubmitText.text.toString())
                 aiAdapter?.addMessage(IsMessage(etSubmitText.text.toString(), true))
                 rvAiChat.scrollToPosition(aiAdapter?.itemCount!! - 1)
->>>>>>> 095f2d58f4aa856ecc7b2919186382adb4359271
                 etSubmitText.text.clear()
             }
         }
@@ -326,13 +302,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
                         when (state) {
                             is LatestUiState.Success -> {
                                 Log.d("TAG", "setViewModelListener: Success")
-<<<<<<< HEAD
-                                adapter?.addMessage(state.data)
-                                adapter?.isLoading = false
-                                etSubmitText.isEnabled = true
-                                btnSend.isEnabled = true
-                                rvAiChat.scrollToPosition(adapter?.itemCount!! - 1)
-=======
                                 aiAdapter?.addMessage(state.data)
                                 aiAdapter?.isLoading = false
                                 etSubmitText.isEnabled = true
@@ -340,7 +309,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
                                 etSubmitText.setBackgroundColor(Color.WHITE)
                                 btnSend.isEnabled = true
                                 rvAiChat.scrollToPosition(aiAdapter?.itemCount!! - 1)
->>>>>>> 095f2d58f4aa856ecc7b2919186382adb4359271
                             }
 
                             is LatestUiState.Error -> {
@@ -353,11 +321,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
 
                             is LatestUiState.Loading -> {
                                 Log.d("TAG", "setViewModelListener: Loading")
-<<<<<<< HEAD
-                                adapter?.isLoading = true
-=======
                                 aiAdapter?.isLoading = true
->>>>>>> 095f2d58f4aa856ecc7b2919186382adb4359271
                                 etSubmitText.isEnabled = false
                                 etSubmitText.setHint(R.string.ai_loading_state)
                                 etSubmitText.setBackgroundResource(R.color.middle_light_gray)
@@ -368,7 +332,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
                 }
             }
         }
-
     }
 
     private fun observeDestinationChanges() {

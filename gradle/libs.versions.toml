@@ -1,12 +1,11 @@
 [versions]
-agp = "8.5.1"
+agp = "8.5.2"
 androidMapsUtils = "3.8.2"
 chipNavigationBar = "1.4.0"
 converterGso = "2.11.0"
 coreSplashscreen = "1.0.1"
 dotsindicator = "5.0"
 facebookLogin = "17.0.0"
-firebaseUiAuth = "7.2.0"
 flexbox = "3.0.0"
 glide = "4.16.0"
 groupie = "2.10.1"
@@ -38,15 +37,15 @@ googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
 googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 playServicesMaps = "19.0.0"
-firebaseAuth = "23.0.0"
 safeargs = "2.7.7"
 places = "3.5.0"
 googleDevtoolsKsp = "2.0.0-1.0.21"
-pagingCommonAndroid = "3.3.1"
+pagingCommonAndroid = "3.3.2"
 carUiLib = "2.6.0"
 firebaseCrashlyticsKtx = "19.0.3"
 firebaseCrashlytics = "3.0.2"
 firebaseFirestoreKtx = "25.0.0"
+firebaseMessagingKtx = "24.0.0"
 
 [libraries]
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
@@ -64,6 +63,7 @@ chip-navigation-bar = { module = "com.github.ismaeldivita:chip-navigation-bar", 
 dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
 facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 groupie = { module = "com.github.lisawray.groupie:groupie", version.ref = "groupie" }
@@ -94,6 +94,7 @@ places = { group = "com.google.android.libraries.places", name = "places", versi
 car-ui-lib = { group = "com.android.car.ui", name = "car-ui-lib", version.ref = "carUiLib" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 
 
 [plugins]

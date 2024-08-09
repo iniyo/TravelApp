@@ -10,3 +10,4 @@ plugins {
     alias(libs.plugins.firebase.crashlytics) apply false
     kotlin("kapt") version "2.0.0"
 }
+

@@ -91,7 +91,8 @@ dependencies {
     // glide
     implementation(libs.glide)
     // firebase
-    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.firestore) // storage
+    implementation(libs.firebase.messaging) // FCM
     // google maps service
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
@@ -130,6 +131,7 @@ dependencies {
     implementation(libs.car.ui.lib)
     implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.messaging.ktx)
     kapt(libs.hilt.compiler)
 
     // paging

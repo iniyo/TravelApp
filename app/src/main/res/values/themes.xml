@@ -24,6 +24,11 @@
         <item name="background">@drawable/bg_blue_solid_corner</item>
     </style>
 
+    <!-- text -->
+    <style name="ai_chat_edit_theme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorPrimary">@color/white</item>
+    </style>
+
     <!-- rolling textview attr -->
     <declare-styleable name="RollingTextView">
         <attr name="duration" format="integer" />

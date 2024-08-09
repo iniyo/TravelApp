@@ -6,6 +6,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import com.kizitonwose.calendar.core.CalendarDay
@@ -125,29 +126,41 @@ class CalendarFragment : BaseFragment<FragmentCalendarBinding>() {
             }
         }
 
-        if (selection.daysBetween != null) {
-            val period = formatDaysBetween(selection.daysBetween)
-            binding.tvTourDate.text = period
-            viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
-            viewModel.fetchSelectedCalendarDatePeriod(
-                dateRangeDisplayText(
-                    selection.startDate,
-                    selection.endDate
-                )
-            )
-            viewModel.fetchUserAdapter(
-                selectedMonthsAndDays(
-                    selection.startDate,
-                    selection.endDate
-                )
-            )
 
-            viewModel.fetchUserPlan()
+
+        if (selection.daysBetween != null) {
+            if(selection.daysBetween!! > 15) {
+                clearSelection()
+            }else {
+                val period = formatDaysBetween(selection.daysBetween)
+                binding.tvTourDate.text = period
+                viewModel.fetchTripPeriod(selection.daysBetween!!.toInt())
+                viewModel.fetchSelectedCalendarDatePeriod(
+                    dateRangeDisplayText(
+                        selection.startDate,
+                        selection.endDate
+                    )
+                )
+                viewModel.fetchUserAdapter(
+                    selectedMonthsAndDays(
+                        selection.startDate,
+                        selection.endDate
+                    )
+                )
+
+                viewModel.fetchUserPlan()
+            }
         } else {
             binding.tvTourDate.text = resources.getText(R.string.tour_date)
         }
 
         binding.btnSave.isEnabled = selection.daysBetween != null
+    }
+
+    private fun clearSelection() {
+        selection = DateSelection() // Clear all selections
+        binding.cvMain.notifyCalendarChanged()
+        Toast.makeText(requireContext(), "15일 이상 선택할 수 없습니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun configureBinders() {

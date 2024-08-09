@@ -83,6 +83,7 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
     private suspend fun observePlaceDetails() {
         detailViewModel.placeDetails.collectLatest { detail ->
             detail?.let {
+                Log.d("TAG", "observePlaceDetails: $detail")
                 updateUIForPlaceDetail(
                     it.bitmap.orEmpty().filterNotNull(),
                     it.place.name,
@@ -100,6 +101,7 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
     private suspend fun observePlaceResult() {
         detailViewModel.placeResult.collectLatest { result ->
             result?.let {
+                Log.d("TAG", "observePlaceResult: $result")
                 updateUIForPlaceResult(
                     it.photos.orEmpty(),
                     it.name,
@@ -111,7 +113,6 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
                     it.photos.orEmpty().size.toString() + getString(R.string.page),
                     it.openingHours?.openNow!!
                 )
-                Log.d("TAG", "observePlaceResult: ${result.openingHours?.openNow}")
             }
         }
     }
@@ -125,8 +126,7 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
         weekDayText: List<String>?,
         imageSize: String?,
     ) {
-        binding.apply {
-            imageViewPagerAdapter.submitBitmaps(bitmaps)
+        bind {
             tvStoreTitle.text = name
             tvStoreType.text = type ?: getString(R.string.travel_destination)
             tvReviews.text = reviews?.joinToString("\n\n") ?: getString(R.string.not_founded_review)
@@ -135,6 +135,7 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
             tvOpeningHours.text =
                 weekDayText?.joinToString("\n") ?: getString(R.string.not_founded_opening_hours)
             tvImagesSize.text = imageSize ?: (ZERO_NUMBER.toString() + getString(R.string.page))
+            imageViewPagerAdapter.submitBitmaps(bitmaps)
         }
     }
 
@@ -148,8 +149,7 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
         imageSize: String?,
         openStatus: Boolean
     ) {
-        binding.apply {
-            imageViewPagerAdapter.submitPhotos(photos)
+        bind {
             tvStoreTitle.text = name
             tvStoreType.text = type ?: getString(R.string.travel_destination)
             tvReviews.text = reviews?.joinToString("\n\n") ?: getString(R.string.not_founded_review)
@@ -168,11 +168,14 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
                 val color = ContextCompat.getColor(requireContext(), R.color.dark_purple)
                 tvOpenState.setTextColor(ColorStateList.valueOf(color))
             }
+            Log.d("TAG", "asdf: $openStatus")
+            imageViewPagerAdapter.submitPhotos(photos)
+            Log.d("TAG", "dd: $openStatus")
         }
     }
 
     override fun initListener() {
-        binding.apply {
+        bind {
             // text copy
             tvStoreTitle.setOnLongClickListener {
                 requireContext().copyTextToClipboard(tvStoreTitle.text.toString())
@@ -200,6 +203,16 @@ class PlaceDetailFragment : BaseFragment<FragmentPlaceDetailBinding>() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        detailViewModel.fetchPlaceClear()
+        Log.d("TAG", "onDestroyView:")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d("TAG", "onCreate:")
+    }
     /*private fun formatOpeningHours(weekDayText: List<String>?): CharSequence {
         return weekDayText?.joinToString(separator = ",\n\n") { day ->
             val spannable = SpannableString(day)

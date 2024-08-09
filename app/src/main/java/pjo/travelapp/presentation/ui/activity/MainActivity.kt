@@ -4,13 +4,17 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.provider.Settings.Global
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -22,17 +26,21 @@ import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -41,37 +49,50 @@ import pjo.travelapp.data.entity.IsMessage
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.adapter.AiChatAdapter
 import pjo.travelapp.presentation.ui.fragment.BaseFragment
+import pjo.travelapp.presentation.ui.fragment.PlaceDetailFragment
 import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
+import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.ui.viewmodel.PlanViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.SlidingPaneListener
 import pjo.travelapp.presentation.util.extension.copyTextToClipboard
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity(), SlidingPaneListener {
 
     private lateinit var splashScreen: SplashScreen
     private lateinit var binding: ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private val planViewModel: PlanViewModel by viewModels()
     private val aiChatViewModel: AiChatViewModel by viewModels()
+    private val detailViewModel: DetailViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    @Inject lateinit var navigator: AppNavigator
+    @Inject
+    lateinit var navigator: AppNavigator
     private var backPressedOnce = false
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var checkPermissionState: Boolean = false
-    private lateinit var db: FirebaseFirestore
 
     // check permision array
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
+    private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+    } else {
+        arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    }
 
     // other activity intent callback
     private val settingsLauncher = registerForActivityResult(
@@ -89,7 +110,6 @@ open class MainActivity : AppCompatActivity() {
             showPermissionDeniedDialog()
         } else {
             setCheckLocationPermission()
-            setViewModel()
         }
     }
 
@@ -108,8 +128,11 @@ open class MainActivity : AppCompatActivity() {
         setBottomSheet()
         setAdapter()
         setViewModelListener()
+        setViewModel()
         setClickListener()
+        setListener()
         observeDestinationChanges()
+        firebaseMessaging() // new! token set
     }
 
     private fun startSplash() {
@@ -136,10 +159,82 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun closePane() {
+        if (binding.splContainer.isOpen) {
+            binding.splContainer.closePane()
+            isOpen = false
+        }
+    }
+
+    override fun openPane() {
+        if (!binding.splContainer.isOpen) {
+            binding.splContainer.openPane()
+            isOpen = true
+        }
+    }
+
+    override fun toggleLayout() {
+        binding.apply {
+            if (splContainer.isOpen) {
+                splContainer.closePane()
+            } else {
+                splContainer.openPane()
+            }
+        }
+    }
+
+    override var isOpen: Boolean = false
+        set(value) {
+            if (value) {
+                // Pane를 열 때 실행할 동작
+                println("Opening pane")
+                field = true
+            } else {
+                // Pane를 닫을 때 실행할 동작
+                println("Closing pane")
+                field = false
+            }
+        }
+
+    private fun setListener() {
+        binding.apply {
+            splContainer.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED
+            splContainer.addPanelSlideListener(object : SlidingPaneLayout.PanelSlideListener {
+                override fun onPanelSlide(panel: View, slideOffset: Float) {
+                    Log.d("TAG", "onPanelSlide: slideOffset = $slideOffset")
+                    // 슬라이드 중에 호출되는 로직을 작성
+                }
+
+                override fun onPanelOpened(panel: View) {
+                    Log.d("TAG", "onPanelOpened: opened")
+                    val fragment =
+                        supportFragmentManager.findFragmentById(R.id.place_detail_fragment)
+                    if (fragment == null) {
+                        supportFragmentManager.commit {
+                            add(R.id.place_detail_fragment, PlaceDetailFragment())
+                        }
+                    } else {
+                        supportFragmentManager.commit {
+                            show(fragment)
+                        }
+                    }
+                    panel.isEnabled = true
+                }
+
+                override fun onPanelClosed(panel: View) {
+                    Log.d("TAG", "onPanelClosed: closed")
+                    // 패널이 완전히 닫혔을 때 호출되는 로직을 작성
+                    detailViewModel.fetchPlaceClear()
+                    panel.isEnabled = false
+                }
+            })
+        }
+    }
+
     // back stack 관리
     private fun handleBackStack() {
         val fragmentManager = supportFragmentManager
-        if (fragmentManager.backStackEntryCount > 1) {
+        if (fragmentManager.backStackEntryCount > 2) {
             fragmentManager.popBackStack(
                 fragmentManager.getBackStackEntryAt(0).id,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE
@@ -197,9 +292,9 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun setViewModel() {
-        /*mainViewModel.fetchData()
+        mainViewModel.fetchData()
         mainViewModel.setDates()
-        mainViewModel.searchHotels("tokyo")*/
+        mainViewModel.searchHotels("tokyo")
         planViewModel.fetchUserSchedules()
     }
 
@@ -214,6 +309,8 @@ open class MainActivity : AppCompatActivity() {
                                 aiAdapter?.addMessage(state.data)
                                 aiAdapter?.isLoading = false
                                 etSubmitText.isEnabled = true
+                                etSubmitText.setHint(R.string.ai_chat)
+                                etSubmitText.setBackgroundColor(Color.WHITE)
                                 btnSend.isEnabled = true
                                 rvAiChat.scrollToPosition(aiAdapter?.itemCount!! - 1)
                             }
@@ -230,6 +327,8 @@ open class MainActivity : AppCompatActivity() {
                                 Log.d("TAG", "setViewModelListener: Loading")
                                 aiAdapter?.isLoading = true
                                 etSubmitText.isEnabled = false
+                                etSubmitText.setHint(R.string.ai_loading_state)
+                                etSubmitText.setBackgroundResource(R.color.middle_light_gray)
                                 btnSend.isEnabled = false
                             }
                         }
@@ -299,6 +398,7 @@ open class MainActivity : AppCompatActivity() {
         })
     }
 
+
     private fun setFusedLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -331,13 +431,10 @@ open class MainActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
         if (missingPermissions.isNotEmpty()) {
-            if(!checkPermissionState){
+            if (!checkPermissionState) {
                 requestMultiplePermissionsLauncher.launch(missingPermissions.toTypedArray())
                 checkPermissionState = true
-            }else {
-               /* missingPermissions.any {
-                    ActivityCompat.shouldShowRequestPermissionRationale(this, it)
-                }*/
+            } else {
                 showPermissionDeniedDialog()
             }
         } else {
@@ -354,6 +451,25 @@ open class MainActivity : AppCompatActivity() {
                 mainViewModel.fetchCurrentLocation(currentLatLng)
             }
         }
+    }
+
+    private fun firebaseMessaging() {
+        // FirebaseMessaging 인스턴스를 통해 FCM 등록 토큰을 비동기적으로 가져옴
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            // 토큰을 가져오는데 실패한 경우
+            if (!task.isSuccessful) {
+                Log.w("TAG", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // 새 FCM 등록 토큰을 가져옴
+            val token = task.result
+
+            // 로그로 토큰을 출력하고, 사용자에게 Toast 메시지로 토큰을 보여줌
+            val msg = token
+            Log.d("TAG", msg)
+            Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        })
     }
 }
 

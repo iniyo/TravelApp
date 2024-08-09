@@ -41,4 +41,10 @@ class DetailViewModel @Inject constructor(
     fun fetchHotelDetail(hotelDetail: HotelCard) {
         _hotelDetail.value = hotelDetail
     }
+
+    fun fetchPlaceClear() {
+        Log.d("TAG", "fetchPlaceClear: ")
+        _placeResult.value = null
+        _placeDetails.value = null
+    }
 }

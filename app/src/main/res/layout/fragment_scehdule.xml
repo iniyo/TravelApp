@@ -120,18 +120,49 @@
                     app:layout_constraintStart_toStartOf="@+id/tv_my_trip"
                     app:layout_constraintTop_toBottomOf="@+id/cl_user_schedule" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_next_trips"
-                    android:layout_width="0dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cl_recycler_container"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:adapter="@{default_adapter_2}"
-                    android:orientation="horizontal"
-                    tools:listitem="@layout/rv_schedule_item"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/tv_next_trip"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_next_trip" />
+                    app:layout_constraintTop_toBottomOf="@+id/tv_next_trip">
+
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/sfl_next_trips"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <include layout="@layout/item_home_place_data_shimmer" />
+
+                            <include layout="@layout/item_home_place_data_shimmer" />
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_next_trips"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:adapter="@{default_adapter_2}"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:listitem="@layout/rv_schedule_item" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/tv_around_best"
@@ -143,7 +174,28 @@
                     android:textSize="17sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="@+id/tv_next_trip"
-                    app:layout_constraintTop_toBottomOf="@+id/rv_next_trips" />
+                    app:layout_constraintTop_toBottomOf="@+id/cl_recycler_container" />
+
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/sfl_around_place"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tv_next_trip"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_around_best">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <include layout="@layout/item_home_place_data_shimmer" />
+
+                        <include layout="@layout/item_home_place_data_shimmer" />
+                    </LinearLayout>
+                </com.facebook.shimmer.ShimmerFrameLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_around_place"
@@ -151,6 +203,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:adapter="@{default_adapter_1}"
+                    android:visibility="gone"
                     android:orientation="horizontal"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"

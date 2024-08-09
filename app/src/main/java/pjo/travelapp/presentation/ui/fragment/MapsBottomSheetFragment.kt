@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.util.Log
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -14,13 +15,15 @@ class MapsBottomSheetFragment : BaseFragment<FragmentMapsBottomSheetBinding>() {
     private lateinit var imageViewPagerAdapter: ImageViewPagerAdapter
     private val mapsViewModel: MapsViewModel by activityViewModels()
 
+    override fun initCreate() {
+        Log.d("TAG", "initCreate maps bottomsheet: $")
+    }
+
     override fun initView() {
         super.initView()
         bind {
-            vpImageSlider.offscreenPageLimit = 2
-            imageViewPagerAdapter = ImageViewPagerAdapter()
-            vpImageSlider.adapter = imageViewPagerAdapter
-            diVpIndicator.attachTo(vpImageSlider)
+            Log.d("TAG", "initView maps bottomsheet: $")
+
         }
     }
 

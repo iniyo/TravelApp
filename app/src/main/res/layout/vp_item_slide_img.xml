@@ -3,5 +3,6 @@
     android:id="@+id/iv_img_container"
     android:importantForAccessibility="no"
     android:scaleType="fitXY"
+    android:src="@drawable/img_tokyo"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>

@@ -34,6 +34,7 @@ import pjo.travelapp.data.entity.RoutesRequest
 import pjo.travelapp.data.entity.RoutesResponse
 import pjo.travelapp.databinding.FragmentMapsBinding
 import pjo.travelapp.presentation.adapter.AutoCompleteItemAdapter
+import pjo.travelapp.presentation.adapter.ImageViewPagerAdapter
 import pjo.travelapp.presentation.ui.consts.AdapterStyle
 import pjo.travelapp.presentation.ui.consts.SHOW_DIRECTION
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
@@ -64,6 +65,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
     private var currentAdapterStyle: AdapterStyle? = null
     private var isToolbarToggler = true
     private var currentPolyline: Polyline? = null
+
 
     @Inject
     lateinit var navigate: AppNavigator
@@ -130,6 +132,10 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
             mapFragment?.getMapAsync(callback)
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
+            infoBottomSheet.vpImageSlider.offscreenPageLimit = 2
+            pagerAdapter = ImageViewPagerAdapter()
+           /* infoBottomSheet.diVpIndicator.attachTo(infoBottomSheet.vpImageSlider)*/
+
             setBottomSheet()
             setClickListener()
             backPressed()
@@ -147,7 +153,7 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                         mapsViewModel.placeDetailsList.collectLatest {
                             Log.d("TAG", "placeDetailsList: ")
                             placeDetailsList = it.toMutableList()
-                            adapter?.submitList(placeDetailsList)
+                            /*adapter?.submitList(placeDetailsList)*/
                         }
                     }
 
@@ -157,10 +163,16 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                             it?.let {
                                 lat = LatLng(it.geometry.location.lat, it.geometry.location.lng)
                                 place = it
+                                it?.photos?.let { nonNullPhotos ->
+                                    Log.d("TAG", "init nonnull: $nonNullPhotos")
+                                    infoBottomSheet.tvImagesSize.text = nonNullPhotos.size.toString() + getString(R.string.page)
+                                    pagerAdapter?.submitPhotos(nonNullPhotos)
+                                } ?: run {
+                                    pagerAdapter?.submitPhotos(emptyList())
+                                }
                             }
                         }
                     }
-
                     // 검색 결과
                     launch {
                         mapsViewModel.predictionList.collectLatest { predictions ->
@@ -332,6 +344,9 @@ class MapsFragment : BaseFragment<FragmentMapsBinding>() {
                     }
                 }
             }
+
+
+
         }
     }
 

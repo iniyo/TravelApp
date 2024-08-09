@@ -17,7 +17,7 @@
 
         <variable
             name="popular_recycle_adapter"
-            type="pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter" />
+            type="pjo.travelapp.presentation.adapter.RecommendedRecyclerAdapter" />
 
         <variable
             name="category_recycle_adapter"
@@ -293,7 +293,7 @@
                         android:id="@+id/rv_popular"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:adapter="@{popular_recycle_adapter}"
+                        android:adapter="@{recommended_recycle_adapter}"
                         android:clipToPadding="false"
                         android:orientation="horizontal"
                         android:paddingHorizontal="16dp"

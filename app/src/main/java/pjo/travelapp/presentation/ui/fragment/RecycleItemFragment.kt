@@ -26,13 +26,21 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val detailViewModel: DetailViewModel by activityViewModels()
+
     @Inject
     lateinit var navigator: AppNavigator
     private lateinit var pop: String
 
+    private fun dummyTest() {
+        bind {
+
+        }
+    }
+
     override fun initView() {
         super.initView()
         bind {
+
             if (rvMorePlaces.adapter == null) {
                 rvMorePlaces.layoutManager =
                     StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -43,16 +51,23 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         true
                     )
                 ) // 16dp의 마진 적용
+
                 adapter = MorePlaceRecyclerAdapter(
                     placeItemClickListener = {
                         detailViewModel.fetchPlaceDetails(it)
                         navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+                        /*slidingPaneListener?.toggleLayout()*/
                     },
                     hotelItemClickListener = {
                         detailViewModel.fetchHotelDetail(it)
                         navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+                        /*slidingPaneListener?.toggleLayout()*/
+                    },
+                    placeResultClickListener = {
+                        navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
                     }
                 )
+                dummyTest()
             }
         }
     }
@@ -119,21 +134,23 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
     private fun handleUiState(
         placeState: LatestUiState<List<PlaceDetail>>? = null,
-        hotelState: LatestUiState<List<HotelCard>>? = null
+        hotelState: LatestUiState<List<HotelCard>>? = null,
     ) {
         bind {
             when (placeState) {
                 is LatestUiState.Loading -> {
-                    sflMainPlaces.visibility = View.VISIBLE
+                    /* sflMainPlaces.visibility = View.VISIBLE*/
                 }
 
                 is LatestUiState.Success -> {
                     sflMainPlaces.visibility = View.GONE
+                    rvMorePlaces.visibility = View.VISIBLE
                     adapter?.submitPlaces(placeState.data)
                 }
 
                 is LatestUiState.Error -> {
-                    sflMainPlaces.visibility = View.GONE
+                    /* sflMainPlaces.visibility = View.VISIBLE*/
+                    Log.d("TAG", "handleUiState error: ${placeState.exception.message}")
                     Toast.makeText(
                         context,
                         "Error: ${placeState.exception.message}",
@@ -146,16 +163,17 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
 
             when (hotelState) {
                 is LatestUiState.Loading -> {
-                    sflMainPlaces.visibility = View.VISIBLE
+                    /*sflMainPlaces.visibility = View.VISIBLE*/
                 }
 
                 is LatestUiState.Success -> {
                     sflMainPlaces.visibility = View.GONE
+                    rvMorePlaces.visibility = View.VISIBLE
                     adapter?.submitHotels(hotelState.data)
                 }
 
                 is LatestUiState.Error -> {
-                    sflMainPlaces.visibility = View.GONE
+                    /* sflMainPlaces.visibility = View.VISIBLE*/
                     Log.d("TAG", "handleUiState: ${hotelState.exception.message}")
                     Toast.makeText(
                         context,

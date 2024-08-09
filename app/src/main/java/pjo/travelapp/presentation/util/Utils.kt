@@ -181,4 +181,7 @@ fun makeItemId(): String {
 
 interface SlidingPaneListener {
     fun closePane()
+    fun openPane()
+    fun toggleLayout()
+    var isOpen: Boolean
 }

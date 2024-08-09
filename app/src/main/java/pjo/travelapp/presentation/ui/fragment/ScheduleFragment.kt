@@ -1,6 +1,7 @@
 package pjo.travelapp.presentation.ui.fragment
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.data.entity.PlaceDetail
 import pjo.travelapp.data.entity.UserPlan
+
 import pjo.travelapp.databinding.FragmentScehduleBinding
 import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
 import pjo.travelapp.presentation.adapter.UserScheduleAdapter
@@ -36,50 +38,59 @@ class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
         planViewModel.fetchUserSchedules()
     }
 
-    override fun initViewModel() {
 
-        bind {
-            launchWhenStarted {
-                launch {
-                    mainViewModel.nearbySearch.collectLatest {
-                        handleUiState(it, choose = true)
-                    }
-                }
-                launch {
-                    mainViewModel.shuffledHotPlaceList.collectLatest {
-                        handleUiState(it, choose = false)
-                    }
-                }
-                launch {
-                    planViewModel.userScheduleList.collectLatest {
-                        if (it.isEmpty()) {
-                            vpTrips.visibility = View.GONE
-                            tvNoSchedule.visibility = View.VISIBLE
-                        } else {
-                            vpTrips.visibility = View.VISIBLE
-                            tvNoSchedule.visibility = View.GONE
-                            scheduleAdapter?.submitList(it)
-                        }
-                    }
-                }
-            }
-        }
-    }
+     override fun initViewModel() {
+
+         bind {
+             launchWhenStarted {
+                 launch {
+                     mainViewModel.nearbySearch.collectLatest {
+                         handleUiState(it, choose = true)
+                     }
+                 }
+                 launch {
+                     mainViewModel.shuffledHotPlaceList.collectLatest {
+                         handleUiState(it, choose = false)
+                     }
+                 }
+
+                 launch {
+                     planViewModel.userScheduleList.collectLatest {
+                         if (it.isEmpty()) {
+                             vpTrips.visibility = View.GONE
+                             tvNoSchedule.visibility = View.VISIBLE
+                         } else {
+                             vpTrips.visibility = View.VISIBLE
+                             tvNoSchedule.visibility = View.GONE
+                             scheduleAdapter?.submitList(it)
+                         }
+                     }
+                 }
+             }
+         }
+     }
 
     private fun handleUiState(state: LatestUiState<List<PlaceDetail>>? = null, choose: Boolean) {
         bind {
             when (state) {
                 is LatestUiState.Loading -> {
-
+                    sflNextTrips.visibility = View.VISIBLE
+                    sflAroundPlace.visibility = View.VISIBLE
+                    rvNextTrips.visibility = View.GONE
+                    rvAroundPlace.visibility = View.GONE
                 }
 
                 is LatestUiState.Success -> {
                     when (choose) {
                         true -> {
+                            rvAroundPlace.visibility = View.VISIBLE
+                            sflAroundPlace.visibility = View.GONE
                             defaultAdapter1?.submitList(state.data)
                         }
 
                         else -> {
+                            rvNextTrips.visibility = View.VISIBLE
+                            sflNextTrips.visibility = View.GONE
                             defaultAdapter2?.submitList(state.data)
                         }
                     }
@@ -87,6 +98,17 @@ class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
 
                 is LatestUiState.Error -> {
                     // 에러 처리 로직 추가
+                    when (choose) {
+                        true -> {
+                            rvAroundPlace.visibility = View.VISIBLE
+                            sflAroundPlace.visibility = View.GONE
+                        }
+
+                        else -> {
+                            rvNextTrips.visibility = View.VISIBLE
+                            sflNextTrips.visibility = View.GONE
+                        }
+                    }
                     Toast.makeText(context, "Error: ${state.exception.message}", Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -109,7 +131,7 @@ class ScheduleFragment : BaseFragment<FragmentScehduleBinding>() {
                 }
             )
             val scheduleAdapter = ScheduleDefaultAdapter {
-                detailViewModel.fetchPlaceDetails(it)
+               /* detailViewModel.fetchPlaceDetails(it)*/
                 navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_ITEM)
             }
             defaultAdapter1 = scheduleAdapter

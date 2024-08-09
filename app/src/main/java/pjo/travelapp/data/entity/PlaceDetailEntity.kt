@@ -28,8 +28,7 @@ data class PlaceDetailsResponse(
 
 
 data class PlaceResult(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val parentId: Int,
+
   /*
     @SerializedName("address_components") val addressComponents: List<AddressComponent>,
     @SerializedName("adr_address") val adrAddress: String,
@@ -39,7 +38,7 @@ data class PlaceResult(
     @SerializedName("serves_dinner") val servesDinner: Boolean,
     @SerializedName("serves_lunch") val servesLunch: Boolean,
     @SerializedName("current_opening_hours") val currentOpeningHours: CurrentOpeningHours?,
-    */
+
     @SerializedName("business_status") val businessStatus: String,
     @SerializedName("dine_in") val dineIn: Boolean,
     @SerializedName("icon") val icon: String,
@@ -50,6 +49,8 @@ data class PlaceResult(
     @SerializedName("utc_offset") val utcOffset: Int,
     @SerializedName("url") val url: String,
     @SerializedName("user_ratings_total") val userRatingsTotal: Int,
+
+     */
     @SerializedName("formatted_address") val formattedAddress: String,
     @SerializedName("formatted_phone_number") val formattedPhoneNumber: String?,
     @SerializedName("geometry") val geometry: Geometry,
@@ -62,7 +63,7 @@ data class PlaceResult(
     @SerializedName("reviews") val reviews: List<Review>?,
     @SerializedName("vicinity") val vicinity: String,
     @SerializedName("website") val website: String?
-): Serializable
+)
 
 data class AddressComponent(
     @SerializedName("long_name") val longName: String,

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pjo.travelapp.data.entity.ChildItemWithPosition
 import pjo.travelapp.data.entity.ParentGroupData
 import pjo.travelapp.data.entity.ParentGroups
 import pjo.travelapp.data.entity.TravelDestinationAbroad
@@ -19,6 +20,8 @@ import pjo.travelapp.data.entity.TravelDestinationDomestic
 import pjo.travelapp.data.entity.UserNote
 import pjo.travelapp.data.entity.UserPlan
 import pjo.travelapp.data.repo.UserRepository
+import pjo.travelapp.presentation.adapter.ChildPlanItem
+import pjo.travelapp.presentation.adapter.ParentPlanItem
 import pjo.travelapp.presentation.util.BitmapUtil
 import pjo.travelapp.presentation.util.makeItemId
 import javax.inject.Inject
@@ -107,9 +110,28 @@ class PlanViewModel @Inject constructor(
         }
     }
 
-    fun fetchParentGroups(parentGroups: List<ExpandableGroup>) {
+    fun fetchParentGroups(userPlan: UserPlan? = null, parentGroups: List<ExpandableGroup>) {
         Log.d("TAG", "fetchParentGroups: ")
-        _parentGroups.value = parentGroups
+        if(userPlan != null) {
+            val parentGroupDataList = parentGroups.mapIndexed { index, parentGroup ->
+                val parentItem = (parentGroup.getGroup(0) as ParentPlanItem).item
+                val userNote = (parentGroup.getGroup(0) as ParentPlanItem).note
+                val childItems = (1 until parentGroup.groupCount).map { childIndex ->
+                    val placeResult =
+                        (parentGroup.getGroup(childIndex) as ChildPlanItem).item
+                    ChildItemWithPosition(placeResult, index)
+                }
+                ParentGroupData(parentItem, userNote, childItems)
+            }
+            // 새로운 UserPlan 객체를 복사하면서 parentGroups 값을 변경
+            val updatedUserPlan = userPlan?.copy(
+                parentGroups = ParentGroups(parentGroupDataList) // parentGroups 값을 새로 설정
+            )
+            _userPlan.value = updatedUserPlan
+            _parentGroups.value = parentGroups
+        }else {
+            _parentGroups.value = parentGroups
+        }
     }
 
     fun fetchUserSchedule(userPlan: UserPlan) {

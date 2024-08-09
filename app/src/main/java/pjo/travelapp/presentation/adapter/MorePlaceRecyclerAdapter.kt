@@ -16,11 +16,12 @@ import pjo.travelapp.databinding.RvMorePlacesItemBinding
 
 class MorePlaceRecyclerAdapter(
     private val placeItemClickListener: (PlaceDetail) -> Unit,
-    private val hotelItemClickListener: (HotelCard) -> Unit
+    private val hotelItemClickListener: (HotelCard) -> Unit,
+    private val placeResultClickListener: (PlaceResult) -> Unit // PlaceResult 클릭 리스너 추가
 ) : ListAdapter<Any, RecyclerView.ViewHolder>(DiffCallback()) {
 
     enum class DataType {
-        PLACE, HOTEL
+        PLACE, HOTEL, PLACERESULT // PLACERESULT 타입 추가
     }
 
     private var currentDataType: DataType = DataType.PLACE
@@ -59,7 +60,7 @@ class MorePlaceRecyclerAdapter(
             binding.apply {
                 try {
                     tvSatisfaction.visibility = View.VISIBLE
-                    ivMainContent.setImageResource(R.drawable.intro_pic) // 기본 이미지
+                    ivMainContent.setImageResource(R.drawable.intro_pic)
                     tvTitle.text = item.name
                     tvRating.text = item.stars
                     Glide.with(root)
@@ -77,11 +78,32 @@ class MorePlaceRecyclerAdapter(
         }
     }
 
+    // 새로운 ViewHolder 추가
+    inner class PlaceResultViewHolder(private val binding: RvMorePlacesItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: PlaceResult) {
+            binding.apply {
+                try {
+                    ivMainContent.setImageResource(R.drawable.intro_pic) // 기본 이미지
+                    tvTitle.text = item.name // PlaceResult의 제목
+                    tvRating.text = item.rating.toString() // PlaceResult의 평점
+                    rbScore.rating = item.rating.toFloat()
+                    tvReviews.text = item.reviews?.joinToString("\n")
+
+                    itemView.setOnClickListener { placeResultClickListener(item) }
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val binding = RvMorePlacesItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return when (currentDataType) {
             DataType.PLACE -> PlaceViewHolder(binding)
             DataType.HOTEL -> HotelViewHolder(binding)
+            DataType.PLACERESULT -> PlaceResultViewHolder(binding) // 새로운 ViewHolder 생성
         }
     }
 
@@ -89,6 +111,7 @@ class MorePlaceRecyclerAdapter(
         when (holder) {
             is PlaceViewHolder -> holder.bind(getItem(position) as PlaceDetail)
             is HotelViewHolder -> holder.bind(getItem(position) as HotelCard)
+            is PlaceResultViewHolder -> holder.bind(getItem(position) as PlaceResult) // 새로운 바인딩 로직 추가
         }
     }
 
@@ -101,15 +124,20 @@ class MorePlaceRecyclerAdapter(
         currentDataType = DataType.HOTEL
         submitList(hotels)
     }
+
+    // 새로운 submit 함수 추가
+    fun submitPlaceResults(placeResults: List<PlaceResult>) {
+        currentDataType = DataType.PLACERESULT
+        submitList(placeResults)
+    }
 }
 class DiffCallback : DiffUtil.ItemCallback<Any>() {
     override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
-        return if (oldItem is PlaceDetail && newItem is PlaceDetail) {
-            oldItem.place.id == newItem.place.id
-        } else if (oldItem is HotelCard && newItem is HotelCard) {
-            oldItem.id == newItem.id
-        } else {
-            false
+        return when {
+            oldItem is PlaceDetail && newItem is PlaceDetail -> oldItem.place.id == newItem.place.id
+            oldItem is HotelCard && newItem is HotelCard -> oldItem.id == newItem.id
+            oldItem is PlaceResult && newItem is PlaceResult -> oldItem.placeId == newItem.placeId
+            else -> false
         }
     }
 

@@ -26,10 +26,7 @@
             type="pjo.travelapp.presentation.adapter.ImageViewPagerAdapter" />
 
     </data>
-    <androidx.slidingpanelayout.widget.SlidingPaneLayout
-        android:id="@+id/spl_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -164,9 +161,5 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <FrameLayout
-            android:id="@+id/place_detail_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </androidx.slidingpanelayout.widget.SlidingPaneLayout>
+
 </layout>

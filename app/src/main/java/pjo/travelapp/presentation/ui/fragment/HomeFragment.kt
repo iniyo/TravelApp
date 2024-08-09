@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
+import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +21,7 @@ import pjo.travelapp.presentation.adapter.ScheduleDefaultAdapter
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
 import pjo.travelapp.presentation.ui.viewmodel.MainViewModel
 import pjo.travelapp.presentation.util.LatestUiState
+import pjo.travelapp.presentation.util.SlidingPaneListener
 import pjo.travelapp.presentation.util.mapper.MyGraphicMapper
 import pjo.travelapp.presentation.util.navigator.AppNavigator
 import pjo.travelapp.presentation.util.navigator.Fragments
@@ -31,6 +34,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     lateinit var navigator: AppNavigator
     private val mainViewModel: MainViewModel by activityViewModels()
     private val detailViewModel: DetailViewModel by activityViewModels()
+    private var slidingPaneListener: SlidingPaneListener? = null
 
     override fun initView() {
         super.initView()
@@ -52,7 +56,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
                             is LatestUiState.Success -> {
                                 sflPopular.visibility = View.GONE
-                                popularRecycleAdapter?.submitList(it.data)
+                                it.data.forEach { res ->
+                                    popularRecycleAdapter?.addPlace(res)
+                                }
                             }
 
                             is LatestUiState.Error -> it.exception.printStackTrace()
@@ -181,7 +187,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     getString(R.string.my_travel_schedule) -> {
                         navigator.navigateTo(Fragments.PLACE_SELECT_PAGE)
                     }
-
                     getString(R.string.restaurants_nearby) -> {}
                 }
             }
@@ -189,9 +194,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             recommendedRecycleAdapter = RecommendedRecyclerAdapter {
                 detailViewModel.fetchPlaceDetails(it)
                 navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+              /*  slidingPaneListener?.toggleLayout()*/
             }
 
-            popularRecycleAdapter = scehduleAdapter
+            popularRecycleAdapter = RecommendedRecyclerAdapter {
+                detailViewModel.fetchPlaceDetails(it)
+                navigator.navigateTo(Fragments.PLACE_DETAIL_PAGE)
+                /*  slidingPaneListener?.toggleLayout()*/
+            }
+
             morePlaceViewpagerAdapter = MorePlacesViewPagerAdapter(requireActivity(), 0)
         }
     }
@@ -204,18 +215,19 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             lavNoticeBell.setOnClickListener {
                 navigator.navigateTo(Fragments.NOTICE_PAGE)
             }
+
         }
     }
 
     private fun setLottieAnimation(hasNewNotice: Boolean) {
-       bind {
-           if (hasNewNotice) {
-               lavNoticeBell.playAnimation()
-           } else {
-               lavNoticeBell.cancelAnimation()
-               lavNoticeBell.progress = 0f  // 애니메이션 초기화
-           }
-       }
+        bind {
+            if (hasNewNotice) {
+                lavNoticeBell.playAnimation()
+            } else {
+                lavNoticeBell.cancelAnimation()
+                lavNoticeBell.progress = 0f  // 애니메이션 초기화
+            }
+        }
     }
 
     private fun startRollingTextAnimation() {

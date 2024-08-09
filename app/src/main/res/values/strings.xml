@@ -33,6 +33,7 @@
     <string name="meta_client_token">0099472ecd0470fd45362119307d4b6c</string>
     <string name="map">지도</string>
     <string name="share">공유</string>
+    <string name="token">메시지 토큰</string>
     <string name="edit">편집</string>
     <string name="budget_plan">예산계획</string>
     <string name="check_list">체크리스트</string>
@@ -120,6 +121,7 @@
     <string name="page">" 장"</string>
     <string name="no_opening_hours">운영시간이 없습니다.</string>
     <string name="cancel">취소</string>
+    <string name="ai_waiting">기다려주세요!</string>
     <string name="note">메모 추가</string>
     <string name="select_place">장소 선택</string>
     <string name="all_delete">전체 삭제</string>
@@ -144,4 +146,6 @@
     <string name="tourist_attraction">관광지</string>
     <string name="my_travel_schedule">내 여행 계획</string>
     <string name="restaurants_nearby">근처 맛집</string>
+    <string name="plan_send_button">여행 하러 가볼까요?</string>
+    <string name="tilde_sign">~</string>
 </resources>

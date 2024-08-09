@@ -1,5 +1,6 @@
 package pjo.travelapp.presentation.ui.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -9,17 +10,16 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.slidingpanelayout.widget.SlidingPaneLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.xwray.groupie.ExpandableGroup
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.ChildItemWithPosition
@@ -47,7 +47,7 @@ import pjo.travelapp.presentation.util.saveImageIntoFileFromUri
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
+class PlanFragment : BaseFragment<FragmentPlanBinding>() {
 
     @Inject
     lateinit var appNavigator: AppNavigator
@@ -61,9 +61,12 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
     private lateinit var id: String
     private lateinit var datePeriod: String
     private lateinit var title: String
+    private lateinit var setUserPlan: UserPlan
     private val groupAdapter = GroupAdapter<GroupieViewHolder>()
     private var parentGroups = mutableListOf<ExpandableGroup>()
     private var selectedPosition: Int = -1
+    private var slidingPaneListener: SlidingPaneListener? = null
+
 
     override fun initView() {
         bind {
@@ -80,35 +83,17 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
         backPressed()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is SlidingPaneListener) {
+            slidingPaneListener = context
+        } else {
+            throw RuntimeException("$context must implement SlidingPaneListener")
+        }
+    }
+
     override fun initListener() {
         bind {
-            splContainer.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED
-            splContainer.addPanelSlideListener(object : SlidingPaneLayout.PanelSlideListener {
-                override fun onPanelSlide(panel: View, slideOffset: Float) {
-                    Log.d("TAG", "onPanelOpened: slide ")
-                }
-
-                override fun onPanelOpened(panel: View) {
-                    Log.d("TAG", "onPanelOpened: opened ")
-                    val fragment = childFragmentManager.findFragmentById(R.id.place_detail_fragment)
-                    if (fragment == null) {
-                        childFragmentManager.commit {
-                            add(R.id.place_detail_fragment, PlaceDetailFragment())
-                        }
-                    } else {
-                        childFragmentManager.commit {
-                            show(fragment)
-                        }
-                    }
-                    panel.isEnabled = true
-                }
-
-                override fun onPanelClosed(panel: View) {
-                    // 패널이 닫혔을 때 동작
-                    Log.d("TAG", "onPanelClosed: Panel closed")
-                    panel.isEnabled = false
-                }
-            })
 
             btnAddedSchedule.setOnClickListener {
                 lifecycleScope.launch {
@@ -164,10 +149,12 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
     override fun initViewModel() {
         bind {
             launchWhenStarted {
+
                 launch {
                     planViewModel.userPlan.collectLatest { userPlan ->
                         Log.d("TAG", "initViewModel: 이거임 ")
                         if (userPlan != null) {
+
                             title = userPlan.title
                             binding.tvTripTitle.text = userPlan.title
                             datePeriod = userPlan.datePeriod
@@ -224,8 +211,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
                                     expandableGroup
                                 }
                             Log.d("TAG", "parentGroup1: ${newParentGroups.size} ")
-
-                            planViewModel.fetchParentGroups(newParentGroups)
+                            setUserPlan = userPlan
+                            planViewModel.fetchParentGroups(parentGroups = newParentGroups)
                         }
                     }
                 }
@@ -239,6 +226,7 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
                         parentGroups.addAll(group)
                         Log.d("TAG", "initViewModel: ${group.size}")
                         Log.d("TAG", "initViewModel: ${parentGroups.size}")
+
                         groupAdapter.update(parentGroups)
                     }
                 }
@@ -254,29 +242,22 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
         }
     }
 
-    override fun closePane() {
-        if (binding.splContainer.isOpen) {
-            binding.splContainer.closePane()
-        }
-    }
-
     private fun setAdapter() {
         bind {
             autoAdapter = AutoCompleteItemAdapter { selectedItem ->
                 hideKeyboard(clPlanMainContainer)
-
                 if (selectedPosition != -1 && selectedPosition < parentGroups.size) {
                     parentGroups[selectedPosition].add(
                         ChildPlanItem(
                             item = selectedItem.first,
                             itemClickListener = { placeResult ->
+                                Log.d("TAG", "setAdapter dd: $placeResult")
                                 detailViewModel.fetchPlaceResult(placeResult)
-                                toggleLayout()
+                                /*slidingPaneListener?.toggleLayout()*/
+                                appNavigator.navigateTo(Fragments.PLACE_DETAIL_PAGE_RE)
                             },
                             parentGroup = parentGroups[selectedPosition],
                             adapter = groupAdapter
-
-
                         )
                     )
                     Log.d("TAG", "setupAdapter: ${parentGroups[selectedPosition]}")
@@ -284,18 +265,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
                         parentGroups[selectedPosition].onToggleExpanded()
                     }
                 }
-                planViewModel.fetchParentGroups(parentGroups)
+                planViewModel.fetchParentGroups(setUserPlan, parentGroups)
                 toggleBottomSheet(searchBottomSheetBehavior)
-            }
-        }
-    }
-
-    private fun toggleLayout() {
-        bind {
-            if (splContainer.isOpen) {
-                splContainer.closePane()
-            } else {
-                splContainer.openPane()
             }
         }
     }
@@ -428,8 +399,8 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(), SlidingPaneListener {
                     bind {
                         if (searchBottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) searchBottomSheetBehavior.state =
                             BottomSheetBehavior.STATE_HIDDEN
-                        else if (splContainer.isOpen) {
-                            splContainer.closePane()
+                        else if (slidingPaneListener?.isOpen == true) {
+                            slidingPaneListener?.closePane()
                         } else appNavigator.navigateUp()
                     }
                 }

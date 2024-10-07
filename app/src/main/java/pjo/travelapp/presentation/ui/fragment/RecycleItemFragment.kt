@@ -81,7 +81,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         title = pop
                         launch {
                             mainViewModel.tokyoHotPlaceList.collectLatest {
-                                handleUiState(it)
+                                (it)
                             }
                         }
                     }
@@ -90,7 +90,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         title = pop
                         launch {
                             mainViewModel.fukuokaHotPlaceList.collectLatest {
-                                handleUiState(it)
+                                (it)
                             }
                         }
                     }
@@ -99,7 +99,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         title = pop
                         launch {
                             mainViewModel.parisHotPlaceList.collectLatest {
-                                handleUiState(it)
+                                (it)
                             }
                         }
                     }
@@ -108,7 +108,7 @@ class RecycleItemFragment : BaseFragment<FragmentRecycleItemBinding>() {
                         title = pop
                         launch {
                             mainViewModel.nearbySearch.collectLatest {
-                                handleUiState(it)
+                                (it)
                             }
                         }
                     }

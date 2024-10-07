@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.provider.Settings.Global
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -36,14 +38,17 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pjo.travelapp.R
 import pjo.travelapp.data.entity.IsMessage
-import pjo.travelapp.data.repo.FirebaseMessaging
 import pjo.travelapp.databinding.ActivityMainBinding
 import pjo.travelapp.presentation.adapter.AiChatAdapter
+import pjo.travelapp.presentation.ui.fragment.BaseFragment
 import pjo.travelapp.presentation.ui.fragment.PlaceDetailFragment
 import pjo.travelapp.presentation.ui.viewmodel.AiChatViewModel
 import pjo.travelapp.presentation.ui.viewmodel.DetailViewModel
@@ -66,7 +71,6 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
     private val aiChatViewModel: AiChatViewModel by viewModels()
     private val detailViewModel: DetailViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-
     @Inject
     lateinit var navigator: AppNavigator
     private var backPressedOnce = false
@@ -128,7 +132,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
         setClickListener()
         setListener()
         observeDestinationChanges()
-
+        firebaseMessaging() // new! token set
     }
 
     private fun startSplash() {
@@ -449,7 +453,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
         }
     }
 
-    /*private fun firebaseMessaging() {
+    private fun firebaseMessaging() {
         // FirebaseMessaging 인스턴스를 통해 FCM 등록 토큰을 비동기적으로 가져옴
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             // 토큰을 가져오는데 실패한 경우
@@ -466,7 +470,7 @@ open class MainActivity : AppCompatActivity(), SlidingPaneListener {
             Log.d("TAG", msg)
             Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
         })
-    }*/
+    }
 }
 
 
